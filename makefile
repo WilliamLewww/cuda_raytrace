@@ -23,27 +23,27 @@ compile:
 
 run:
 	mkdir -p dump
-	cd dump; ../bin/raytrace_renderer.out image.ppm
+	cd dump; ../bin/raytrace_renderer.out
 
 memory-check:
 	mkdir -p dump
-	cd dump; $(MEMCHECK) ../bin/raytrace_renderer.out image.ppm
+	cd dump; $(MEMCHECK) ../bin/raytrace_renderer.out
 
 profile:
 	mkdir -p dump
-	cd dump; sudo $(NVPROF) ../bin/raytrace_renderer.out image.ppm 2>profile.log; cat profile.log;
+	cd dump; sudo $(NVPROF) ../bin/raytrace_renderer.out 2>profile.log; cat profile.log;
 
 profile-metrics:
 	mkdir -p dump
-	cd dump; sudo $(NVPROF) --metrics all ../bin/raytrace_renderer.out image.ppm 2>profile-metrics.log; cat profile-metrics.log;
+	cd dump; sudo $(NVPROF) --metrics all ../bin/raytrace_renderer.out 2>profile-metrics.log; cat profile-metrics.log;
 
 profile-events:
 	mkdir -p dump
-	cd dump; sudo $(NVPROF) --events all ../bin/raytrace_renderer.out image.ppm 2>profile-events.log; cat profile-events.log;
+	cd dump; sudo $(NVPROF) --events all ../bin/raytrace_renderer.out 2>profile-events.log; cat profile-events.log;
 
 nsight-cli:
 	mkdir -p dump
-	cd dump; sudo $(NSIGHTCLI) ../bin/raytrace_renderer.out image.ppm > nsight-cli.log; cat nsight-cli.log;
+	cd dump; sudo $(NSIGHTCLI) ../bin/raytrace_renderer.out > nsight-cli.log; cat nsight-cli.log;
 
 nvvp:
 	sudo $(NVVP) $(CURRENTPATH)/bin/$(CURRENTFILE).out -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
