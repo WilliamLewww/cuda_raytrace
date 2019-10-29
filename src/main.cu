@@ -31,13 +31,10 @@ void colorFromRay(Tuple* colorData) {
 	Ray ray = {origin, direction};
 
 	Sphere sphere = {{0.0, 0.0, 5.0, 1.0}};
+	float intersection = intersectSphere(sphere, ray);
 
-	if (intersectSphere(sphere, ray)) {
-		colorData[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
-	}
-	else {
-		colorData[(idy*IMAGE_WIDTH)+idx] = {0, 0, 255};
-	}
+	float color = intersection * 255.0;
+	colorData[(idy*IMAGE_WIDTH)+idx] = {color, color, color};
 }
 
 void writeColorDataToFile(Tuple* colorData) {
