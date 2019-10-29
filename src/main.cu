@@ -1,9 +1,22 @@
 #include <fstream>
 #include <stdio.h>
+#include "shape.h"
 #include "ray.h"
 
 #define IMAGE_WIDTH 100
 #define IMAGE_HEIGHT 100
+
+__device__
+bool intersectSphere(Sphere sphere, Ray ray) {
+	Tuple sphereToRay = ray.origin - sphere.origin;
+	float a = dot(ray.direction, ray.direction);
+	float b = 2.0 * dot(sphereToRay, ray.direction);
+	float c = dot(sphereToRay, sphereToRay) - 1;
+
+	float discriminant = (b * b) - (4 * a * c);
+
+	return discriminant > 0;
+}
 
 __global__
 void colorFromRay(Tuple* colorData) {
@@ -11,8 +24,20 @@ void colorFromRay(Tuple* colorData) {
 	int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
 	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
-	
-	colorData[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
+
+	Tuple origin = {0.0, 0.0, 0.0, 1.0};
+	Tuple pixel = {float(idx) - (IMAGE_WIDTH / 2), float(idy) - (IMAGE_HEIGHT / 2), 100.0, 0.0};
+	Tuple direction = normalize(pixel - origin);
+	Ray ray = {origin, direction};
+
+	Sphere sphere = {{0.0, 0.0, 5.0, 1.0}};
+
+	if (intersectSphere(sphere, ray)) {
+		colorData[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
+	}
+	else {
+		colorData[(idy*IMAGE_WIDTH)+idx] = {0, 0, 255};
+	}
 }
 
 void writeColorDataToFile(Tuple* colorData) {

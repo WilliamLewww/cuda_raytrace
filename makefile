@@ -13,7 +13,7 @@ CUDAFLAGS=--gpu-architecture=sm_50 -rdc=true
 OUPUTFILE=raytrace_renderer.out
 IMAGEFILE=image.ppm
 
-all: compile run
+all: compile run open
 
 clean:
 	rm -rf bin
