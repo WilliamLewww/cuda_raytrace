@@ -3,8 +3,8 @@
 #include "shape.h"
 #include "ray.h"
 
-#define IMAGE_WIDTH 100
-#define IMAGE_HEIGHT 100
+#define IMAGE_WIDTH 1000
+#define IMAGE_HEIGHT 1000
 
 __device__
 bool intersectSphere(Sphere sphere, Ray ray) {
@@ -30,16 +30,17 @@ void colorFromRay(Tuple* colorData) {
 	Tuple direction = normalize(pixel - origin);
 	Ray ray = {origin, direction};
 
-	Sphere sphere = {{0.0, 0.0, 5.0, 1.0}};
-	float intersection = intersectSphere(sphere, ray);
+	Sphere sphere_A = {{0.0, 0.0, 5.0, 1.0}};
+	Sphere sphere_B = {{1.0, 1.0, 4.0, 1.0}};
+	float intersection = intersectSphere(sphere_A, ray) + intersectSphere(sphere_B, ray);
 
 	float color = intersection * 255.0;
 	colorData[(idy*IMAGE_WIDTH)+idx] = {color, color, color};
 }
 
-void writeColorDataToFile(Tuple* colorData) {
+void writeColorDataToFile(const char* filename, Tuple* colorData) {
 	std::ofstream file;
-	file.open("image.ppm");
+	file.open(filename);
 	file << "P3\n" << IMAGE_WIDTH << " " << IMAGE_HEIGHT << "\n255\n";
 
 	for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
@@ -53,21 +54,27 @@ void writeColorDataToFile(Tuple* colorData) {
 }
 
 int main(void) {
+	printf("\n");
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 	Tuple* d_colorData;
 	cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 
 	dim3 block(32, 32);
 	dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
+	printf("rendering ray traced image...\n");
 	colorFromRay<<<grid, block>>>(d_colorData);
 	cudaDeviceSynchronize();
+	printf("finished rendering\n");
 
 	cudaMemcpy(h_colorData, d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
 	cudaFree(d_colorData);
 
-	writeColorDataToFile(h_colorData);
+	const char* filename = "image.ppm";
+	writeColorDataToFile(filename, h_colorData);
+	printf("saved image as: [%s]\n", filename);
 
 	cudaDeviceReset();
 	free(h_colorData);
+	printf("\n");
 	return 0;
 }
