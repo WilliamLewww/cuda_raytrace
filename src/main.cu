@@ -1,10 +1,11 @@
 #include <fstream>
 #include <stdio.h>
+#include "analysis.h"
 #include "shape.h"
 #include "ray.h"
 
-#define IMAGE_WIDTH 1000
-#define IMAGE_HEIGHT 1000
+#define IMAGE_WIDTH 100
+#define IMAGE_HEIGHT 100
 
 __device__
 bool intersectSphere(Sphere sphere, Ray ray) {
@@ -26,15 +27,16 @@ void colorFromRay(Tuple* colorData) {
 	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
 	Tuple origin = {0.0, 0.0, 0.0, 1.0};
-	Tuple pixel = {float(idx) - (IMAGE_WIDTH / 2), float(idy) - (IMAGE_HEIGHT / 2), 100.0, 0.0};
+	Tuple pixel = {float(idx) - (IMAGE_WIDTH / 2), float(idy) - (IMAGE_HEIGHT / 2), 100.0, 1.0};
 	Tuple direction = normalize(pixel - origin);
+
 	Ray ray = {origin, direction};
 
 	Sphere sphere_A = {{0.0, 0.0, 5.0, 1.0}};
 	Sphere sphere_B = {{1.0, 1.0, 4.0, 1.0}};
 	float intersection = intersectSphere(sphere_A, ray) + intersectSphere(sphere_B, ray);
 
-	float color = intersection * 255.0;
+	float color = intersection * 100.0;
 	colorData[(idy*IMAGE_WIDTH)+idx] = {color, color, color};
 }
 
@@ -55,6 +57,8 @@ void writeColorDataToFile(const char* filename, Tuple* colorData) {
 
 int main(void) {
 	printf("\n");
+
+	Analysis::setAbsoluteStart();
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 	Tuple* d_colorData;
 	cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
@@ -72,6 +76,7 @@ int main(void) {
 	const char* filename = "image.ppm";
 	writeColorDataToFile(filename, h_colorData);
 	printf("saved image as: [%s]\n", filename);
+	Analysis::printAll(IMAGE_WIDTH, IMAGE_HEIGHT);
 
 	cudaDeviceReset();
 	free(h_colorData);
