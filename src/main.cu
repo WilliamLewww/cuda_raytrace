@@ -10,9 +10,9 @@ void colorFromRay(Tuple* colorData) {
 	int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 	int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-	if (idx < IMAGE_WIDTH && idy < IMAGE_HEIGHT) {
-		colorData[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
-	}
+	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+	
+	colorData[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
 }
 
 void writeColorDataToFile(Tuple* colorData) {
@@ -45,6 +45,7 @@ int main(void) {
 
 	writeColorDataToFile(h_colorData);
 
+	cudaDeviceReset();
 	free(h_colorData);
 	return 0;
 }
