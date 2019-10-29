@@ -25,6 +25,9 @@ run:
 	mkdir -p dump
 	cd dump; ../bin/raytrace_renderer.out
 
+open:
+	cd dump; xdg-open image.ppm
+
 memory-check:
 	mkdir -p dump
 	cd dump; $(MEMCHECK) ../bin/raytrace_renderer.out

@@ -11,7 +11,7 @@ void colorFromRay(Tuple* colorData) {
 	int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
 	if (idx < IMAGE_WIDTH && idy < IMAGE_HEIGHT) {
-
+		colorData[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
 	}
 }
 
