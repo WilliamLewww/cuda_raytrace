@@ -13,7 +13,7 @@ CUDAFLAGS=--gpu-architecture=sm_50 -rdc=true
 OUPUTFILE=raytrace_renderer.out
 IMAGEFILE=image.ppm
 
-all: compile run open
+all: compile run
 
 clean:
 	rm -rf bin
@@ -52,4 +52,4 @@ nsight-cli:
 	cd dump; sudo $(NSIGHTCLI) ../bin/$(OUPUTFILE) > nsight-cli.log; cat nsight-cli.log;
 
 nvvp:
-	sudo $(NVVP) $(CURRENTPATH)/bin/$(OUPUTFILE).out -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+	sudo $(NVVP) $(CURRENTPATH)/bin/$(OUPUTFILE) -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
