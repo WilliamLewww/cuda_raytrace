@@ -51,12 +51,12 @@ public:
 
 			for (int z = 0; z < labelList.size(); z++) {
 				if (labelList[z].first == x) {
-					printf("%s ", labelList[z].second);
+					printf("%20s ", labelList[z].second);
 				}
 			}
 
 			printf("[%d]: ", x);
-			printf("%f\n", float(average / durationList[x].size()));
+			printf("%ld\n", long(average / durationList[x].size()));
 		}
 
 		int64_t absoluteTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - absoluteStart).count();

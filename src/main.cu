@@ -59,23 +59,32 @@ int main(void) {
 	printf("\n");
 
 	Analysis::setAbsoluteStart();
+	Analysis::createLabel(0, "kernel");
+	Analysis::createLabel(1, "create_image");
+
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 	Tuple* d_colorData;
 	cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 
 	dim3 block(32, 32);
 	dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
+
+	Analysis::begin();
 	printf("rendering ray traced image...\n");
 	colorFromRay<<<grid, block>>>(d_colorData);
 	cudaDeviceSynchronize();
 	printf("finished rendering\n");
+	Analysis::end(0);
 
 	cudaMemcpy(h_colorData, d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
 	cudaFree(d_colorData);
 
+	Analysis::begin();
 	const char* filename = "image.ppm";
 	writeColorDataToFile(filename, h_colorData);
 	printf("saved image as: [%s]\n", filename);
+	Analysis::end(1);
+
 	Analysis::printAll(IMAGE_WIDTH, IMAGE_HEIGHT);
 
 	cudaDeviceReset();
