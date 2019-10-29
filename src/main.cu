@@ -1,4 +1,5 @@
 #include <fstream>
+#include <stdio.h>
 #include "ray.h"
 
 #define IMAGE_WIDTH 100
@@ -41,7 +42,7 @@ int main(void) {
 
 	cudaMemcpy(h_colorData, d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
 	cudaFree(d_colorData);
-	
+
 	free(h_colorData);
 	return 0;
 }

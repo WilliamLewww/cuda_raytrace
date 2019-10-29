@@ -10,7 +10,7 @@ NVVP=$(CUDAPATH)/bin/nvvp
 
 CUDAFLAGS=--gpu-architecture=sm_50 -rdc=true
 
-all: clean compile run
+all: compile run
 
 clean:
 	rm -rf bin
