@@ -4,11 +4,11 @@
 #include "shape.h"
 #include "ray.h"
 
-#define IMAGE_WIDTH 1000
-#define IMAGE_HEIGHT 1000
+#define IMAGE_WIDTH 500
+#define IMAGE_HEIGHT 500
 
 __device__
-bool intersectSphere(Sphere sphere, Ray ray) {
+bool intersectSphere(float* intersectionPoints, Sphere sphere, Ray ray) {
 	Tuple sphereToRay = ray.origin - sphere.origin;
 	float a = dot(ray.direction, ray.direction);
 	float b = 2.0 * dot(sphereToRay, ray.direction);
@@ -20,7 +20,7 @@ bool intersectSphere(Sphere sphere, Ray ray) {
 }
 
 __global__
-void colorFromRay(Tuple* colorData) {
+void colorFromRay(Tuple* colorOut) {
 	int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 	int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
@@ -34,10 +34,8 @@ void colorFromRay(Tuple* colorData) {
 
 	Sphere sphere_A = {{0.0, 0.0, 5.0, 1.0}};
 	Sphere sphere_B = {{1.0, 1.0, 4.0, 1.0}};
-	float intersection = intersectSphere(sphere_A, ray) + intersectSphere(sphere_B, ray);
 
-	float color = intersection * 100.0;
-	colorData[(idy*IMAGE_WIDTH)+idx] = {color, color, color};
+	colorOut[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
