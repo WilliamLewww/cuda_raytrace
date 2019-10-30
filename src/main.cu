@@ -8,14 +8,18 @@
 #define IMAGE_HEIGHT 500
 
 __device__
-bool intersectSphere(float* intersectionPoints, Sphere sphere, Ray ray) {
+bool intersectSphere(int* intersectCount, float* intersectionPoints, Sphere sphere, Ray ray) {
 	Tuple sphereToRay = ray.origin - sphere.origin;
 	float a = dot(ray.direction, ray.direction);
 	float b = 2.0 * dot(sphereToRay, ray.direction);
 	float c = dot(sphereToRay, sphereToRay) - 1;
 
 	float discriminant = (b * b) - (4 * a * c);
-
+	
+	// 0: discriminant < 0
+	// 1: (-b - sqrt(discriminant)) / (2 * a) == (-b + sqrt(discriminant)) / (2 * a)
+	// 2: 
+	
 	return discriminant > 0;
 }
 
