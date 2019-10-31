@@ -6,21 +6,25 @@
 
 #define IMAGE_WIDTH 500
 #define IMAGE_HEIGHT 500
+#define SPHERE_COUNT 1
+
+__constant__ Sphere sphereArray[1];
 
 __device__
-bool intersectSphere(int* intersectCount, float* intersectionPoints, Sphere sphere, Ray ray) {
+int intersectSphere(float* intersectionPoints, Sphere sphere, Ray ray) {
 	Tuple sphereToRay = ray.origin - sphere.origin;
 	float a = dot(ray.direction, ray.direction);
 	float b = 2.0 * dot(sphereToRay, ray.direction);
 	float c = dot(sphereToRay, sphereToRay) - 1;
 
 	float discriminant = (b * b) - (4 * a * c);
-	
-	// 0: discriminant < 0
-	// 1: (-b - sqrt(discriminant)) / (2 * a) == (-b + sqrt(discriminant)) / (2 * a)
-	// 2: 
-	
-	return discriminant > 0;
+	float pointA = (-b - sqrt(discriminant)) / (2 * a);
+	float pointB = (-b + sqrt(discriminant)) / (2 * a);
+
+	intersectionPoints[0] = pointA;
+	intersectionPoints[1] = pointB;
+
+	return (discriminant >= 0) * (2 - (pointA == pointB));
 }
 
 __global__
@@ -36,8 +40,8 @@ void colorFromRay(Tuple* colorOut) {
 
 	Ray ray = {origin, direction};
 
-	Sphere sphere_A = {{0.0, 0.0, 5.0, 1.0}};
-	Sphere sphere_B = {{1.0, 1.0, 4.0, 1.0}};
+	float intersectionPoints[2];
+	int intersectionCount = intersectSphere(intersectionPoints, sphereArray[0], ray);
 
 	colorOut[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
 }
@@ -67,6 +71,9 @@ int main(void) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
+	const Sphere h_sphereArray[] = {{0.0, 0.0, 5.0, 1.0}};
+	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
+
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 	Tuple* d_colorData;
 	cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
