@@ -28,6 +28,11 @@ Tuple operator*(Tuple tuple, float scalar) {
 }
 
 __device__
+Tuple hadamardProduct(Tuple tupleA, Tuple tupleB) {
+	return {tupleA.x * tupleB.x, tupleA.y * tupleB.y, tupleA.z * tupleB.z, tupleA.w * tupleB.w};
+}
+
+__device__
 float magnitude(Tuple tuple) {
 	return sqrt(pow(tuple.x, 2) + pow(tuple.y, 2) + pow(tuple.z, 2) + pow(tuple.w, 2));
 }

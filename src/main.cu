@@ -5,11 +5,31 @@
 #include "shape.h"
 #include "ray.h"
 
-#define IMAGE_WIDTH 1000
-#define IMAGE_HEIGHT 1000
+#define IMAGE_WIDTH 5000
+#define IMAGE_HEIGHT 5000
 #define SPHERE_COUNT 1
 
 __constant__ Sphere sphereArray[1];
+
+__device__
+Tuple lighting(Sphere sphere, Precomputed precomputed) {
+	Tuple lightPosition = {10, 10, -3, 1};
+	Tuple lightIntensity = {1, 1, 1, 1};
+
+	Tuple ambient;
+	Tuple diffuse = {0, 0, 0, 1};
+	Tuple specular = {0, 0, 0, 1};
+
+	Tuple materialColor = {255, 0, 0};
+	Tuple effectiveColor = hadamardProduct(materialColor, lightIntensity);
+	Tuple lightV = normalize(lightPosition - precomputed.point);
+
+	ambient = effectiveColor * 0.01;
+
+	float lightDotNormal = dot(lightV, precomputed.normalV);
+
+	return ambient + diffuse + specular;
+}
 
 __device__
 Tuple normalAtSphere(Sphere sphere, Tuple point) {
@@ -69,12 +89,7 @@ void colorFromRay(Tuple* colorOut) {
 
 	Precomputed precomputed = prepareComputations(intersectionPoint * (intersectionCount > 0), sphereArray[0], ray);
 
-	if (intersectionCount > 0) {
-		colorOut[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
-	}
-	else {
-		colorOut[(idy*IMAGE_WIDTH)+idx] = {0, 0, 0};
-	}
+	colorOut[(idy*IMAGE_WIDTH)+idx] = lighting(sphereArray[0], precomputed);
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
@@ -83,9 +98,9 @@ void writeColorDataToFile(const char* filename, Tuple* colorData) {
 	file << "P3\n" << IMAGE_WIDTH << " " << IMAGE_HEIGHT << "\n255\n";
 
 	for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
-		file << colorData[x].x << " ";
-		file << colorData[x].y << " ";
-		file << colorData[x].z << "\n";
+		file << int(colorData[x].x) << " ";
+		file << int(colorData[x].y) << " ";
+		file << int(colorData[x].z) << "\n";
 
 	}
 
