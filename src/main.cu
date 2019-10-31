@@ -1,17 +1,42 @@
 #include <fstream>
 #include <stdio.h>
 #include "analysis.h"
+#include "precomputed.h"
 #include "shape.h"
 #include "ray.h"
 
-#define IMAGE_WIDTH 500
-#define IMAGE_HEIGHT 500
+#define IMAGE_WIDTH 1000
+#define IMAGE_HEIGHT 1000
 #define SPHERE_COUNT 1
 
 __constant__ Sphere sphereArray[1];
 
 __device__
-int intersectSphere(float* intersectionPoints, Sphere sphere, Ray ray) {
+Tuple normalAtSphere(Sphere sphere, Tuple point) {
+	return point - sphere.origin;
+}
+
+__device__
+Precomputed prepareComputations(float intersectionPoint, Sphere sphere, Ray ray) {
+	Precomputed precomputed;
+
+	precomputed.intersectionPoint = intersectionPoint;
+
+	precomputed.point = project(ray, precomputed.intersectionPoint);
+	precomputed.eyeV = negate(ray.direction);
+	precomputed.normalV = normalAtSphere(sphere, precomputed.point);
+
+	bool isNegative = dot(precomputed.normalV, precomputed.eyeV) < 0;
+	precomputed.inside = isNegative;
+	precomputed.normalV = (precomputed.normalV * !isNegative) + (negate(precomputed.normalV) * isNegative);
+
+	precomputed.overPoint = precomputed.point + precomputed.normalV * 0.01;
+
+	return precomputed;
+}
+
+__device__
+int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
 	Tuple sphereToRay = ray.origin - sphere.origin;
 	float a = dot(ray.direction, ray.direction);
 	float b = 2.0 * dot(sphereToRay, ray.direction);
@@ -21,8 +46,7 @@ int intersectSphere(float* intersectionPoints, Sphere sphere, Ray ray) {
 	float pointA = (-b - sqrt(discriminant)) / (2 * a);
 	float pointB = (-b + sqrt(discriminant)) / (2 * a);
 
-	intersectionPoints[0] = pointA;
-	intersectionPoints[1] = pointB;
+	*intersectionPoint = (pointA * (pointA <= pointB)) + (pointB * (pointB < pointA));
 
 	return (discriminant >= 0) * (2 - (pointA == pointB));
 }
@@ -40,10 +64,17 @@ void colorFromRay(Tuple* colorOut) {
 
 	Ray ray = {origin, direction};
 
-	float intersectionPoints[2];
-	int intersectionCount = intersectSphere(intersectionPoints, sphereArray[0], ray);
+	float intersectionPoint = 0;
+	int intersectionCount = intersectSphere(&intersectionPoint, sphereArray[0], ray);
 
-	colorOut[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
+	Precomputed precomputed = prepareComputations(intersectionPoint * (intersectionCount > 0), sphereArray[0], ray);
+
+	if (intersectionCount > 0) {
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255};
+	}
+	else {
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {0, 0, 0};
+	}
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
@@ -71,7 +102,7 @@ int main(void) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
-	const Sphere h_sphereArray[] = {{0.0, 0.0, 5.0, 1.0}};
+	const Sphere h_sphereArray[] = {{{0.0, 0.0, 5.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
