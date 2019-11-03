@@ -3,26 +3,26 @@
 #include "analysis.h"
 #include "precomputed.h"
 #include "shape.h"
+#include "light.h"
 #include "ray.h"
 
-#define IMAGE_WIDTH 5000
-#define IMAGE_HEIGHT 5000
+#define IMAGE_WIDTH 500
+#define IMAGE_HEIGHT 500
 #define SPHERE_COUNT 1
+#define LIGHT_COUNT 1
 
 __constant__ Sphere sphereArray[1];
+__constant__ Light lightArray[1];
 
 __device__
-Tuple lighting(Sphere sphere, Precomputed precomputed) {
-	Tuple lightPosition = {10, 10, -3, 1};
-	Tuple lightIntensity = {1, 1, 1, 1};
-
+Tuple lighting(Precomputed precomputed) {
 	Tuple ambient;
 	Tuple diffuse = {0, 0, 0, 1};
 	Tuple specular = {0, 0, 0, 1};
 
 	Tuple materialColor = {255, 0, 0};
-	Tuple effectiveColor = hadamardProduct(materialColor, lightIntensity);
-	Tuple lightV = normalize(lightPosition - precomputed.point);
+	Tuple effectiveColor = hadamardProduct(materialColor, lightArray[0].intensity);
+	Tuple lightV = normalize(lightArray[0].position - precomputed.point);
 
 	ambient = effectiveColor * 0.01;
 
@@ -89,7 +89,7 @@ void colorFromRay(Tuple* colorOut) {
 
 	Precomputed precomputed = prepareComputations(intersectionPoint * (intersectionCount > 0), sphereArray[0], ray);
 
-	colorOut[(idy*IMAGE_WIDTH)+idx] = lighting(sphereArray[0], precomputed);
+	colorOut[(idy*IMAGE_WIDTH)+idx] = lighting(precomputed);
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
@@ -119,6 +119,9 @@ int main(void) {
 	Analysis::begin();
 	const Sphere h_sphereArray[] = {{{0.0, 0.0, 5.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
+
+	const Light h_lightArray[] = {{{10, 10, -3, 1}, {1, 1, 1, 1}}};
+	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 	Tuple* d_colorData;
