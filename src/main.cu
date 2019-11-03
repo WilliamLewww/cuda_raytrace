@@ -1,7 +1,6 @@
 #include <fstream>
 #include <stdio.h>
 #include "analysis.h"
-#include "precomputed.h"
 #include "shape.h"
 #include "light.h"
 #include "ray.h"
@@ -13,47 +12,6 @@
 
 __constant__ Sphere sphereArray[1];
 __constant__ Light lightArray[1];
-
-__device__
-Tuple lighting(Precomputed precomputed) {
-	Tuple ambient;
-	Tuple diffuse = {0, 0, 0, 1};
-	Tuple specular = {0, 0, 0, 1};
-
-	Tuple materialColor = {255, 0, 0};
-	Tuple effectiveColor = hadamardProduct(materialColor, lightArray[0].intensity);
-	Tuple lightV = normalize(lightArray[0].position - precomputed.point);
-
-	ambient = effectiveColor * 0.01;
-
-	float lightDotNormal = dot(lightV, precomputed.normalV);
-
-	return ambient + diffuse + specular;
-}
-
-__device__
-Tuple normalAtSphere(Sphere sphere, Tuple point) {
-	return point - sphere.origin;
-}
-
-__device__
-Precomputed prepareComputations(float intersectionPoint, Sphere sphere, Ray ray) {
-	Precomputed precomputed;
-
-	precomputed.intersectionPoint = intersectionPoint;
-
-	precomputed.point = project(ray, precomputed.intersectionPoint);
-	precomputed.eyeV = negate(ray.direction);
-	precomputed.normalV = normalAtSphere(sphere, precomputed.point);
-
-	bool isNegative = dot(precomputed.normalV, precomputed.eyeV) < 0;
-	precomputed.inside = isNegative;
-	precomputed.normalV = (precomputed.normalV * !isNegative) + (negate(precomputed.normalV) * isNegative);
-
-	precomputed.overPoint = precomputed.point + precomputed.normalV * 0.01;
-
-	return precomputed;
-}
 
 __device__
 int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
@@ -87,9 +45,7 @@ void colorFromRay(Tuple* colorOut) {
 	float intersectionPoint = 0;
 	int intersectionCount = intersectSphere(&intersectionPoint, sphereArray[0], ray);
 
-	Precomputed precomputed = prepareComputations(intersectionPoint * (intersectionCount > 0), sphereArray[0], ray);
-
-	colorOut[(idy*IMAGE_WIDTH)+idx] = lighting(precomputed);
+	colorOut[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255, 1};
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
