@@ -1,9 +1,7 @@
 #include <fstream>
 #include <stdio.h>
 #include "analysis.h"
-#include "shape.h"
-#include "light.h"
-#include "ray.h"
+#include "structures.h"
 
 #define IMAGE_WIDTH 500
 #define IMAGE_HEIGHT 500
@@ -45,7 +43,12 @@ void colorFromRay(Tuple* colorOut) {
 	float intersectionPoint = 0;
 	int intersectionCount = intersectSphere(&intersectionPoint, sphereArray[0], ray);
 
-	colorOut[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255, 1};
+	if (intersectionCount > 0) {
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {255, 255, 255, 1};
+	}
+	else {
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {0, 0, 0, 1};
+	}
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {

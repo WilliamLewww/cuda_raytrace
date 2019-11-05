@@ -24,6 +24,11 @@ compile:
 	cd bin; $(NVCC) $(CUDAFLAGS) --device-c ../src/*.cu
 	cd bin; $(NVCC) $(CUDAFLAGS) *.o -o $(OUPUTFILE)
 
+compile-ptx:
+	mkdir -p bin
+	cd bin; $(NVCC) $(CUDAFLAGS) --ptx --device-c ../src/*.cu
+	cd bin; $(NVCC) $(CUDAFLAGS) --ptx *.o -o raytrace_renderer.ptx
+
 run:
 	mkdir -p dump
 	cd dump; ../bin/$(OUPUTFILE)
