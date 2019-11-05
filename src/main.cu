@@ -44,12 +44,12 @@ void colorFromRay(Tuple* colorOut) {
 	int intersectionCount = intersectSphere(&intersectionPoint, sphereArray[0], ray);
 
 	if (intersectionCount > 0) {
-		Tuple direction = lightArray[0].position - sphereArray[0].origin;
-		Tuple normal = sphereArray[0].origin - project(ray, intersectionPoint);
+		Tuple direction = normalize(lightArray[0].position - sphereArray[0].origin);
+		Tuple normal = normalize(sphereArray[0].origin - project(ray, intersectionPoint));
 		float angleDifference = dot(normal, direction);
-		printf("%f\n", angleDifference);
+		float color = ((angleDifference > 0) * angleDifference) * 255;
 
-		colorOut[(idy*IMAGE_WIDTH)+idx] = {-angleDifference * 255, 0, 0, 1};
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0, 0, 1};
 	}
 	else {
 		colorOut[(idy*IMAGE_WIDTH)+idx] = {0, 0, 0, 1};
