@@ -22,7 +22,7 @@ int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
 	float pointA = (-b - sqrt(discriminant)) / (2 * a);
 	float pointB = (-b + sqrt(discriminant)) / (2 * a);
 
-	*intersectionPoint = (pointA * (pointA <= pointB)) + (pointB * (pointB < pointA));
+	*intersectionPoint = (pointB * (pointA <= pointB)) + (pointA * (pointB < pointA));
 
 	return (discriminant >= 0) * (2 - (pointA == pointB));
 }
@@ -81,7 +81,7 @@ int main(void) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
-	const Sphere h_sphereArray[] = {{{0.0, 0.0, 5.0, 1.0}}};
+	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	const Light h_lightArray[] = {{{10, 10, -3, 1}, {1, 1, 1, 1}}};
