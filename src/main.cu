@@ -19,8 +19,8 @@ int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
 	float c = dot(sphereToRay, sphereToRay) - 1.0f;
 
 	float discriminant = (b * b) - (4.0f * a * c);
-	float pointA = (-b - __frsqrt_rn(discriminant)) / (2.0f * a);
-	float pointB = (-b + __frsqrt_rn(discriminant)) / (2.0f * a);
+	float pointA = (-b - sqrt(discriminant)) / (2.0f * a);
+	float pointB = (-b + sqrt(discriminant)) / (2.0f * a);
 
 	*intersectionPoint = (pointB * (pointA <= pointB)) + (pointA * (pointB < pointA));
 
