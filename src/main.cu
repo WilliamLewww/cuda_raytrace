@@ -15,12 +15,12 @@ __device__
 int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
 	Tuple sphereToRay = ray.origin - sphere.origin;
 	float a = dot(ray.direction, ray.direction);
-	float b = 2.0 * dot(sphereToRay, ray.direction);
-	float c = dot(sphereToRay, sphereToRay) - 1;
+	float b = 2.0f * dot(sphereToRay, ray.direction);
+	float c = dot(sphereToRay, sphereToRay) - 1.0f;
 
-	float discriminant = (b * b) - (4 * a * c);
-	float pointA = (-b - sqrt(discriminant)) / (2 * a);
-	float pointB = (-b + sqrt(discriminant)) / (2 * a);
+	float discriminant = (b * b) - (4.0f * a * c);
+	float pointA = (-b - sqrt(discriminant)) / (2.0f * a);
+	float pointB = (-b + sqrt(discriminant)) / (2.0f * a);
 
 	*intersectionPoint = (pointB * (pointA <= pointB)) + (pointA * (pointB < pointA));
 
@@ -34,25 +34,25 @@ void colorFromRay(Tuple* colorOut) {
 
 	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
-	Tuple origin = {0.0, 0.0, 0.0, 1.0};
-	Tuple pixel = {float(idx) - (IMAGE_WIDTH / 2), float(idy) - (IMAGE_HEIGHT / 2), 100.0, 1.0};
+	Tuple origin = {0.0f, 0.0f, 0.0f, 1.0f};
+	Tuple pixel = {float(idx) - (IMAGE_WIDTH / 2.0f), float(idy) - (IMAGE_HEIGHT / 2.0f), 100.0f, 1.0f};
 	Tuple direction = normalize(pixel - origin);
 
 	Ray ray = {origin, direction};
 
-	float intersectionPoint = 0;
+	float intersectionPoint = 0.0f;
 	int intersectionCount = intersectSphere(&intersectionPoint, sphereArray[0], ray);
 
 	if (intersectionCount > 0) {
 		Tuple direction = normalize(lightArray[0].position - sphereArray[0].origin);
 		Tuple normal = normalize(sphereArray[0].origin - project(ray, intersectionPoint));
 		float angleDifference = dot(normal, direction);
-		float color = ((angleDifference > 0) * angleDifference) * 255;
+		float color = ((angleDifference > 0) * angleDifference) * 255.0f;
 
-		colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0, 0, 1};
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
 	}
 	else {
-		colorOut[(idy*IMAGE_WIDTH)+idx] = {0, 0, 0, 1};
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
 	}
 }
 
