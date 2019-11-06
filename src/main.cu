@@ -47,7 +47,7 @@ void colorFromRay(Tuple* colorOut) {
 		Tuple direction = normalize(lightArray[0].position - sphereArray[0].origin);
 		Tuple normal = normalize(sphereArray[0].origin - project(ray, intersectionPoint));
 		float angleDifference = dot(normal, direction);
-		float color = ((angleDifference > 0) * angleDifference) * 255.0f;
+		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f;
 
 		colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
 	}
