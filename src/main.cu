@@ -3,11 +3,8 @@
 #include "analysis.h"
 #include "structures.h"
 
-#define RESOLUTION_WIDTH 500
-#define RESOLUTION_HEIGHT 500
 #define IMAGE_WIDTH 500
 #define IMAGE_HEIGHT 500
-
 #define SPHERE_COUNT 1
 #define LIGHT_COUNT 1
 
@@ -35,10 +32,10 @@ void colorFromRay(Tuple* colorOut) {
 	int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 	int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-	if (idx >= RESOLUTION_WIDTH || idy >= RESOLUTION_HEIGHT) { return; }
+	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
 	Tuple origin = {0.0f, 0.0f, 0.0f, 1.0f};
-	Tuple pixel = {float(idx) - (RESOLUTION_WIDTH / 2.0f), float(idy) - (RESOLUTION_HEIGHT / 2.0f), 100.0f, 1.0f};
+	Tuple pixel = {float(idx) - (IMAGE_WIDTH / 2.0f), float(idy) - (IMAGE_HEIGHT / 2.0f), 100.0f, 1.0f};
 	Tuple direction = normalize(pixel - origin);
 
 	Ray ray = {origin, direction};
@@ -52,19 +49,19 @@ void colorFromRay(Tuple* colorOut) {
 		float angleDifference = dot(normal, direction);
 		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f;
 
-		colorOut[(idy*RESOLUTION_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
 	}
 	else {
-		colorOut[(idy*RESOLUTION_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
 	}
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
 	std::ofstream file;
 	file.open(filename);
-	file << "P3\n" << RESOLUTION_WIDTH << " " << RESOLUTION_HEIGHT << "\n255\n";
+	file << "P3\n" << IMAGE_WIDTH << " " << IMAGE_HEIGHT << "\n255\n";
 
-	for (int x = 0; x < RESOLUTION_WIDTH * RESOLUTION_HEIGHT; x++) {
+	for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
 		file << int(colorData[x].x) << " ";
 		file << int(colorData[x].y) << " ";
 		file << int(colorData[x].z) << "\n";
@@ -90,13 +87,13 @@ int main(void) {
 	const Light h_lightArray[] = {{{10, 10, -3, 1}, {1, 1, 1, 1}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-	Tuple* h_colorData = (Tuple*)malloc(RESOLUTION_WIDTH*RESOLUTION_HEIGHT*sizeof(Tuple));
+	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 	Tuple* d_colorData;
-	cudaMalloc((Tuple**)&d_colorData, RESOLUTION_WIDTH*RESOLUTION_HEIGHT*sizeof(Tuple));
+	cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 	Analysis::end(0);
 
 	dim3 block(32, 32);
-	dim3 grid((RESOLUTION_WIDTH + block.x - 1) / block.x, (RESOLUTION_HEIGHT + block.y - 1) / block.y);
+	dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
 
 	Analysis::begin();
 	printf("rendering ray traced image...\n");
@@ -106,7 +103,7 @@ int main(void) {
 	Analysis::end(1);
 
 	Analysis::begin();
-	cudaMemcpy(h_colorData, d_colorData, RESOLUTION_WIDTH*RESOLUTION_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_colorData, d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
 	cudaFree(d_colorData);
 	Analysis::end(2);
 
@@ -116,7 +113,7 @@ int main(void) {
 	printf("saved image as: [%s]\n", filename);
 	Analysis::end(3);
 
-	Analysis::printAll(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
+	Analysis::printAll(IMAGE_WIDTH, IMAGE_HEIGHT);
 
 	cudaDeviceReset();
 	free(h_colorData);
