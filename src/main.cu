@@ -3,10 +3,14 @@
 #include "analysis.h"
 #include "structures.h"
 
-#define IMAGE_WIDTH 500
+#define IMAGE_WIDTH 1000
 #define IMAGE_HEIGHT 500
+#define FOV 1.0471975512
+
 #define SPHERE_COUNT 1
 #define LIGHT_COUNT 1
+
+__constant__ Camera camera;
 
 __constant__ Sphere sphereArray[1];
 __constant__ Light lightArray[1];
@@ -65,7 +69,6 @@ void writeColorDataToFile(const char* filename, Tuple* colorData) {
 		file << int(colorData[x].x) << " ";
 		file << int(colorData[x].y) << " ";
 		file << int(colorData[x].z) << "\n";
-
 	}
 
 	file.close();
@@ -81,6 +84,15 @@ int main(void) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
+	float halfView = tan(FOV / 2);
+	float aspect = IMAGE_WIDTH / IMAGE_HEIGHT;
+	float halfWidth = ((aspect >= 1) * halfView) + ((aspect < 1) * halfView / aspect);
+	float halfHeight = ((aspect >= 1) * halfView * aspect) + ((aspect < 1) * halfView);
+	float pixelSize = (halfWidth * 2) / IMAGE_WIDTH;
+
+	const Camera h_camera = {halfWidth, halfHeight, pixelSize};
+	cudaMemcpyToSymbol(&camera, &h_camera, sizeof(Camera));
+
 	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
