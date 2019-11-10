@@ -3,14 +3,14 @@
 #include "analysis.h"
 #include "structures.h"
 
-#define IMAGE_WIDTH 1000
+#define IMAGE_WIDTH 500
 #define IMAGE_HEIGHT 500
 #define FOV 1.0471975512
 
 #define SPHERE_COUNT 1
 #define LIGHT_COUNT 1
 
-__constant__ Camera camera;
+__constant__ Camera camera[1];
 
 __constant__ Sphere sphereArray[1];
 __constant__ Light lightArray[1];
@@ -39,7 +39,8 @@ void colorFromRay(Tuple* colorOut) {
 	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
 	Tuple origin = {0.0f, 0.0f, 0.0f, 1.0f};
-	Tuple pixel = {float(idx) - (IMAGE_WIDTH / 2.0f), float(idy) - (IMAGE_HEIGHT / 2.0f), 100.0f, 1.0f};
+	Tuple pixel = {(float(idx) * camera[0].halfWidth) - (camera[0].halfWidth * IMAGE_WIDTH / 2.0f), 
+				   (float(idy) * camera[0].halfHeight) - (camera[0].halfHeight * IMAGE_HEIGHT / 2.0f), 100.0f, 1.0f};
 	Tuple direction = normalize(pixel - origin);
 
 	Ray ray = {origin, direction};
@@ -90,8 +91,9 @@ int main(void) {
 	float halfHeight = ((aspect >= 1) * halfView * aspect) + ((aspect < 1) * halfView);
 	float pixelSize = (halfWidth * 2) / IMAGE_WIDTH;
 
-	const Camera h_camera = {halfWidth, halfHeight, pixelSize};
-	cudaMemcpyToSymbol(&camera, &h_camera, sizeof(Camera));
+	const Camera h_camera[] = {{halfWidth, halfHeight, pixelSize}};
+	printf("%f %f %f\n", halfWidth, halfHeight, pixelSize);
+	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
 	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
