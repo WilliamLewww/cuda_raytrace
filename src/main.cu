@@ -39,8 +39,8 @@ void colorFromRay(Tuple* colorOut) {
 	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
 	Tuple origin = {0.0f, 0.0f, 0.0f, 1.0f};
-	Tuple pixel = {(float(idx) * camera[0].halfWidth) - (camera[0].halfWidth * IMAGE_WIDTH / 2.0f), 
-				   (float(idy) * camera[0].halfHeight) - (camera[0].halfHeight * IMAGE_HEIGHT / 2.0f), 100.0f, 1.0f};
+	Tuple pixel = {float(idx) - (IMAGE_WIDTH / 2.0f), 
+				   float(idy) - (IMAGE_HEIGHT / 2.0f), 100.0f, 1.0f};
 	Tuple direction = normalize(pixel - origin);
 
 	Ray ray = {origin, direction};
@@ -86,9 +86,10 @@ int main(void) {
 
 	Analysis::begin();
 	float halfView = tan(FOV / 2);
-	float aspect = IMAGE_WIDTH / IMAGE_HEIGHT;
-	float halfWidth = ((aspect >= 1) * halfView) + ((aspect < 1) * halfView / aspect);
-	float halfHeight = ((aspect >= 1) * halfView * aspect) + ((aspect < 1) * halfView);
+	float aspect = float(IMAGE_WIDTH) / float(IMAGE_HEIGHT);
+
+	float halfWidth = ((aspect >= 1) * halfView) + ((aspect < 1) * halfView * aspect);
+	float halfHeight = ((aspect >= 1) * halfView / aspect) + ((aspect < 1) * halfView);
 	float pixelSize = (halfWidth * 2) / IMAGE_WIDTH;
 
 	const Camera h_camera[] = {{halfWidth, halfHeight, pixelSize}};
