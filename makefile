@@ -8,7 +8,7 @@ MEMCHECK=$(CUDAPATH)/bin/cuda-memcheck
 NSIGHTCLI=$(CUDAPATH)/bin/nv-nsight-cu-cli
 NVVP=$(CUDAPATH)/bin/nvvp
 
-CUDAFLAGS=--gpu-architecture=sm_50 -rdc=true
+CUDAFLAGS=--gpu-architecture=sm_50
 
 OUPUTFILE=raytrace_renderer.out
 IMAGEFILE=image.ppm
