@@ -7,13 +7,13 @@
 #define IMAGE_HEIGHT 1000
 #define FOV 1.0471975512
 
-#define SPHERE_COUNT 1
+#define SPHERE_COUNT 2
 #define LIGHT_COUNT 1
 
 __constant__ Camera camera[1];
 
-__constant__ Sphere sphereArray[1];
-__constant__ Light lightArray[1];
+__constant__ Sphere sphereArray[SPHERE_COUNT];
+__constant__ Light lightArray[LIGHT_COUNT];
 
 __device__
 int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
@@ -45,8 +45,13 @@ void colorFromRay(Tuple* colorOut) {
 
 	Ray ray = {origin, direction};
 
+	int intersectionCount = 0;
 	float intersectionPoint = 0.0f;
-	int intersectionCount = intersectSphere(&intersectionPoint, sphereArray[0], ray);
+
+	#pragma unroll
+	for (int x = 0; x < SPHERE_COUNT; x++) {
+		intersectionCount += intersectSphere(&intersectionPoint, sphereArray[x], ray);
+	}
 
 	if (intersectionCount > 0) {
 		Tuple direction = normalize(lightArray[0].position - sphereArray[0].origin);
@@ -95,7 +100,7 @@ int main(void) {
 	const Camera h_camera[] = {{halfWidth, halfHeight, pixelSize}};
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
-	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}}};
+	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}},{{3.0, 3.0, 5.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	const Light h_lightArray[] = {{{10, 10, -3, 1}, {1, 1, 1, 1}}};
