@@ -3,8 +3,8 @@
 #include "analysis.h"
 #include "structures.h"
 
-#define IMAGE_WIDTH 1000
-#define IMAGE_HEIGHT 1000
+#define IMAGE_WIDTH 250
+#define IMAGE_HEIGHT 250
 #define FOV 1.0471975512
 
 #define SPHERE_COUNT 2
@@ -48,14 +48,23 @@ void colorFromRay(Tuple* colorOut) {
 	int intersectionCount = 0;
 	float intersectionPoint = 0.0f;
 
+	int index = -1;
+
 	#pragma unroll
 	for (int x = 0; x < SPHERE_COUNT; x++) {
-		intersectionCount += intersectSphere(&intersectionPoint, sphereArray[x], ray);
+		float point;
+		int count = intersectSphere(&point, sphereArray[x], ray);
+		intersectionCount += count;
+
+		if (count > 0) {
+			intersectionPoint = point;
+			index = x;
+		}
 	}
 
 	if (intersectionCount > 0) {
-		Tuple direction = normalize(lightArray[0].position - sphereArray[0].origin);
-		Tuple normal = normalize(sphereArray[0].origin - project(ray, intersectionPoint));
+		Tuple direction = normalize(lightArray[0].position - sphereArray[index].origin);
+		Tuple normal = normalize(sphereArray[index].origin - project(ray, intersectionPoint));
 		float angleDifference = dot(normal, direction);
 		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f;
 
