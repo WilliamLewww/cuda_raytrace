@@ -45,26 +45,23 @@ void colorFromRay(Tuple* colorOut) {
 
 	Ray ray = {origin, direction};
 
-	int intersectionCount = 0;
+	int intersectionIndex = -1;
 	float intersectionPoint = 0.0f;
-
-	int index = -1;
 
 	#pragma unroll
 	for (int x = 0; x < SPHERE_COUNT; x++) {
 		float point;
 		int count = intersectSphere(&point, sphereArray[x], ray);
-		intersectionCount += count;
 
 		if (count > 0 && (point < intersectionPoint || intersectionPoint == 0)) {
+			intersectionIndex = x;
 			intersectionPoint = point;
-			index = x;
 		}
 	}
 
-	if (intersectionCount > 0) {
-		Tuple direction = normalize(lightArray[0].position - sphereArray[index].origin);
-		Tuple normal = normalize(sphereArray[index].origin - project(ray, intersectionPoint));
+	if (intersectionIndex != -1) {
+		Tuple direction = normalize(lightArray[0].position - sphereArray[intersectionIndex].origin);
+		Tuple normal = normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint));
 		float angleDifference = dot(normal, direction);
 		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f;
 
