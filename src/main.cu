@@ -3,8 +3,8 @@
 #include "analysis.h"
 #include "structures.h"
 
-#define IMAGE_WIDTH 250
-#define IMAGE_HEIGHT 250
+#define IMAGE_WIDTH 1000
+#define IMAGE_HEIGHT 1000
 #define FOV 1.0471975512
 
 #define SPHERE_COUNT 2
@@ -56,7 +56,7 @@ void colorFromRay(Tuple* colorOut) {
 		int count = intersectSphere(&point, sphereArray[x], ray);
 		intersectionCount += count;
 
-		if (count > 0) {
+		if (count > 0 && (point < intersectionPoint || intersectionPoint == 0)) {
 			intersectionPoint = point;
 			index = x;
 		}
@@ -109,7 +109,7 @@ int main(void) {
 	const Camera h_camera[] = {{halfWidth, halfHeight, pixelSize}};
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
-	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}},{{3.0, 3.0, 5.0, 1.0}}};
+	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}},{{1.0, 2.0, 5.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	const Light h_lightArray[] = {{{10, 10, -3, 1}, {1, 1, 1, 1}}};
