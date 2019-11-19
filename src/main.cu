@@ -87,7 +87,7 @@ void writeColorDataToFile(const char* filename, Tuple* colorData) {
 	file.close();
 }
 
-int main(void) {
+int main(int argn, char** argv) {
 	printf("\n");
 
 	Analysis::setAbsoluteStart();
@@ -134,7 +134,7 @@ int main(void) {
 	Analysis::end(2);
 
 	Analysis::begin();
-	const char* filename = "image.ppm";
+	const char* filename = argv[1];
 	writeColorDataToFile(filename, h_colorData);
 	printf("saved image as: [%s]\n", filename);
 	Analysis::end(3);
