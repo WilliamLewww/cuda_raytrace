@@ -3,8 +3,8 @@
 #include "analysis.h"
 #include "structures.h"
 
-#define IMAGE_WIDTH 250
-#define IMAGE_HEIGHT 250
+#define IMAGE_WIDTH 500
+#define IMAGE_HEIGHT 500
 #define FOV 1.0471975512
 
 #define SPHERE_COUNT 2
@@ -58,6 +58,9 @@ void colorFromRay(Tuple* colorOut) {
 	}
 
 	if (intersectionIndex != -1) {
+		Ray lightRay = {lightArray[0].position, project(ray, intersectionPoint) - lightArray[0].position};
+		printf("%f %f %f\n", lightRay.direction.x, lightRay.direction.y, lightRay.direction.z);
+
 		Tuple direction = normalize(lightArray[0].position - sphereArray[intersectionIndex].origin);
 		Tuple normal = normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint));
 		float angleDifference = dot(normal, direction);
@@ -107,7 +110,7 @@ int main(void) {
 	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}},{{1.0, 2.0, 5.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
-	const Light h_lightArray[] = {{{10, 10, -3, 1}, {1, 1, 1, 1}}};
+	const Light h_lightArray[] = {{{0, 10, -3, 1}, {1, 1, 1, 1}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
