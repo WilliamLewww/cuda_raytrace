@@ -3,8 +3,8 @@
 #include "analysis.h"
 #include "structures.h"
 
-#define IMAGE_WIDTH 500
-#define IMAGE_HEIGHT 500
+#define IMAGE_WIDTH 250
+#define IMAGE_HEIGHT 250
 #define FOV 1.0471975512
 
 #define SPHERE_COUNT 2

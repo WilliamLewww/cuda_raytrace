@@ -6,21 +6,30 @@ CC=g++
 NVCC=$(CUDA_PATH)/bin/nvcc
 NVPROF=$(CUDA_PATH)/bin/nvprof
 MEMCHECK=$(CUDA_PATH)/bin/cuda-memcheck
-NSIGHTCLI=$(CUDA_PATH)/bin/nv-nsight-cu-cli
+NSIGHT_CLI=$(CUDA_PATH)/bin/nv-nsight-cu-cli
 NVVP=$(CUDA_PATH)/bin/nvvp
 
 CUDA_FLAGS=--gpu-architecture=sm_50
 
-all: clean raytrace_renderer run
+EXEC=raytrace_renderer
+EXEC_ARGS=bin/image.ppm
 
-raytrace_renderer: main.o
-	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)*.o -o $(BIN_PATH)raytrace_renderer
+all: clean $(EXEC) run
+
+$(EXEC): main.o
+	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)*.o -o $(BIN_PATH)$(EXEC)
 
 main.o: ./src/main.cu
 	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)main.o
 
 run:
-	$(BIN_PATH)raytrace_renderer bin/image.ppm
+	$(BIN_PATH)$(EXEC) $(EXEC_ARGS)
+
+memory-check:
+	$(MEMCHECK) $(BIN_PATH)$(EXEC) $(EXEC_ARGS)
+
+profile:
+	sudo $(NVPROF) $(BIN_PATH)$(EXEC) $(EXEC_ARGS) 2>$(BIN_PATH)profile.log; cat $(BIN_PATH)profile.log;
 
 open:
 	xdg-open bin/image.ppm
