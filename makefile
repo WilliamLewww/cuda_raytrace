@@ -1,60 +1,20 @@
-CUDAPATH=/usr/local/cuda-10.1
-CURRENTPATH=$(shell pwd)
+BIN_PATH=./bin/
+CUDA_PATH=/usr/local/cuda-10.1
 
 CC=g++
-NVCC=$(CUDAPATH)/bin/nvcc
-NVPROF=$(CUDAPATH)/bin/nvprof
-MEMCHECK=$(CUDAPATH)/bin/cuda-memcheck
-NSIGHTCLI=$(CUDAPATH)/bin/nv-nsight-cu-cli
-NVVP=$(CUDAPATH)/bin/nvvp
+NVCC=$(CUDA_PATH)/bin/nvcc
+NVPROF=$(CUDA_PATH)/bin/nvprof
+MEMCHECK=$(CUDA_PATH)/bin/cuda-memcheck
+NSIGHTCLI=$(CUDA_PATH)/bin/nv-nsight-cu-cli
+NVVP=$(CUDA_PATH)/bin/nvvp
 
-CUDAFLAGS=--gpu-architecture=sm_50
+CUDA_FLAGS=--gpu-architecture=sm_50
 
-OUPUTFILE=raytrace_renderer.out
-IMAGEFILE=image.ppm
+raytrace_renderer: main.o
+	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)*.o -o $(BIN_PATH)raytrace_renderer
 
-all: compile run
+main.o: ./src/main.cu
+	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)main.o
 
 clean:
-	rm -rf bin
-	rm -rf dump
-
-compile:
-	mkdir -p bin
-	cd bin; $(NVCC) $(CUDAFLAGS) --device-c ../src/*.cu
-	cd bin; $(NVCC) $(CUDAFLAGS) *.o -o $(OUPUTFILE)
-
-compile-ptx:
-	mkdir -p bin
-	cd bin; $(NVCC) $(CUDAFLAGS) --ptx --device-c ../src/*.cu
-	cd bin; $(NVCC) $(CUDAFLAGS) --ptx *.o -o raytrace_renderer.ptx
-
-run:
-	mkdir -p dump
-	cd dump; ../bin/$(OUPUTFILE)
-
-open:
-	cd dump; xdg-open $(IMAGEFILE)
-
-memory-check:
-	mkdir -p dump
-	cd dump; $(MEMCHECK) ../bin/$(OUPUTFILE)
-
-profile:
-	mkdir -p dump
-	cd dump; sudo $(NVPROF) ../bin/$(OUPUTFILE) 2>profile.log; cat profile.log;
-
-profile-metrics:
-	mkdir -p dump
-	cd dump; sudo $(NVPROF) --metrics all ../bin/$(OUPUTFILE) 2>profile-metrics.log; cat profile-metrics.log;
-
-profile-events:
-	mkdir -p dump
-	cd dump; sudo $(NVPROF) --events all ../bin/$(OUPUTFILE) 2>profile-events.log; cat profile-events.log;
-
-nsight-cli:
-	mkdir -p dump
-	cd dump; sudo $(NSIGHTCLI) ../bin/$(OUPUTFILE) > nsight-cli.log; cat nsight-cli.log;
-
-nvvp:
-	sudo $(NVVP) $(CURRENTPATH)/bin/$(OUPUTFILE) -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+	rm -rf $(BIN_PATH)*
