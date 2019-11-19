@@ -58,7 +58,7 @@ void colorFromRay(Tuple* colorOut) {
 	}
 
 	if (intersectionIndex != -1) {
-		Ray lightRay = {lightArray[0].position, project(ray, intersectionPoint) - lightArray[0].position};
+		Ray lightRay = {lightArray[0].position, normalize(project(ray, intersectionPoint) - lightArray[0].position)};
 		printf("%f %f %f\n", lightRay.direction.x, lightRay.direction.y, lightRay.direction.z);
 
 		Tuple direction = normalize(lightArray[0].position - sphereArray[intersectionIndex].origin);
