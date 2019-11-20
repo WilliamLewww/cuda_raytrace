@@ -3,8 +3,8 @@
 #include "analysis.h"
 #include "structures.h"
 
-#define IMAGE_WIDTH 250
-#define IMAGE_HEIGHT 250
+#define IMAGE_WIDTH 1000
+#define IMAGE_HEIGHT 1000
 #define FOV 1.0471975512
 
 #define SPHERE_COUNT 2
@@ -58,8 +58,20 @@ void colorFromRay(Tuple* colorOut) {
 	}
 
 	if (intersectionIndex != -1) {
-		Ray lightRay = {lightArray[0].position, normalize(project(ray, intersectionPoint) - lightArray[0].position)};
-		printf("%f %f %f\n", lightRay.direction.x, lightRay.direction.y, lightRay.direction.z);
+		Tuple intersectionPosition = project(ray, intersectionPoint);
+		Ray lightRay = {intersectionPosition, normalize(lightArray[0].position - intersectionPosition)};
+
+		#pragma unroll
+		for (int x = 0; x < SPHERE_COUNT; x++) {
+			float point;
+			int count = intersectSphere(&point, sphereArray[x], lightRay);
+
+			Tuple projectedPoint = project(lightRay, point);
+
+			if (count > 0) {
+				printf("%f | %f\n", magnitude(projectedPoint), magnitude(intersectionPosition));
+			}
+		}
 
 		Tuple direction = normalize(lightArray[0].position - sphereArray[intersectionIndex].origin);
 		Tuple normal = normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint));
