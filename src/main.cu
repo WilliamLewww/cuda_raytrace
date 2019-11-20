@@ -8,6 +8,7 @@
 #define FOV 1.0471975512
 
 #define SHADE_OFFSET 0.01
+#define PLANE_COMPARISON 0.00001
 
 #define LIGHT_COUNT 1
 
@@ -35,6 +36,20 @@ int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
 	*intersectionPoint = (pointB * (pointA <= pointB)) + (pointA * (pointB < pointA));
 
 	return (discriminant >= 0) * (2 - (pointA == pointB));
+}
+
+__device__
+int intersectPlane(float* intersectionPoint, Plane plane, Ray ray) {
+	float denom = dot(plane.normal, ray.direction);
+	if (fabsf(denom) > PLANE_COMPARISON) {
+		float t = dot(plane.origin - ray.origin, plane.normal);
+
+		if (t >= 0) {
+			
+		}
+	}
+
+	return 0;
 }
 
 __global__
