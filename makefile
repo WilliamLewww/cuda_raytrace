@@ -26,10 +26,13 @@ run:
 	$(BIN_PATH)$(EXEC) $(EXEC_ARGS)
 
 memory-check:
-	$(MEMCHECK) $(BIN_PATH)$(EXEC) $(EXEC_ARGS)
+	$(MEMCHECK) $(BIN_PATH)$(EXEC) $(EXEC_ARGS) 2>$(BIN_PATH)memory-check.log; cat $(BIN_PATH)memory-check.log;
 
 profile:
 	sudo $(NVPROF) $(BIN_PATH)$(EXEC) $(EXEC_ARGS) 2>$(BIN_PATH)profile.log; cat $(BIN_PATH)profile.log;
+
+nvvp:
+	sudo $(NVVP) $(CURRENT_PATH)/bin/$(EXEC) $(EXEC_ARGS) -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 
 open:
 	xdg-open bin/image.ppm
