@@ -69,57 +69,69 @@ void colorFromRay(Tuple* colorOut) {
 
 	Ray ray = {origin, direction};
 
+	int intersectionIndex = -1;
+	float intersectionPoint = 0.0f;
+
+	#pragma unroll
+	for (int x = 0; x < SPHERE_COUNT; x++) {
+		float point;
+		int count = intersectSphere(&point, sphereArray[x], ray);
+
+		intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+		intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+	}
+
+	if (intersectionIndex != -1) {
+		Tuple intersectionPosition = project(ray, intersectionPoint);
+		Ray lightRay = {intersectionPosition, normalize(lightArray[0].position - intersectionPosition)};
+
+		float lightIntersectionPoint = 0.0f;
+
+		#pragma unroll
+		for (int x = 0; x < SPHERE_COUNT; x++) {
+			float point;
+			int count = intersectSphere(&point, sphereArray[x], lightRay);
+
+			lightIntersectionPoint = (point * (count > 0 && (point < lightIntersectionPoint || lightIntersectionPoint == 0))) + (lightIntersectionPoint * (count <= 0 || (point >= lightIntersectionPoint && lightIntersectionPoint != 0)));
+		}
+
+		Tuple projectedPosition = project(lightRay, lightIntersectionPoint);
+		int inShade = (magnitude(projectedPosition) + SHADE_OFFSET) < magnitude(intersectionPosition);
+
+		Tuple direction = normalize(lightArray[0].position - project(ray, intersectionPoint));
+		Tuple normal = normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint));
+		float angleDifference = dot(normal, direction);
+		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f * inShade;
+
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
+	}
+	else {
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
+	}
+
 	// int intersectionIndex = -1;
 	// float intersectionPoint = 0.0f;
 
 	// #pragma unroll
-	// for (int x = 0; x < SPHERE_COUNT; x++) {
+	// for (int x = 0; x < PLANE_COUNT; x++) {
 	// 	float point;
-	// 	int count = intersectSphere(&point, sphereArray[x], ray);
+	// 	int count = intersectPlane(&point, planeArray[x], ray);
 
 	// 	intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
 	// 	intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
 	// }
 
 	// if (intersectionIndex != -1) {
-	// 	Tuple intersectionPosition = project(ray, intersectionPoint);
-	// 	Ray lightRay = {intersectionPosition, normalize(lightArray[0].position - intersectionPosition)};
-
-	// 	float lightIntersectionPoint = 0.0f;
-
-	// 	#pragma unroll
-	// 	for (int x = 0; x < SPHERE_COUNT; x++) {
-	// 		float point;
-	// 		int count = intersectSphere(&point, sphereArray[x], lightRay);
-
-	// 		lightIntersectionPoint = (point * (count > 0 && (point < lightIntersectionPoint || lightIntersectionPoint == 0))) + (lightIntersectionPoint * (count <= 0 || (point >= lightIntersectionPoint && lightIntersectionPoint != 0)));
-	// 	}
-
-	// 	Tuple projectedPosition = project(lightRay, lightIntersectionPoint);
-	// 	int inShade = (magnitude(projectedPosition) + SHADE_OFFSET) < magnitude(intersectionPosition);
-
-	// 	Tuple direction = normalize(lightArray[0].position - sphereArray[intersectionIndex].origin);
+	// 	Tuple direction = normalize(lightArray[0].position - plane[intersectionIndex].origin);
 	// 	Tuple normal = normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint));
 	// 	float angleDifference = dot(normal, direction);
 	// 	float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f * inShade;
-
+		
 	// 	colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
 	// }
 	// else {
 	// 	colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
 	// }
-
-	int intersectionIndex = -1;
-	float intersectionPoint = 0.0f;
-
-	#pragma unroll
-	for (int x = 0; x < PLANE_COUNT; x++) {
-		float point;
-		int count = intersectPlane(&point, planeArray[x], ray);
-
-		intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-		intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-	}
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
@@ -162,7 +174,7 @@ int main(int argn, char** argv) {
 	const Sphere h_sphereArray[] = {{{0.0, 0.0, 5.0, 1.0}},{{2.0, 2.0, 5.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
-	const Plane h_planeArray[] = {{{0, 0, 0},{0, 1, 0}}};
+	const Plane h_planeArray[] = {{{0, 0, 5},{0, 1, 1}}};
 	cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
