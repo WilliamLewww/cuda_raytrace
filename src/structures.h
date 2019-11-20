@@ -21,6 +21,11 @@ struct Sphere {
 	Tuple origin;
 };
 
+struct Plane {
+	Tuple origin;
+	Tuple normal;
+};
+
 struct Camera {
 	float halfWidth;
 	float halfHeight;
