@@ -108,30 +108,6 @@ void colorFromRay(Tuple* colorOut) {
 	else {
 		colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
 	}
-
-	// int intersectionIndex = -1;
-	// float intersectionPoint = 0.0f;
-
-	// #pragma unroll
-	// for (int x = 0; x < PLANE_COUNT; x++) {
-	// 	float point;
-	// 	int count = intersectPlane(&point, planeArray[x], ray);
-
-	// 	intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-	// 	intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-	// }
-
-	// if (intersectionIndex != -1) {
-	// 	Tuple direction = normalize(lightArray[0].position - plane[intersectionIndex].origin);
-	// 	Tuple normal = normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint));
-	// 	float angleDifference = dot(normal, direction);
-	// 	float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f * inShade;
-		
-	// 	colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
-	// }
-	// else {
-	// 	colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
-	// }
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
@@ -168,7 +144,7 @@ int main(int argn, char** argv) {
 	const Camera h_camera[] = {{halfWidth, halfHeight, pixelSize}};
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
-	const Light h_lightArray[] = {{{-2, -2, 5, 1}, {1, 1, 1, 1}}};
+	const Light h_lightArray[] = {{{-10, -10, 5, 1}, {1, 1, 1, 1}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
 	const Sphere h_sphereArray[] = {{{0.0, 0.0, 5.0, 1.0}},{{2.0, 2.0, 5.0, 1.0}}};
