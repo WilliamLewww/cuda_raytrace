@@ -7,6 +7,8 @@
 #define IMAGE_HEIGHT 1000
 #define FOV 1.0471975512
 
+#define SHADE_OFFSET 0.01
+
 #define SPHERE_COUNT 2
 #define LIGHT_COUNT 1
 
@@ -61,22 +63,23 @@ void colorFromRay(Tuple* colorOut) {
 		Tuple intersectionPosition = project(ray, intersectionPoint);
 		Ray lightRay = {intersectionPosition, normalize(lightArray[0].position - intersectionPosition)};
 
+		float lightIntersectionPoint = 0.0f;
+
 		#pragma unroll
 		for (int x = 0; x < SPHERE_COUNT; x++) {
 			float point;
 			int count = intersectSphere(&point, sphereArray[x], lightRay);
 
-			Tuple projectedPoint = project(lightRay, point);
-
-			if (count > 0) {
-				printf("%f | %f\n", magnitude(projectedPoint), magnitude(intersectionPosition));
-			}
+			lightIntersectionPoint = (point * (count > 0 && (point < lightIntersectionPoint || lightIntersectionPoint == 0))) + (lightIntersectionPoint * (count <= 0 || (point >= lightIntersectionPoint && lightIntersectionPoint != 0)));
 		}
+
+		Tuple projectedPosition = project(lightRay, lightIntersectionPoint);
+		int inShade = (magnitude(projectedPosition) + SHADE_OFFSET) < magnitude(intersectionPosition);
 
 		Tuple direction = normalize(lightArray[0].position - sphereArray[intersectionIndex].origin);
 		Tuple normal = normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint));
 		float angleDifference = dot(normal, direction);
-		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f;
+		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f * inShade;
 
 		colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
 	}
@@ -119,10 +122,10 @@ int main(int argn, char** argv) {
 	const Camera h_camera[] = {{halfWidth, halfHeight, pixelSize}};
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
-	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}},{{1.0, 2.0, 5.0, 1.0}}};
+	const Sphere h_sphereArray[] = {{{0.0, 0.0, 5.0, 1.0}},{{2.0, 2.0, 5.0, 1.0}}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
-	const Light h_lightArray[] = {{{0, 10, -3, 1}, {1, 1, 1, 1}}};
+	const Light h_lightArray[] = {{{-2, -2, 5, 1}, {1, 1, 1, 1}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
