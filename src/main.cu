@@ -66,10 +66,8 @@ void colorFromRay(Tuple* colorOut) {
 
 		#pragma unroll
 		for (int x = 0; x < SPHERE_COUNT; x++) {
-			if (x != intersectionIndex) {
-				float point;
-				intersecionCount += intersectSphere(&point, sphereArray[x], lightRay);
-			}
+			float point;
+			intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * (x != intersectionIndex);
 		}
 
 		Tuple direction = normalize(lightArray[0].position - project(ray, intersectionPoint));
