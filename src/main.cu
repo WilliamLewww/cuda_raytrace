@@ -40,9 +40,9 @@ void colorFromRay(Tuple* colorOut) {
 	Tuple pixel = {
 		(idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
 		(idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
-		0.5f, 1.0f
+		0.0f, 1.0f
 	};
-	Tuple direction = normalize(pixel - camera[0].position);
+	Tuple direction = normalize(pixel - camera[0].position + camera[0].direction);
 
 	Ray ray = {camera[0].position, direction};
 
@@ -108,7 +108,7 @@ int main(int argn, char** argv) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
-	const Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
+	const Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 0.3, 0.0}}};
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
 	const Light h_lightArray[] = {{{-10.0, -10.0, 0.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
