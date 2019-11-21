@@ -30,9 +30,8 @@ struct Plane {
 };
 
 struct Camera {
-	float halfWidth;
-	float halfHeight;
-	float pixelSize;
+	Tuple position;
+	Tuple direction;
 };
 
 __device__ Tuple operator+(Tuple tupleA, Tuple tupleB) { return {tupleA.x + tupleB.x, tupleA.y + tupleB.y, tupleA.z + tupleB.z, tupleA.w + tupleB.w}; }

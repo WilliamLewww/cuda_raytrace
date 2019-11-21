@@ -9,6 +9,8 @@
 #define LIGHT_COUNT 1
 #define SPHERE_COUNT 3
 
+__constant__ Camera camera[1];
+
 __constant__ Light lightArray[LIGHT_COUNT];
 __constant__ Sphere sphereArray[SPHERE_COUNT];
 
@@ -35,11 +37,10 @@ void colorFromRay(Tuple* colorOut) {
 
 	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
-	Tuple origin = {0.0f, 0.0f, 0.0f, 1.0f};
 	Tuple pixel = {idx - (IMAGE_WIDTH / 2.0f), idy - (IMAGE_HEIGHT / 2.0f), 200.0f, 1.0f};
-	Tuple direction = normalize(pixel - origin);
+	Tuple direction = normalize(pixel - camera[0].position);
 
-	Ray ray = {origin, direction};
+	Ray ray = {camera[0].position, direction};
 
 	int intersectionIndex = -1;
 	float intersectionPoint = 0.0f;
@@ -103,9 +104,8 @@ int main(int argn, char** argv) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
-	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
-	Tuple* d_colorData;
-	cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+	const Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
+	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
 	const Light h_lightArray[] = {{{-10.0, -10.0, 0.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
@@ -116,6 +116,10 @@ int main(int argn, char** argv) {
 									{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0}}
 								};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
+
+	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+	Tuple* d_colorData;
+	cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 	Analysis::end(0);
 
 	dim3 block(32, 32);
