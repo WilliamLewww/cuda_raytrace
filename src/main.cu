@@ -35,7 +35,7 @@ void colorFromRay(Tuple* colorOut) {
 	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
 	Tuple origin = {0.0f, 0.0f, 0.0f, 1.0f};
-	Tuple pixel = {idx - (IMAGE_WIDTH / 2.0f), idy - (IMAGE_HEIGHT / 2.0f), 100.0f, 1.0f};
+	Tuple pixel = {idx - (IMAGE_WIDTH / 2.0f), idy - (IMAGE_HEIGHT / 2.0f), 200.0f, 1.0f};
 	Tuple direction = normalize(pixel - origin);
 
 	Ray ray = {origin, direction};
@@ -69,12 +69,12 @@ void colorFromRay(Tuple* colorOut) {
 		Tuple direction = normalize(lightArray[0].position - project(ray, intersectionPoint));
 		Tuple normal = negate(normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint)));
 		float angleDifference = dot(normal, direction);
-		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f * (intersecionCount == 0);
+		Tuple color = (0.1f * sphereArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * sphereArray[intersectionIndex].color * (intersecionCount == 0);
 
-		colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
+		colorOut[(idy*IMAGE_WIDTH)+idx] = color;
 	}
 	else {
-		colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0, 0.0, 0.0, 1.0};
 	}
 }
 
@@ -99,10 +99,13 @@ int main(int argn, char** argv) {
 	Tuple* d_colorData;
 	cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 
-	const Light h_lightArray[] = {{{-10, -10, 0, 1}, {1, 1, 1, 1}}};
+	const Light h_lightArray[] = {{{-10.0, -10.0, 0.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}, 2},{{5.0, 5.0, 5.0, 1.0}, 4}};
+	const Sphere h_sphereArray[] = {
+									{{0.0, 0.0, 3.0, 1.0}, 2.0, {255.0, 0.0, 0.0}},
+									{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0}}
+								};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	dim3 block(32, 32);
