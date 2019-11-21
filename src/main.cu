@@ -6,6 +6,8 @@
 #define IMAGE_WIDTH 1000
 #define IMAGE_HEIGHT 1000
 
+#define PLANE_COMPARISON 0.00001
+
 #define LIGHT_COUNT 1
 
 #define SPHERE_COUNT 3
@@ -32,6 +34,17 @@ int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
 	*intersectionPoint = (pointA * (pointA <= pointB)) + (pointB * (pointB < pointA));
 
 	return (discriminant >= 0) * (2 - (pointA == pointB)) * (pointA > 0 && pointB > 0);
+}
+
+__device__
+int intersectPlane(float* intersectionPoint, Plane plane, Ray ray) {
+	float denom = dot(plane.normal, ray.direction);
+	int isIntersecting = (fabsf(denom) > PLANE_COMPARISON);
+
+	float t = dot(plane.origin - ray.origin, plane.normal) * isIntersecting;
+	*intersectionPoint = t * isIntersecting * (t >= 0);
+
+	return 1 * isIntersecting * (t >= 0);
 }
 
 __global__
