@@ -37,7 +37,11 @@ void colorFromRay(Tuple* colorOut) {
 
 	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
-	Tuple pixel = {idx - (IMAGE_WIDTH / 2.0f), idy - (IMAGE_HEIGHT / 2.0f), 200.0f, 1.0f};
+	Tuple pixel = {
+		(idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
+		(idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+		0.5f, 1.0f
+	};
 	Tuple direction = normalize(pixel - camera[0].position);
 
 	Ray ray = {camera[0].position, direction};
