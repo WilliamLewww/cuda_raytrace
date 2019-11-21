@@ -5,8 +5,6 @@
 #define IMAGE_WIDTH 1000
 #define IMAGE_HEIGHT 1000
 
-#define SHADE_OFFSET 0.001
-
 #define LIGHT_COUNT 1
 #define SPHERE_COUNT 2
 
