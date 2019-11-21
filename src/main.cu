@@ -5,7 +5,7 @@
 #define IMAGE_WIDTH 1000
 #define IMAGE_HEIGHT 1000
 
-#define SHADE_OFFSET 0.000
+#define SHADE_OFFSET 0.001
 
 #define LIGHT_COUNT 1
 #define SPHERE_COUNT 2
@@ -26,7 +26,7 @@ int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
 
 	*intersectionPoint = (pointA * (pointA <= pointB)) + (pointB * (pointB < pointA));
 
-	return (discriminant >= 0) * (2 - (pointA == pointB));
+	return (discriminant >= 0) * (2 - (pointA == pointB)) * (pointA > 0 && pointB > 0);
 }
 
 __global__
@@ -55,10 +55,23 @@ void colorFromRay(Tuple* colorOut) {
 	}
 
 	if (intersectionIndex != -1) {
+		Tuple intersectionPosition = project(ray, intersectionPoint);
+		Ray lightRay = {intersectionPosition, normalize(lightArray[0].position - intersectionPosition)};
+
+		int intersecionCount = 0;
+
+		#pragma unroll
+		for (int x = 0; x < SPHERE_COUNT; x++) {
+			if (x != intersectionIndex) {
+				float point;
+				intersecionCount += intersectSphere(&point, sphereArray[x], lightRay);
+			}
+		}
+
 		Tuple direction = normalize(lightArray[0].position - project(ray, intersectionPoint));
 		Tuple normal = negate(normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint)));
 		float angleDifference = dot(normal, direction);
-		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f;
+		float color = (0.1f * 255.0f) + ((angleDifference > 0) * angleDifference) * 255.0f * (intersecionCount == 0);
 
 		colorOut[(idy*IMAGE_WIDTH)+idx] = {color, 0.0f, 0.0f, 1.0f};
 	}
@@ -91,7 +104,7 @@ int main(int argn, char** argv) {
 	const Light h_lightArray[] = {{{-10, -10, 0, 1}, {1, 1, 1, 1}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-	const Sphere h_sphereArray[] = {{{0.0, 0.0, 5.0, 1.0}, 2},{{4.0, 3.0, 5.0, 1.0}, 3}};
+	const Sphere h_sphereArray[] = {{{0.0, 0.0, 3.0, 1.0}, 2},{{5.0, 5.0, 5.0, 1.0}, 4}};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	dim3 block(32, 32);
