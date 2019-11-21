@@ -19,6 +19,7 @@ struct Light {
 
 struct Sphere {
 	Tuple origin;
+	float radius;
 };
 
 struct Plane {
