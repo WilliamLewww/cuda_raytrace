@@ -7,12 +7,16 @@
 #define IMAGE_HEIGHT 1000
 
 #define LIGHT_COUNT 1
+
 #define SPHERE_COUNT 3
+#define PLANE_COUNT 1
 
 __constant__ Camera camera[1];
 
 __constant__ Light lightArray[LIGHT_COUNT];
+
 __constant__ Sphere sphereArray[SPHERE_COUNT];
+__constant__ Plane planeArray[PLANE_COUNT];
 
 __device__
 int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
@@ -113,11 +117,16 @@ int main(int argn, char** argv) {
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
 	const Sphere h_sphereArray[] = {
-									{{0.0, 0.0, 3.0, 1.0}, 2.0, {255.0, 0.0, 0.0}},
-									{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0}},
-									{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0}}
+									{{0.0, 0.0, 3.0, 1.0}, 2.0, {255.0, 0.0, 0.0, 1.0}},
+									{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0, 1.0}},
+									{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0, 1.0}}
 								};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
+
+	const Plane h_planeArray[] = {
+								{{0.0, 0.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0}}
+							};
+	cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 	Tuple* d_colorData;
