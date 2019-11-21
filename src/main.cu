@@ -7,7 +7,7 @@
 #define IMAGE_HEIGHT 1000
 
 #define LIGHT_COUNT 1
-#define SPHERE_COUNT 2
+#define SPHERE_COUNT 3
 
 __constant__ Light lightArray[LIGHT_COUNT];
 __constant__ Sphere sphereArray[SPHERE_COUNT];
@@ -112,7 +112,8 @@ int main(int argn, char** argv) {
 
 	const Sphere h_sphereArray[] = {
 									{{0.0, 0.0, 3.0, 1.0}, 2.0, {255.0, 0.0, 0.0}},
-									{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0}}
+									{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0}},
+									{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0}}
 								};
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 	Analysis::end(0);
