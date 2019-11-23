@@ -113,7 +113,7 @@ void colorFromRay(Tuple* colorOut) {
 
 		if (shapeType == 2) {
 			Tuple direction = normalize(lightArray[0].position - project(ray, intersectionPoint));
-			Tuple normal = negate(normalize(planeArray[intersectionIndex].origin - project(ray, intersectionPoint)));
+			Tuple normal = planeArray[intersectionIndex].normal;
 			float angleDifference = dot(normal, direction);
 			color = (0.1f * planeArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * planeArray[intersectionIndex].color * (intersecionCount == 0);
 		}
