@@ -6,7 +6,7 @@
 #define IMAGE_WIDTH 1000
 #define IMAGE_HEIGHT 1000
 
-#define PLANE_COMPARISON 0.00001
+#define PLANE_COMPARISON 0.000001
 
 #define LIGHT_COUNT 1
 
@@ -38,13 +38,11 @@ int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
 
 __device__
 int intersectPlane(float* intersectionPoint, Plane plane, Ray ray) {
-	float denom = dot(plane.normal, ray.direction);
-	int isIntersecting = (fabsf(denom) > PLANE_COMPARISON);
+	float denominator = dot(plane.normal, ray.direction);
+	float t = dot(plane.origin - ray.origin, plane.normal) / denominator;
+	*intersectionPoint = t;
 
-	float t = dot(plane.origin - ray.origin, plane.normal) * isIntersecting;
-	*intersectionPoint = t * isIntersecting * (t >= 0);
-
-	return 1 * isIntersecting * (t >= 0);
+	return 1 * (t >= 0);
 }
 
 __global__
@@ -95,7 +93,7 @@ void colorFromRay(Tuple* colorOut) {
 		colorOut[(idy*IMAGE_WIDTH)+idx] = color;
 	}
 	else {
-		colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0, 0.0, 0.0, 1.0};
+		colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
 	}
 }
 
@@ -137,7 +135,7 @@ int main(int argn, char** argv) {
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	const Plane h_planeArray[] = {
-								{{0.0, 0.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0}}
+								{{0.0, 1.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0}, {255.0, 0.0, 0.0, 1.0}}
 							};
 	cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 

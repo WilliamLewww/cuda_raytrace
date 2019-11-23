@@ -27,6 +27,8 @@ struct Sphere {
 struct Plane {
 	Tuple origin;
 	Tuple normal;
+
+	Tuple color;
 };
 
 struct Camera {
