@@ -152,7 +152,7 @@ int main(int argn, char** argv) {
 	const Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 0.3, 0.0}}};
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
-	const Light h_lightArray[] = {{{-10.0, -10.0, 0.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
+	const Light h_lightArray[] = {{{-2.0, -2.0, 0.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
 	const Sphere h_sphereArray[] = {
