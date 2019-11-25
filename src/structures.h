@@ -90,6 +90,18 @@ void initializeModelMatrix(Sphere* sphere) {
 	for (int x = 0; x < 16; x++) { array[x] = inverseArray[x]; }
 }
 
+void initializeModelMatrix(Plane* plane) {
+	float* array = plane->modelMatrix;
+	array[0] = 1.0;  array[1] = 0.0;  array[2] = 0.0;  array[3] = 0.0;
+	array[4] = 0.0;  array[5] = 1.0;  array[6] = 0.0;  array[7] = 0.0;
+	array[8] = 0.0;  array[9] = 0.0;  array[10] = 1.0; array[11] = 0.0;
+	array[12] = 0.0; array[13] = 0.0; array[14] = 0.0; array[15] = 1.0;
+
+	array = plane->inverseModelMatrix;
+	float* inverseArray = inverseMatrix(transposeMatrix(plane->modelMatrix));
+	for (int x = 0; x < 16; x++) { array[x] = inverseArray[x]; }
+}
+
 __device__ Tuple multiply(float* matrix, Tuple tuple) {
 	return { 
 			(matrix[0] * tuple.x) + (matrix[1] * tuple.y) + (matrix[2] * tuple.z) + (matrix[3] * tuple.w),

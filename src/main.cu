@@ -22,9 +22,11 @@ __constant__ Plane planeArray[PLANE_COUNT];
 
 __device__
 int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
-	Tuple sphereToRay = ray.origin - sphere.origin;
-	float a = dot(ray.direction, ray.direction);
-	float b = 2.0f * dot(sphereToRay, ray.direction);
+	Ray transformedRay = transform(ray, sphere.inverseModelMatrix);
+
+	Tuple sphereToRay = transformedRay.origin - sphere.origin;
+	float a = dot(transformedRay.direction, transformedRay.direction);
+	float b = 2.0f * dot(sphereToRay, transformedRay.direction);
 	float c = dot(sphereToRay, sphereToRay) - (sphere.radius * sphere.radius);
 
 	float discriminant = (b * b) - (4.0f * a * c);
@@ -38,8 +40,10 @@ int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
 
 __device__
 int intersectPlane(float* intersectionPoint, Plane plane, Ray ray) {
-	float denominator = dot(plane.normal, ray.direction);
-	float t = dot(plane.origin - ray.origin, plane.normal) / denominator;
+	Ray transformedRay = transform(ray, plane.inverseModelMatrix);
+
+	float denominator = dot(plane.normal, transformedRay.direction);
+	float t = dot(plane.origin - transformedRay.origin, plane.normal) / denominator;
 	*intersectionPoint = t;
 
 	return 1 * (t >= 0);
@@ -168,6 +172,7 @@ int main(int argn, char** argv) {
 	Plane h_planeArray[] = {
 							{{0.0, 0.0, 10.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {255.0, 255.0, 0.0, 1.0}}
 						};
+	initializeModelMatrix(&h_planeArray[0]);
 	cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
