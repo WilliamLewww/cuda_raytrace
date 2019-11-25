@@ -3,8 +3,8 @@
 #include "structures.h"
 #include "analysis.h"
 
-#define IMAGE_WIDTH 5000
-#define IMAGE_HEIGHT 5000
+#define IMAGE_WIDTH 1000
+#define IMAGE_HEIGHT 1000
 
 #define PLANE_COMPARISON 0.000001
 

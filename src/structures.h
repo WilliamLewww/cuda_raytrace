@@ -79,18 +79,35 @@ float* createIdentityMatrix() {
 
 float* createTranslateMatrix(float x, float y, float z) {
 	float* matrix = createIdentityMatrix();
-	matrix[3] = x;
-	matrix[7] = y;
-	matrix[11] = z;
+	matrix[3] = x; matrix[7] = y; matrix[11] = z;
 
 	return matrix;
 }
 
 float* createScaleMatrix(float x, float y, float z) {
 	float* matrix = createIdentityMatrix();
-	matrix[0] = x;
-	matrix[5] = y;
-	matrix[10] = z;
+	matrix[0] = x; matrix[5] = y; matrix[10] = z;
+
+	return matrix;
+}
+
+float* createRotationMatrixX(float radians) {
+	float* matrix = createIdentityMatrix();
+	matrix[5] = cos(radians); matrix[6] = -sin(radians); matrix[9] = sin(radians); matrix[10] = cos(radians);
+
+	return matrix;
+}
+
+float* createRotationMatrixY(float radians) {
+	float* matrix = createIdentityMatrix();
+	matrix[0] = cos(radians); matrix[2] = sin(radians); matrix[8] = -sin(radians); matrix[10] = cos(radians);
+
+	return matrix;
+}
+
+float* createRotationMatrixZ(float radians) {
+	float* matrix = createIdentityMatrix();
+	matrix[0] = cos(radians); matrix[1] = -sin(radians); matrix[4] = sin(radians); matrix[5] = cos(radians);
 
 	return matrix;
 }
