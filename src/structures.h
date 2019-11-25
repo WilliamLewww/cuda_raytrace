@@ -51,7 +51,6 @@ float* transposeMatrix(float* matrix) {
 
 float* inverseMatrix(float* matrix) {
     float* inverse = (float*)malloc(16*sizeof(float));
-    float determinant;
 
     inverse[0] = matrix[5]  * matrix[10] * matrix[15] - matrix[5]  * matrix[11] * matrix[14] - matrix[9]  * matrix[6]  * matrix[15] + matrix[9]  * matrix[7]  * matrix[14] +matrix[13] * matrix[6]  * matrix[11] - matrix[13] * matrix[7]  * matrix[10];
     inverse[4] = -matrix[4]  * matrix[10] * matrix[15] + matrix[4]  * matrix[11] * matrix[14] + matrix[8]  * matrix[6]  * matrix[15] - matrix[8]  * matrix[7]  * matrix[14] - matrix[12] * matrix[6]  * matrix[11] + matrix[12] * matrix[7]  * matrix[10];
@@ -70,7 +69,7 @@ float* inverseMatrix(float* matrix) {
     inverse[11] = -matrix[0] * matrix[5] * matrix[11] + matrix[0] * matrix[7] * matrix[9] + matrix[4] * matrix[1] * matrix[11] - matrix[4] * matrix[3] * matrix[9] - matrix[8] * matrix[1] * matrix[7] + matrix[8] * matrix[3] * matrix[5];
     inverse[15] = matrix[0] * matrix[5] * matrix[10] - matrix[0] * matrix[6] * matrix[9] - matrix[4] * matrix[1] * matrix[10] + matrix[4] * matrix[2] * matrix[9] + matrix[8] * matrix[1] * matrix[6] - matrix[8] * matrix[2] * matrix[5];
 
-    determinant = 1.0 / (matrix[0] * inverse[0] + matrix[1] * inverse[4] + matrix[2] * inverse[8] + matrix[3] * inverse[12]);
+    float determinant = 1.0 / (matrix[0] * inverse[0] + matrix[1] * inverse[4] + matrix[2] * inverse[8] + matrix[3] * inverse[12]);
     for (int x = 0; x < 16; x++) {
         inverse[x] *= determinant;
     }
@@ -78,24 +77,28 @@ float* inverseMatrix(float* matrix) {
     return inverse;
 }
 
-void initializeModelMatrix(Sphere* sphere) {
-	float* array = sphere->modelMatrix;
+float* createIdentityMatrix() {
+	float* array = (float*)malloc(16*sizeof(float));
 	array[0] = 1.0;  array[1] = 0.0;  array[2] = 0.0;  array[3] = 0.0;
 	array[4] = 0.0;  array[5] = 1.0;  array[6] = 0.0;  array[7] = 0.0;
 	array[8] = 0.0;  array[9] = 0.0;  array[10] = 1.0; array[11] = 0.0;
 	array[12] = 0.0; array[13] = 0.0; array[14] = 0.0; array[15] = 1.0;
+
+	return array;
+}
+
+void initializeModelMatrix(Sphere* sphere, float* matrix) {
+	float* array = sphere->modelMatrix;
+	for (int x = 0; x < 16; x++) { array[x] = matrix[x]; }
 
 	array = sphere->inverseModelMatrix;
 	float* inverseArray = inverseMatrix(transposeMatrix(sphere->modelMatrix));
 	for (int x = 0; x < 16; x++) { array[x] = inverseArray[x]; }
 }
 
-void initializeModelMatrix(Plane* plane) {
+void initializeModelMatrix(Plane* plane, float* matrix) {
 	float* array = plane->modelMatrix;
-	array[0] = 1.0;  array[1] = 0.0;  array[2] = 0.0;  array[3] = 0.0;
-	array[4] = 0.0;  array[5] = 1.0;  array[6] = 0.0;  array[7] = 0.0;
-	array[8] = 0.0;  array[9] = 0.0;  array[10] = 1.0; array[11] = 0.0;
-	array[12] = 0.0; array[13] = 0.0; array[14] = 0.0; array[15] = 1.0;
+	for (int x = 0; x < 16; x++) { array[x] = matrix[x]; }
 
 	array = plane->inverseModelMatrix;
 	float* inverseArray = inverseMatrix(transposeMatrix(plane->modelMatrix));
