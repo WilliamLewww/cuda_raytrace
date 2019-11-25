@@ -90,7 +90,15 @@ void colorFromRay(Tuple* colorOut) {
 	}
 
 	if (intersectionIndex != -1) {
-		Tuple intersectionPosition = project(ray, intersectionPoint);
+		Ray transformedRay;
+		if (shapeType == 1) {
+			transformedRay = transform(ray, sphereArray[intersectionIndex].inverseModelMatrix);
+		}
+		if (shapeType == 2) {
+			transformedRay = transform(ray, planeArray[intersectionIndex].inverseModelMatrix);
+		}
+
+		Tuple intersectionPosition = project(transformedRay, intersectionPoint);
 		Ray lightRay = {intersectionPosition, normalize(lightArray[0].position - intersectionPosition)};
 
 		int intersecionCount = 0;
@@ -109,14 +117,14 @@ void colorFromRay(Tuple* colorOut) {
 
 		Tuple color;
 		if (shapeType == 1) {
-			Tuple direction = normalize(lightArray[0].position - project(ray, intersectionPoint));
-			Tuple normal = negate(normalize(sphereArray[intersectionIndex].origin - project(ray, intersectionPoint)));
+			Tuple direction = normalize(lightArray[0].position - project(transformedRay, intersectionPoint));
+			Tuple normal = negate(normalize(sphereArray[intersectionIndex].origin - project(transformedRay, intersectionPoint)));
 			float angleDifference = dot(normal, direction);
 			color = (0.1f * sphereArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * sphereArray[intersectionIndex].color * (intersecionCount == 0);
 		}
 
 		if (shapeType == 2) {
-			Tuple direction = normalize(lightArray[0].position - project(ray, intersectionPoint));
+			Tuple direction = normalize(lightArray[0].position - project(transformedRay, intersectionPoint));
 			Tuple normal = planeArray[intersectionIndex].normal;
 			float angleDifference = dot(normal, direction);
 			color = (0.1f * planeArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * planeArray[intersectionIndex].color * (intersecionCount == 0);

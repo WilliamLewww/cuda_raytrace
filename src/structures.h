@@ -44,7 +44,6 @@ struct Camera {
 
 float* inverseMatrix(float* matrix) {
     float* inverse = (float*)malloc(16*sizeof(float));
-
     inverse[0] = matrix[5]  * matrix[10] * matrix[15] - matrix[5]  * matrix[11] * matrix[14] - matrix[9]  * matrix[6]  * matrix[15] + matrix[9]  * matrix[7]  * matrix[14] +matrix[13] * matrix[6]  * matrix[11] - matrix[13] * matrix[7]  * matrix[10];
     inverse[1] = -matrix[1]  * matrix[10] * matrix[15] + matrix[1]  * matrix[11] * matrix[14] + matrix[9]  * matrix[2] * matrix[15] - matrix[9]  * matrix[3] * matrix[14] - matrix[13] * matrix[2] * matrix[11] + matrix[13] * matrix[3] * matrix[10];
     inverse[2] = matrix[1]  * matrix[6] * matrix[15] - matrix[1]  * matrix[7] * matrix[14] - matrix[5]  * matrix[2] * matrix[15] + matrix[5]  * matrix[3] * matrix[14] + matrix[13] * matrix[2] * matrix[7] - matrix[13] * matrix[3] * matrix[6];
@@ -63,9 +62,7 @@ float* inverseMatrix(float* matrix) {
     inverse[15] = matrix[0] * matrix[5] * matrix[10] - matrix[0] * matrix[6] * matrix[9] - matrix[4] * matrix[1] * matrix[10] + matrix[4] * matrix[2] * matrix[9] + matrix[8] * matrix[1] * matrix[6] - matrix[8] * matrix[2] * matrix[5];
 
     float determinant = 1.0 / (matrix[0] * inverse[0] + matrix[1] * inverse[4] + matrix[2] * inverse[8] + matrix[3] * inverse[12]);
-    for (int x = 0; x < 16; x++) {
-        inverse[x] *= determinant;
-    }
+    for (int x = 0; x < 16; x++) { inverse[x] *= determinant; }
 
     return inverse;
 }
