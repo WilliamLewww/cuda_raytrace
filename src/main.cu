@@ -3,8 +3,8 @@
 #include "structures.h"
 #include "analysis.h"
 
-#define IMAGE_WIDTH 1000
-#define IMAGE_HEIGHT 1000
+#define IMAGE_WIDTH 5000
+#define IMAGE_HEIGHT 5000
 
 #define PLANE_COMPARISON 0.000001
 
@@ -90,13 +90,10 @@ void colorFromRay(Tuple* colorOut) {
 	}
 
 	if (intersectionIndex != -1) {
-		Ray transformedRay;
-		if (shapeType == 1) {
-			transformedRay = transform(ray, sphereArray[intersectionIndex].inverseModelMatrix);
-		}
-		if (shapeType == 2) {
-			transformedRay = transform(ray, planeArray[intersectionIndex].inverseModelMatrix);
-		}
+		// performs both calculations but reduces warp divergence
+		Ray transformedRay = setFromShapeType(transform(ray, sphereArray[intersectionIndex].inverseModelMatrix),
+											  transform(ray, planeArray[intersectionIndex].inverseModelMatrix),
+											  shapeType);
 
 		Tuple intersectionPosition = project(transformedRay, intersectionPoint);
 		Ray lightRay = {intersectionPosition, normalize(lightArray[0].position - intersectionPosition)};

@@ -133,3 +133,4 @@ __device__ Tuple normalize(Tuple tuple) { return {tuple.x / magnitude(tuple), tu
 __device__ Tuple negate(Tuple tuple) { return {-tuple.x, -tuple.y, -tuple.z, -tuple.w}; }
 __device__ Tuple project(Ray ray, float t) { return ray.origin + (ray.direction * t); }
 __device__ float dot(Tuple tupleA, Tuple tupleB) { return (tupleA.x * tupleB.x) + (tupleA.y * tupleB.y) + (tupleA.z * tupleB.z) + (tupleA.w * tupleB.w); }
+__device__ Ray setFromShapeType(Ray a, Ray b, int type) { return {(type == 1) * a.origin + (type == 2) * b.origin, (type == 1) * a.direction + (type == 2) * b.direction}; }
