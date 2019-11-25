@@ -155,16 +155,19 @@ int main(int argn, char** argv) {
 	const Light h_lightArray[] = {{{-2.0, -2.0, 0.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-	const Sphere h_sphereArray[] = {
-									{{0.0, 0.0, 3.0, 1.0}, 2.0, {255.0, 0.0, 0.0, 1.0}},
-									{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0, 1.0}},
-									{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0, 1.0}}
-								};
+	Sphere h_sphereArray[] = {
+								{{0.0, 0.0, 3.0, 1.0}, 2.0, {255.0, 0.0, 0.0, 1.0}},
+								{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0, 1.0}},
+								{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0, 1.0}}
+							};
+	initializeModelMatrix(&h_sphereArray[0]);
+	initializeModelMatrix(&h_sphereArray[1]);
+	initializeModelMatrix(&h_sphereArray[2]);
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
-	const Plane h_planeArray[] = {
-								{{0.0, 0.0, 10.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {255.0, 255.0, 0.0, 1.0}}
-							};
+	Plane h_planeArray[] = {
+							{{0.0, 0.0, 10.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {255.0, 255.0, 0.0, 1.0}}
+						};
 	cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
