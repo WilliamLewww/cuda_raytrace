@@ -42,13 +42,6 @@ struct Camera {
 	Tuple direction;
 };
 
-float* transposeMatrix(float* matrix) {
-	float* transpose = (float*)malloc(16*sizeof(float));
-	for (int x = 0; x < 4; x++) { for (int y = 0; y < 4; y++) { transpose[x * 4 + y] = matrix[y * 4 + x]; } }
-
-	return transpose;
-}
-
 float* inverseMatrix(float* matrix) {
     float* inverse = (float*)malloc(16*sizeof(float));
 
@@ -78,31 +71,49 @@ float* inverseMatrix(float* matrix) {
 }
 
 float* createIdentityMatrix() {
-	float* array = (float*)malloc(16*sizeof(float));
-	array[0] = 1.0;  array[1] = 0.0;  array[2] = 0.0;  array[3] = 0.0;
-	array[4] = 0.0;  array[5] = 1.0;  array[6] = 0.0;  array[7] = 0.0;
-	array[8] = 0.0;  array[9] = 0.0;  array[10] = 1.0; array[11] = 0.0;
-	array[12] = 0.0; array[13] = 0.0; array[14] = 0.0; array[15] = 1.0;
+	float* matrix = (float*)malloc(16*sizeof(float));
+	matrix[0] = 1.0;  matrix[1] = 0.0;  matrix[2] = 0.0;  matrix[3] = 0.0;
+	matrix[4] = 0.0;  matrix[5] = 1.0;  matrix[6] = 0.0;  matrix[7] = 0.0;
+	matrix[8] = 0.0;  matrix[9] = 0.0;  matrix[10] = 1.0; matrix[11] = 0.0;
+	matrix[12] = 0.0; matrix[13] = 0.0; matrix[14] = 0.0; matrix[15] = 1.0;
 
-	return array;
+	return matrix;
+}
+
+float* createTranslateMatrix(float x, float y, float z) {
+	float* matrix = createIdentityMatrix();
+	matrix[3] = x;
+	matrix[7] = y;
+	matrix[11] = z;
+
+	return matrix;
+}
+
+float* createScaleMatrix(float x, float y, float z) {
+	float* matrix = createIdentityMatrix();
+	matrix[0] = x;
+	matrix[5] = y;
+	matrix[10] = z;
+
+	return matrix;
 }
 
 void initializeModelMatrix(Sphere* sphere, float* matrix) {
-	float* array = sphere->modelMatrix;
-	for (int x = 0; x < 16; x++) { array[x] = matrix[x]; }
+	float* modelMatrix = sphere->modelMatrix;
+	for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
 
-	array = sphere->inverseModelMatrix;
-	float* inverseArray = inverseMatrix(transposeMatrix(sphere->modelMatrix));
-	for (int x = 0; x < 16; x++) { array[x] = inverseArray[x]; }
+	modelMatrix = sphere->inverseModelMatrix;
+	float* inverseModelMatrix = inverseMatrix(sphere->modelMatrix);
+	for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
 }
 
 void initializeModelMatrix(Plane* plane, float* matrix) {
-	float* array = plane->modelMatrix;
-	for (int x = 0; x < 16; x++) { array[x] = matrix[x]; }
+	float* modelMatrix = plane->modelMatrix;
+	for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
 
-	array = plane->inverseModelMatrix;
-	float* inverseArray = inverseMatrix(transposeMatrix(plane->modelMatrix));
-	for (int x = 0; x < 16; x++) { array[x] = inverseArray[x]; }
+	modelMatrix = plane->inverseModelMatrix;
+	float* inverseModelMatrix = inverseMatrix(plane->modelMatrix);
+	for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
 }
 
 __device__ Tuple multiply(float* matrix, Tuple tuple) {

@@ -160,11 +160,11 @@ int main(int argn, char** argv) {
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
 	Sphere h_sphereArray[] = {
-								{{0.0, 0.0, 3.0, 1.0}, 2.0, {255.0, 0.0, 0.0, 1.0}},
+								{{0.0, 0.0, 3.0, 1.0}, 1.0, {255.0, 0.0, 0.0, 1.0}},
 								{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0, 1.0}},
 								{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0, 1.0}}
 							};
-	initializeModelMatrix(&h_sphereArray[0], createIdentityMatrix());
+	initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(-1, 0, 0));
 	initializeModelMatrix(&h_sphereArray[1], createIdentityMatrix());
 	initializeModelMatrix(&h_sphereArray[2], createIdentityMatrix());
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
