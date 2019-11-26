@@ -115,7 +115,7 @@ void colorFromRay(Tuple* colorOut) {
 		Tuple color;
 		if (shapeType == 1) {
 			Tuple direction = normalize(lightArray[0].position - project(transformedRay, intersectionPoint));
-			Tuple normal = negate(normalize(sphereArray[intersectionIndex].origin - project(transformedRay, intersectionPoint)));
+			Tuple normal = normalize(project(transformedRay, intersectionPoint) - sphereArray[intersectionIndex].origin);
 			float angleDifference = dot(normal, direction);
 			color = (0.1f * sphereArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * sphereArray[intersectionIndex].color * (intersecionCount == 0);
 		}
@@ -169,7 +169,7 @@ int main(int argn, char** argv) {
 								{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0, 1.0}},
 								{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0, 1.0}}
 							};
-	initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(-1, 0, 0));
+	initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(5, 0, 0));
 	initializeModelMatrix(&h_sphereArray[1], createIdentityMatrix());
 	initializeModelMatrix(&h_sphereArray[2], createIdentityMatrix());
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
