@@ -10,7 +10,7 @@
 
 #define LIGHT_COUNT 1
 
-#define SPHERE_COUNT 3
+#define SPHERE_COUNT 4
 #define PLANE_COUNT 1
 
 __constant__ Camera camera[1];
@@ -114,16 +114,14 @@ void colorFromRay(Tuple* colorOut) {
 
 		Tuple color;
 		if (shapeType == 1) {
-			Tuple direction = normalize(lightArray[0].position - project(transformedRay, intersectionPoint));
-			Tuple normal = normalize(project(transformedRay, intersectionPoint) - sphereArray[intersectionIndex].origin);
-			float angleDifference = dot(normal, direction);
+			Tuple normal = normalize(intersectionPosition - sphereArray[intersectionIndex].origin);
+			float angleDifference = dot(normal, lightRay.direction);
 			color = (0.1f * sphereArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * sphereArray[intersectionIndex].color * (intersecionCount == 0);
 		}
 
 		if (shapeType == 2) {
-			Tuple direction = normalize(lightArray[0].position - project(transformedRay, intersectionPoint));
 			Tuple normal = planeArray[intersectionIndex].normal;
-			float angleDifference = dot(normal, direction);
+			float angleDifference = dot(normal, lightRay.direction);
 			color = (0.1f * planeArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * planeArray[intersectionIndex].color * (intersecionCount == 0);
 		}
 
@@ -167,11 +165,13 @@ int main(int argn, char** argv) {
 	Sphere h_sphereArray[] = {
 								{{0.0, 0.0, 3.0, 1.0}, 1.0, {255.0, 0.0, 0.0, 1.0}},
 								{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0, 1.0}},
-								{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0, 1.0}}
+								{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0, 1.0}},
+								{{5.0, 0.0, 3.0, 1.0}, 1.0, {255.0, 0.0, 255.0, 1.0}}
 							};
-	initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(5, 0, 0));
+	initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(5, -2, 0));
 	initializeModelMatrix(&h_sphereArray[1], createIdentityMatrix());
 	initializeModelMatrix(&h_sphereArray[2], createIdentityMatrix());
+	initializeModelMatrix(&h_sphereArray[3], createIdentityMatrix());
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	Plane h_planeArray[] = {
