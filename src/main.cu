@@ -115,7 +115,7 @@ void colorFromRay(Tuple* colorOut) {
 		Tuple color;
 		if (shapeType == 1) {
 			Tuple normal = normalize(intersectionPosition - sphereArray[intersectionIndex].origin);
-			float angleDifference = dot(normal, lightRay.direction);
+			float angleDifference = dot(normal, normalize(lightArray[0].position - multiply(sphereArray[intersectionIndex].modelMatrix, intersectionPosition)));
 			color = (0.1f * sphereArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * sphereArray[intersectionIndex].color * (intersecionCount == 0);
 		}
 
