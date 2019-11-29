@@ -67,6 +67,28 @@ float* inverseMatrix(float* matrix) {
     return inverse;
 }
 
+float* multiply(float* a, float* b) {
+	float* result = (float*)malloc(16*sizeof(float));
+	result[0] = (a[0] * b[0]) + (a[1] * b[4]) + (a[2] * b[8]) + (a[3] * b[12]);
+	result[1] = (a[0] * b[1]) + (a[1] * b[5]) + (a[2] * b[9]) + (a[3] * b[13]);
+	result[2] = (a[0] * b[2]) + (a[1] * b[6]) + (a[2] * b[10]) + (a[3] * b[14]);
+	result[3] = (a[0] * b[3]) + (a[1] * b[7]) + (a[2] * b[11]) + (a[3] * b[15]);
+	result[4] = (a[4] * b[0]) + (a[5] * b[4]) + (a[6] * b[8]) + (a[7] * b[12]);
+	result[5] = (a[4] * b[1]) + (a[5] * b[5]) + (a[6] * b[9]) + (a[7] * b[13]);
+	result[6] = (a[4] * b[2]) + (a[5] * b[6]) + (a[6] * b[10]) + (a[7] * b[14]);
+	result[7] = (a[4] * b[3]) + (a[5] * b[7]) + (a[6] * b[11]) + (a[7] * b[15]);
+	result[8] = (a[8] * b[0]) + (a[9] * b[4]) + (a[10] * b[8]) + (a[11] * b[12]);
+	result[9] = (a[8] * b[1]) + (a[9] * b[5]) + (a[10] * b[9]) + (a[11] * b[13]);
+	result[10] = (a[8] * b[2]) + (a[9] * b[6]) + (a[10] * b[10]) + (a[11] * b[14]);
+	result[11] = (a[8] * b[3]) + (a[9] * b[7]) + (a[10] * b[11]) + (a[11] * b[15]);
+	result[12] = (a[12] * b[0]) + (a[13] * b[4]) + (a[14] * b[8]) + (a[15] * b[12]);
+	result[13] = (a[12] * b[1]) + (a[13] * b[5]) + (a[14] * b[9]) + (a[15] * b[13]);
+	result[14] = (a[12] * b[2]) + (a[13] * b[6]) + (a[14] * b[10]) + (a[15] * b[14]);
+	result[15] = (a[12] * b[3]) + (a[13] * b[7]) + (a[14] * b[11]) + (a[15] * b[15]);
+
+	return result;
+}
+
 float* createIdentityMatrix() {
 	float* matrix = (float*)malloc(16*sizeof(float));
 	matrix[0] = 1.0;  matrix[1] = 0.0;  matrix[2] = 0.0;  matrix[3] = 0.0;
@@ -130,7 +152,7 @@ void initializeModelMatrix(Plane* plane, float* matrix) {
 	for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
 }
 
-__device__ Tuple multiply(float* matrix, Tuple tuple) {
+__device__ Tuple operator*(float* matrix, Tuple tuple) {
 	return { 
 			(matrix[0] * tuple.x) + (matrix[1] * tuple.y) + (matrix[2] * tuple.z) + (matrix[3] * tuple.w),
 			(matrix[4] * tuple.x) + (matrix[5] * tuple.y) + (matrix[6] * tuple.z) + (matrix[7] * tuple.w),
@@ -139,7 +161,7 @@ __device__ Tuple multiply(float* matrix, Tuple tuple) {
 		};
 }
 
-__device__ Ray transform(Ray ray, float* matrix) { return {multiply(matrix, ray.origin), multiply(matrix, ray.direction)}; }
+__device__ Ray transform(Ray ray, float* matrix) { return {(matrix * ray.origin), (matrix * ray.direction)}; }
 __device__ Tuple operator+(Tuple tupleA, Tuple tupleB) { return {tupleA.x + tupleB.x, tupleA.y + tupleB.y, tupleA.z + tupleB.z, tupleA.w + tupleB.w}; }
 __device__ Tuple operator-(Tuple tupleA, Tuple tupleB) { return {tupleA.x - tupleB.x, tupleA.y - tupleB.y, tupleA.z - tupleB.z, tupleA.w - tupleB.w}; }
 __device__ Tuple operator*(Tuple tuple, float scalar) { return {tuple.x * scalar, tuple.y * scalar, tuple.z * scalar, tuple.w * scalar}; }
@@ -150,4 +172,3 @@ __device__ Tuple normalize(Tuple tuple) { return {tuple.x / magnitude(tuple), tu
 __device__ Tuple negate(Tuple tuple) { return {-tuple.x, -tuple.y, -tuple.z, -tuple.w}; }
 __device__ Tuple project(Ray ray, float t) { return ray.origin + (ray.direction * t); }
 __device__ float dot(Tuple tupleA, Tuple tupleB) { return (tupleA.x * tupleB.x) + (tupleA.y * tupleB.y) + (tupleA.z * tupleB.z) + (tupleA.w * tupleB.w); }
-__device__ Ray setFromShapeType(Ray a, Ray b, int type) { return {(type == 1) * a.origin + (type == 2) * b.origin, (type == 1) * a.direction + (type == 2) * b.direction}; }

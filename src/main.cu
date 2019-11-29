@@ -10,7 +10,7 @@
 
 #define LIGHT_COUNT 1
 
-#define SPHERE_COUNT 4
+#define SPHERE_COUNT 5
 #define PLANE_COUNT 1
 
 __constant__ Camera camera[1];
@@ -90,13 +90,21 @@ void colorFromRay(Tuple* colorOut) {
 	}
 
 	if (intersectionIndex != -1) {
-		// performs both calculations but reduces warp divergence
-		Ray transformedRay = setFromShapeType(transform(ray, sphereArray[intersectionIndex].inverseModelMatrix),
-											  transform(ray, planeArray[intersectionIndex].inverseModelMatrix),
-											  shapeType);
+		Ray transformedRay;
+		Tuple intersectionPosition;
+		Ray lightRay;
 
-		Tuple intersectionPosition = project(transformedRay, intersectionPoint);
-		Ray lightRay = {intersectionPosition, normalize(lightArray[0].position - intersectionPosition)};
+		if (shapeType == 1) {
+			transformedRay = transform(ray, sphereArray[intersectionIndex].inverseModelMatrix);
+			intersectionPosition = project(transformedRay, intersectionPoint);
+			lightRay = {sphereArray[intersectionIndex].modelMatrix * intersectionPosition, normalize(lightArray[0].position - (sphereArray[intersectionIndex].modelMatrix * intersectionPosition))};
+		}
+
+		if (shapeType == 2) {
+			transformedRay = transform(ray, planeArray[intersectionIndex].inverseModelMatrix);
+			intersectionPosition = project(transformedRay, intersectionPoint);
+			lightRay = {planeArray[intersectionIndex].modelMatrix * intersectionPosition, normalize(lightArray[0].position - (planeArray[intersectionIndex].modelMatrix * intersectionPosition))};
+		}
 
 		int intersecionCount = 0;
 
@@ -115,13 +123,13 @@ void colorFromRay(Tuple* colorOut) {
 		Tuple color;
 		if (shapeType == 1) {
 			Tuple normal = normalize(intersectionPosition - sphereArray[intersectionIndex].origin);
-			float angleDifference = dot(normal, normalize(lightArray[0].position - multiply(sphereArray[intersectionIndex].modelMatrix, intersectionPosition)));
+			float angleDifference = dot(normal, lightRay.direction);
 			color = (0.1f * sphereArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * sphereArray[intersectionIndex].color * (intersecionCount == 0);
 		}
 
 		if (shapeType == 2) {
 			Tuple normal = planeArray[intersectionIndex].normal;
-			float angleDifference = dot(normal, normalize(lightArray[0].position - multiply(planeArray[intersectionIndex].modelMatrix, intersectionPosition)));
+			float angleDifference = dot(normal, lightRay.direction);
 			color = (0.1f * planeArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * planeArray[intersectionIndex].color * (intersecionCount == 0);
 		}
 
@@ -156,26 +164,28 @@ int main(int argn, char** argv) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
-	const Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 0.3, 0.0}}};
+	const Camera h_camera[] = {{{0.0, 0.0, -5.0, 1.0}, {0.0, 0.0, -4.7, 0.0}}};
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
-	const Light h_lightArray[] = {{{-2.0, -2.0, 0.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
+	const Light h_lightArray[] = {{{10.0, -10.0, -3.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
 	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
 	Sphere h_sphereArray[] = {
-								{{0.0, 0.0, 3.0, 1.0}, 1.0, {255.0, 0.0, 0.0, 1.0}},
-								{{5.0, 5.0, 5.0, 1.0}, 4.0, {0.0, 255.0, 0.0, 1.0}},
-								{{-2.0, 2.0, 2.0, 1.0}, 1.0, {0.0, 0.0, 255.0, 1.0}},
-								{{5.0, 0.0, 3.0, 1.0}, 1.0, {255.0, 0.0, 255.0, 1.0}}
+								{{0.0, 0.0, 0.0, 1.0}, 1.0, {178.5, 255.0, 51.0, 1.0}},
+								{{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 127.5, 1.0}},
+								{{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 51.0, 127.5, 1.0}},
+								{{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 255.0, 1.0}},
+								{{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 76.5, 255.0, 1.0}}
 							};
-	initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(5, -2, 0));
-	initializeModelMatrix(&h_sphereArray[1], createIdentityMatrix());
-	initializeModelMatrix(&h_sphereArray[2], createIdentityMatrix());
-	initializeModelMatrix(&h_sphereArray[3], createIdentityMatrix());
+	initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(-0.5, -1, 0.5));
+	initializeModelMatrix(&h_sphereArray[1], multiply(createTranslateMatrix(-0.5, -2, 0.5), createScaleMatrix(0.75, 0.75, 0.75)));
+	initializeModelMatrix(&h_sphereArray[2], multiply(createTranslateMatrix(2, -1, 0.5), createScaleMatrix(1.25, 1.25, 1.25)));
+	initializeModelMatrix(&h_sphereArray[3], multiply(createTranslateMatrix(-0.5, -0.25, -1.5), createScaleMatrix(0.5, 0.5, 0.5)));
+	initializeModelMatrix(&h_sphereArray[4], multiply(createTranslateMatrix(-0.5, -2, -2.0), createScaleMatrix(0.25, 0.25, 0.25)));
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	Plane h_planeArray[] = {
-							{{0.0, 0.0, 10.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {255.0, 255.0, 0.0, 1.0}}
+							{{0.0, 0.0, 20.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {255.0, 255.0, 0.0, 1.0}}
 						};
 	initializeModelMatrix(&h_planeArray[0], createIdentityMatrix());
 	cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
