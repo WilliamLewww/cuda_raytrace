@@ -3,8 +3,8 @@
 #include "structures.h"
 #include "analysis.h"
 
-#define IMAGE_WIDTH 1000
-#define IMAGE_HEIGHT 1000
+#define IMAGE_WIDTH 5000
+#define IMAGE_HEIGHT 5000
 
 #define LIGHT_COUNT 1
 
@@ -109,13 +109,13 @@ void colorFromRay(Tuple* colorOut) {
 		#pragma unroll
 		for (int x = 0; x < SPHERE_COUNT; x++) {
 			float point;
-			intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * (x != intersectionIndex);
+			intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 1));
 		}
 
 		#pragma unroll
 		for (int x = 0; x < PLANE_COUNT; x++) {
 			float point;
-			intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * (x != intersectionIndex);
+			intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
 		}
 
 		Tuple color;
