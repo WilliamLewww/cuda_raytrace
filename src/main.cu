@@ -163,7 +163,7 @@ int main(int argn, char** argv) {
 
 	Analysis::begin();
 	Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
-	initializeModelMatrix(h_camera[0].modelMatrix, multiply(createTranslateMatrix(4.0, -2.5, -5.0), createRotationMatrixY(-M_PI / 5)));
+	initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
 	const Light h_lightArray[] = {{{10.0, -10.0, -3.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
