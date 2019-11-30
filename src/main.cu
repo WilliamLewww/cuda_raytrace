@@ -129,7 +129,7 @@ void colorFromRay(Tuple* colorOut) {
 			float reflectEyeDifference = dot(lightReflection, eyeDirection);
 
 			color = (0.1f * sphereArray[intersectionIndex].color) + 
-					((lightNormalDifference > 0) * lightNormalDifference) * sphereArray[intersectionIndex].color * (intersecionCount == 0) +
+					(0.7f * lightNormalDifference * sphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
 					(0.2f * sphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
 		}
 
@@ -143,7 +143,7 @@ void colorFromRay(Tuple* colorOut) {
 			float reflectEyeDifference = dot(lightReflection, eyeDirection);
 
 			color = (0.1f * planeArray[intersectionIndex].color) + 
-					((lightNormalDifference > 0) * lightNormalDifference) * planeArray[intersectionIndex].color * (intersecionCount == 0) +
+					(0.7f * lightNormalDifference * planeArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
 					(0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
 		}
 
