@@ -11,7 +11,7 @@
 #define LIGHT_COUNT 1
 
 #define SPHERE_COUNT 5
-#define PLANE_COUNT 1
+#define PLANE_COUNT 3
 
 __constant__ Camera camera[1];
 
@@ -164,7 +164,7 @@ int main(int argn, char** argv) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
-	const Camera h_camera[] = {{{0.0, 0.0, -5.0, 1.0}, {0.0, 0.0, -4.7, 0.0}}};
+	const Camera h_camera[] = {{{0.0, -1.0, -5.0, 1.0}, {0.0, -1.0, -4.7, 0.0}}};
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
 	const Light h_lightArray[] = {{{10.0, -10.0, -3.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
@@ -185,9 +185,13 @@ int main(int argn, char** argv) {
 	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
 	Plane h_planeArray[] = {
-							{{0.0, 0.0, 20.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {255.0, 255.0, 0.0, 1.0}}
+							{{0.0, 0.0, 3.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {229.5, 127.5, 229.5, 1.0}},
+							{{-3.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 0.0}, {229.5, 229.5, 127.5, 1.0}},
+							{{0.0, 0.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 0.0}, {127.5, 229.5, 229.5, 1.0}}
 						};
 	initializeModelMatrix(&h_planeArray[0], createIdentityMatrix());
+	initializeModelMatrix(&h_planeArray[1], createIdentityMatrix());
+	initializeModelMatrix(&h_planeArray[2], createIdentityMatrix());
 	cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
 	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
