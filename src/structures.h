@@ -40,6 +40,8 @@ struct Plane {
 struct Camera {
 	Tuple position;
 	Tuple direction;
+
+	float modelMatrix[16];
 };
 
 float* inverseMatrix(float* matrix) {
@@ -132,6 +134,10 @@ float* createRotationMatrixZ(float radians) {
 	matrix[0] = cos(radians); matrix[1] = -sin(radians); matrix[4] = sin(radians); matrix[5] = cos(radians);
 
 	return matrix;
+}
+
+void initializeModelMatrix(float* dst, float* src) {
+	for (int x = 0; x < 16; x++) { dst[x] = src[x]; }
 }
 
 void initializeModelMatrix(Sphere* sphere, float* matrix) {

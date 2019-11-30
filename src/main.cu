@@ -60,8 +60,8 @@ void colorFromRay(Tuple* colorOut) {
 		0.0f, 1.0f
 	};
 	Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
-
 	Ray ray = {camera[0].position, direction};
+	ray = transform(ray, camera[0].modelMatrix);
 
 	int shapeType = 0;
 	int intersectionIndex = -1;
@@ -162,7 +162,8 @@ int main(int argn, char** argv) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
-	const Camera h_camera[] = {{{3.0, -2.5, -4.0, 1.0}, {2.7, -2.5, -3.7, 0.0}}};
+	Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
+	initializeModelMatrix(h_camera[0].modelMatrix, multiply(createTranslateMatrix(4.0, -2.5, -5.0), createRotationMatrixY(-M_PI / 5)));
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
 	const Light h_lightArray[] = {{{10.0, -10.0, -3.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
