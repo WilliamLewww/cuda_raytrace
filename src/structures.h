@@ -42,6 +42,7 @@ struct Camera {
 	Tuple direction;
 
 	float modelMatrix[16];
+	float inverseModelMatrix[16];
 };
 
 float* inverseMatrix(float* matrix) {
@@ -140,6 +141,11 @@ void initializeModelMatrix(float* dst, float* src) {
 	for (int x = 0; x < 16; x++) { dst[x] = src[x]; }
 }
 
+void initializeInverseModelMatrix(float* dst, float* src) {
+	float* inverseModelMatrix = inverseMatrix(src);
+	for (int x = 0; x < 16; x++) { dst[x] = inverseModelMatrix[x]; }
+}
+
 void initializeModelMatrix(Sphere* sphere, float* matrix) {
 	float* modelMatrix = sphere->modelMatrix;
 	for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
@@ -178,3 +184,4 @@ __device__ Tuple normalize(Tuple tuple) { return {tuple.x / magnitude(tuple), tu
 __device__ Tuple negate(Tuple tuple) { return {-tuple.x, -tuple.y, -tuple.z, -tuple.w}; }
 __device__ Tuple project(Ray ray, float t) { return ray.origin + (ray.direction * t); }
 __device__ float dot(Tuple tupleA, Tuple tupleB) { return (tupleA.x * tupleB.x) + (tupleA.y * tupleB.y) + (tupleA.z * tupleB.z) + (tupleA.w * tupleB.w); }
+__device__ Tuple reflect(Tuple tuple, Tuple normal) { return tuple - (normal * 2.0 * dot(tuple, normal)); }

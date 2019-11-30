@@ -121,14 +121,30 @@ void colorFromRay(Tuple* colorOut) {
 		Tuple color;
 		if (shapeType == 1) {
 			Tuple normal = normalize(intersectionPosition - sphereArray[intersectionIndex].origin);
-			float angleDifference = dot(normal, lightRay.direction);
-			color = (0.1f * sphereArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * sphereArray[intersectionIndex].color * (intersecionCount == 0);
+			float lightNormalDifference = dot(normal, lightRay.direction);
+
+			Tuple lightReflection = reflect(negate(lightRay.direction), normal);
+			Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
+
+			float reflectEyeDifference = dot(lightReflection, eyeDirection);
+
+			color = (0.1f * sphereArray[intersectionIndex].color) + 
+					((lightNormalDifference > 0) * lightNormalDifference) * sphereArray[intersectionIndex].color * (intersecionCount == 0) +
+					(0.2f * sphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
 		}
 
 		if (shapeType == 2) {
 			Tuple normal = planeArray[intersectionIndex].normal;
-			float angleDifference = dot(normal, lightRay.direction);
-			color = (0.1f * planeArray[intersectionIndex].color) + ((angleDifference > 0) * angleDifference) * planeArray[intersectionIndex].color * (intersecionCount == 0);
+			float lightNormalDifference = dot(normal, lightRay.direction);
+
+			Tuple lightReflection = reflect(negate(lightRay.direction), normal);
+			Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
+
+			float reflectEyeDifference = dot(lightReflection, eyeDirection);
+
+			color = (0.1f * planeArray[intersectionIndex].color) + 
+					((lightNormalDifference > 0) * lightNormalDifference) * planeArray[intersectionIndex].color * (intersecionCount == 0) +
+					(0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
 		}
 
 		colorOut[(idy*IMAGE_WIDTH)+idx] = color;
@@ -164,6 +180,7 @@ int main(int argn, char** argv) {
 	Analysis::begin();
 	Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
 	initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
+	initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
 	const Light h_lightArray[] = {{{10.0, -10.0, -3.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
