@@ -3,10 +3,8 @@
 #include "structures.h"
 #include "analysis.h"
 
-#define IMAGE_WIDTH 2000
-#define IMAGE_HEIGHT 2000
-
-#define PLANE_COMPARISON 0.000001
+#define IMAGE_WIDTH 1000
+#define IMAGE_HEIGHT 1000
 
 #define LIGHT_COUNT 1
 
@@ -61,7 +59,7 @@ void colorFromRay(Tuple* colorOut) {
 		(idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
 		0.0f, 1.0f
 	};
-	Tuple direction = normalize(pixel - camera[0].position + camera[0].direction);
+	Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
 
 	Ray ray = {camera[0].position, direction};
 
