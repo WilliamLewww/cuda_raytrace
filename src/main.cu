@@ -3,8 +3,8 @@
 #include "structures.h"
 #include "analysis.h"
 
-#define IMAGE_WIDTH 1000
-#define IMAGE_HEIGHT 1000
+#define IMAGE_WIDTH 2000
+#define IMAGE_HEIGHT 2000
 
 #define PLANE_COMPARISON 0.000001
 
@@ -164,7 +164,7 @@ int main(int argn, char** argv) {
 	Analysis::createLabel(3, "create_image");
 
 	Analysis::begin();
-	const Camera h_camera[] = {{{0.0, -1.0, -5.0, 1.0}, {0.0, -1.0, -4.7, 0.0}}};
+	const Camera h_camera[] = {{{3.0, -2.5, -4.0, 1.0}, {2.7, -2.5, -3.7, 0.0}}};
 	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
 	const Light h_lightArray[] = {{{10.0, -10.0, -3.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
