@@ -1,48 +1,48 @@
 #pragma once
 
 struct Tuple {
-	float x;
-	float y;
-	float z;
-	float w;
+  float x;
+  float y;
+  float z;
+  float w;
 };
 
 struct Ray {
-	Tuple origin;
-	Tuple direction;
+  Tuple origin;
+  Tuple direction;
 };
 
 struct Light {
-	Tuple position;
-	Tuple intensity;
+  Tuple position;
+  Tuple intensity;
 };
 
 struct Sphere {
-	Tuple origin;
-	float radius;
+  Tuple origin;
+  float radius;
 
-	Tuple color;
+  Tuple color;
 
-	float modelMatrix[16];
-	float inverseModelMatrix[16];
+  float modelMatrix[16];
+  float inverseModelMatrix[16];
 };
 
 struct Plane {
-	Tuple origin;
-	Tuple normal;
+  Tuple origin;
+  Tuple normal;
 
-	Tuple color;
+  Tuple color;
 
-	float modelMatrix[16];
-	float inverseModelMatrix[16];
+  float modelMatrix[16];
+  float inverseModelMatrix[16];
 };
 
 struct Camera {
-	Tuple position;
-	Tuple direction;
+  Tuple position;
+  Tuple direction;
 
-	float modelMatrix[16];
-	float inverseModelMatrix[16];
+  float modelMatrix[16];
+  float inverseModelMatrix[16];
 };
 
 float* inverseMatrix(float* matrix) {
@@ -71,106 +71,106 @@ float* inverseMatrix(float* matrix) {
 }
 
 float* multiply(float* a, float* b) {
-	float* result = (float*)malloc(16*sizeof(float));
-	result[0] = (a[0] * b[0]) + (a[1] * b[4]) + (a[2] * b[8]) + (a[3] * b[12]);
-	result[1] = (a[0] * b[1]) + (a[1] * b[5]) + (a[2] * b[9]) + (a[3] * b[13]);
-	result[2] = (a[0] * b[2]) + (a[1] * b[6]) + (a[2] * b[10]) + (a[3] * b[14]);
-	result[3] = (a[0] * b[3]) + (a[1] * b[7]) + (a[2] * b[11]) + (a[3] * b[15]);
-	result[4] = (a[4] * b[0]) + (a[5] * b[4]) + (a[6] * b[8]) + (a[7] * b[12]);
-	result[5] = (a[4] * b[1]) + (a[5] * b[5]) + (a[6] * b[9]) + (a[7] * b[13]);
-	result[6] = (a[4] * b[2]) + (a[5] * b[6]) + (a[6] * b[10]) + (a[7] * b[14]);
-	result[7] = (a[4] * b[3]) + (a[5] * b[7]) + (a[6] * b[11]) + (a[7] * b[15]);
-	result[8] = (a[8] * b[0]) + (a[9] * b[4]) + (a[10] * b[8]) + (a[11] * b[12]);
-	result[9] = (a[8] * b[1]) + (a[9] * b[5]) + (a[10] * b[9]) + (a[11] * b[13]);
-	result[10] = (a[8] * b[2]) + (a[9] * b[6]) + (a[10] * b[10]) + (a[11] * b[14]);
-	result[11] = (a[8] * b[3]) + (a[9] * b[7]) + (a[10] * b[11]) + (a[11] * b[15]);
-	result[12] = (a[12] * b[0]) + (a[13] * b[4]) + (a[14] * b[8]) + (a[15] * b[12]);
-	result[13] = (a[12] * b[1]) + (a[13] * b[5]) + (a[14] * b[9]) + (a[15] * b[13]);
-	result[14] = (a[12] * b[2]) + (a[13] * b[6]) + (a[14] * b[10]) + (a[15] * b[14]);
-	result[15] = (a[12] * b[3]) + (a[13] * b[7]) + (a[14] * b[11]) + (a[15] * b[15]);
+  float* result = (float*)malloc(16*sizeof(float));
+  result[0] = (a[0] * b[0]) + (a[1] * b[4]) + (a[2] * b[8]) + (a[3] * b[12]);
+  result[1] = (a[0] * b[1]) + (a[1] * b[5]) + (a[2] * b[9]) + (a[3] * b[13]);
+  result[2] = (a[0] * b[2]) + (a[1] * b[6]) + (a[2] * b[10]) + (a[3] * b[14]);
+  result[3] = (a[0] * b[3]) + (a[1] * b[7]) + (a[2] * b[11]) + (a[3] * b[15]);
+  result[4] = (a[4] * b[0]) + (a[5] * b[4]) + (a[6] * b[8]) + (a[7] * b[12]);
+  result[5] = (a[4] * b[1]) + (a[5] * b[5]) + (a[6] * b[9]) + (a[7] * b[13]);
+  result[6] = (a[4] * b[2]) + (a[5] * b[6]) + (a[6] * b[10]) + (a[7] * b[14]);
+  result[7] = (a[4] * b[3]) + (a[5] * b[7]) + (a[6] * b[11]) + (a[7] * b[15]);
+  result[8] = (a[8] * b[0]) + (a[9] * b[4]) + (a[10] * b[8]) + (a[11] * b[12]);
+  result[9] = (a[8] * b[1]) + (a[9] * b[5]) + (a[10] * b[9]) + (a[11] * b[13]);
+  result[10] = (a[8] * b[2]) + (a[9] * b[6]) + (a[10] * b[10]) + (a[11] * b[14]);
+  result[11] = (a[8] * b[3]) + (a[9] * b[7]) + (a[10] * b[11]) + (a[11] * b[15]);
+  result[12] = (a[12] * b[0]) + (a[13] * b[4]) + (a[14] * b[8]) + (a[15] * b[12]);
+  result[13] = (a[12] * b[1]) + (a[13] * b[5]) + (a[14] * b[9]) + (a[15] * b[13]);
+  result[14] = (a[12] * b[2]) + (a[13] * b[6]) + (a[14] * b[10]) + (a[15] * b[14]);
+  result[15] = (a[12] * b[3]) + (a[13] * b[7]) + (a[14] * b[11]) + (a[15] * b[15]);
 
-	return result;
+  return result;
 }
 
 float* createIdentityMatrix() {
-	float* matrix = (float*)malloc(16*sizeof(float));
-	matrix[0] = 1.0;  matrix[1] = 0.0;  matrix[2] = 0.0;  matrix[3] = 0.0;
-	matrix[4] = 0.0;  matrix[5] = 1.0;  matrix[6] = 0.0;  matrix[7] = 0.0;
-	matrix[8] = 0.0;  matrix[9] = 0.0;  matrix[10] = 1.0; matrix[11] = 0.0;
-	matrix[12] = 0.0; matrix[13] = 0.0; matrix[14] = 0.0; matrix[15] = 1.0;
+  float* matrix = (float*)malloc(16*sizeof(float));
+  matrix[0] = 1.0;  matrix[1] = 0.0;  matrix[2] = 0.0;  matrix[3] = 0.0;
+  matrix[4] = 0.0;  matrix[5] = 1.0;  matrix[6] = 0.0;  matrix[7] = 0.0;
+  matrix[8] = 0.0;  matrix[9] = 0.0;  matrix[10] = 1.0; matrix[11] = 0.0;
+  matrix[12] = 0.0; matrix[13] = 0.0; matrix[14] = 0.0; matrix[15] = 1.0;
 
-	return matrix;
+  return matrix;
 }
 
 float* createTranslateMatrix(float x, float y, float z) {
-	float* matrix = createIdentityMatrix();
-	matrix[3] = x; matrix[7] = y; matrix[11] = z;
+  float* matrix = createIdentityMatrix();
+  matrix[3] = x; matrix[7] = y; matrix[11] = z;
 
-	return matrix;
+  return matrix;
 }
 
 float* createScaleMatrix(float x, float y, float z) {
-	float* matrix = createIdentityMatrix();
-	matrix[0] = x; matrix[5] = y; matrix[10] = z;
+  float* matrix = createIdentityMatrix();
+  matrix[0] = x; matrix[5] = y; matrix[10] = z;
 
-	return matrix;
+  return matrix;
 }
 
 float* createRotationMatrixX(float radians) {
-	float* matrix = createIdentityMatrix();
-	matrix[5] = cos(radians); matrix[6] = -sin(radians); matrix[9] = sin(radians); matrix[10] = cos(radians);
+  float* matrix = createIdentityMatrix();
+  matrix[5] = cos(radians); matrix[6] = -sin(radians); matrix[9] = sin(radians); matrix[10] = cos(radians);
 
-	return matrix;
+  return matrix;
 }
 
 float* createRotationMatrixY(float radians) {
-	float* matrix = createIdentityMatrix();
-	matrix[0] = cos(radians); matrix[2] = sin(radians); matrix[8] = -sin(radians); matrix[10] = cos(radians);
+  float* matrix = createIdentityMatrix();
+  matrix[0] = cos(radians); matrix[2] = sin(radians); matrix[8] = -sin(radians); matrix[10] = cos(radians);
 
-	return matrix;
+  return matrix;
 }
 
 float* createRotationMatrixZ(float radians) {
-	float* matrix = createIdentityMatrix();
-	matrix[0] = cos(radians); matrix[1] = -sin(radians); matrix[4] = sin(radians); matrix[5] = cos(radians);
+  float* matrix = createIdentityMatrix();
+  matrix[0] = cos(radians); matrix[1] = -sin(radians); matrix[4] = sin(radians); matrix[5] = cos(radians);
 
-	return matrix;
+  return matrix;
 }
 
 void initializeModelMatrix(float* dst, float* src) {
-	for (int x = 0; x < 16; x++) { dst[x] = src[x]; }
+  for (int x = 0; x < 16; x++) { dst[x] = src[x]; }
 }
 
 void initializeInverseModelMatrix(float* dst, float* src) {
-	float* inverseModelMatrix = inverseMatrix(src);
-	for (int x = 0; x < 16; x++) { dst[x] = inverseModelMatrix[x]; }
+  float* inverseModelMatrix = inverseMatrix(src);
+  for (int x = 0; x < 16; x++) { dst[x] = inverseModelMatrix[x]; }
 }
 
 void initializeModelMatrix(Sphere* sphere, float* matrix) {
-	float* modelMatrix = sphere->modelMatrix;
-	for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
+  float* modelMatrix = sphere->modelMatrix;
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
 
-	modelMatrix = sphere->inverseModelMatrix;
-	float* inverseModelMatrix = inverseMatrix(sphere->modelMatrix);
-	for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
+  modelMatrix = sphere->inverseModelMatrix;
+  float* inverseModelMatrix = inverseMatrix(sphere->modelMatrix);
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
 }
 
 void initializeModelMatrix(Plane* plane, float* matrix) {
-	float* modelMatrix = plane->modelMatrix;
-	for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
+  float* modelMatrix = plane->modelMatrix;
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
 
-	modelMatrix = plane->inverseModelMatrix;
-	float* inverseModelMatrix = inverseMatrix(plane->modelMatrix);
-	for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
+  modelMatrix = plane->inverseModelMatrix;
+  float* inverseModelMatrix = inverseMatrix(plane->modelMatrix);
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
 }
 
 __device__ Tuple operator*(float* matrix, Tuple tuple) {
-	return { 
-			(matrix[0] * tuple.x) + (matrix[1] * tuple.y) + (matrix[2] * tuple.z) + (matrix[3] * tuple.w),
-			(matrix[4] * tuple.x) + (matrix[5] * tuple.y) + (matrix[6] * tuple.z) + (matrix[7] * tuple.w),
-			(matrix[8] * tuple.x) + (matrix[9] * tuple.y) + (matrix[10] * tuple.z) + (matrix[11] * tuple.w),
-			(matrix[12] * tuple.x) + (matrix[13] * tuple.y) + (matrix[14] * tuple.z) + (matrix[15] * tuple.w)
-		};
+  return { 
+      (matrix[0] * tuple.x) + (matrix[1] * tuple.y) + (matrix[2] * tuple.z) + (matrix[3] * tuple.w),
+      (matrix[4] * tuple.x) + (matrix[5] * tuple.y) + (matrix[6] * tuple.z) + (matrix[7] * tuple.w),
+      (matrix[8] * tuple.x) + (matrix[9] * tuple.y) + (matrix[10] * tuple.z) + (matrix[11] * tuple.w),
+      (matrix[12] * tuple.x) + (matrix[13] * tuple.y) + (matrix[14] * tuple.z) + (matrix[15] * tuple.w)
+    };
 }
 
 __device__ Ray transform(Ray ray, float* matrix) { return {(matrix * ray.origin), (matrix * ray.direction)}; }

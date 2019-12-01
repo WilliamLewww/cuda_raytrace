@@ -20,226 +20,226 @@ __constant__ Plane planeArray[PLANE_COUNT];
 
 __device__
 int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
-	Ray transformedRay = transform(ray, sphere.inverseModelMatrix);
+  Ray transformedRay = transform(ray, sphere.inverseModelMatrix);
 
-	Tuple sphereToRay = transformedRay.origin - sphere.origin;
-	float a = dot(transformedRay.direction, transformedRay.direction);
-	float b = 2.0f * dot(sphereToRay, transformedRay.direction);
-	float c = dot(sphereToRay, sphereToRay) - (sphere.radius * sphere.radius);
+  Tuple sphereToRay = transformedRay.origin - sphere.origin;
+  float a = dot(transformedRay.direction, transformedRay.direction);
+  float b = 2.0f * dot(sphereToRay, transformedRay.direction);
+  float c = dot(sphereToRay, sphereToRay) - (sphere.radius * sphere.radius);
 
-	float discriminant = (b * b) - (4.0f * a * c);
-	float pointA = (-b - sqrt(discriminant)) / (2.0f * a);
-	float pointB = (-b + sqrt(discriminant)) / (2.0f * a);
+  float discriminant = (b * b) - (4.0f * a * c);
+  float pointA = (-b - sqrt(discriminant)) / (2.0f * a);
+  float pointB = (-b + sqrt(discriminant)) / (2.0f * a);
 
-	*intersectionPoint = (pointA * (pointA <= pointB)) + (pointB * (pointB < pointA));
+  *intersectionPoint = (pointA * (pointA <= pointB)) + (pointB * (pointB < pointA));
 
-	return (discriminant >= 0) * (2 - (pointA == pointB)) * (pointA > 0 && pointB > 0);
+  return (discriminant >= 0) * (2 - (pointA == pointB)) * (pointA > 0 && pointB > 0);
 }
 
 __device__
 int intersectPlane(float* intersectionPoint, Plane plane, Ray ray) {
-	Ray transformedRay = transform(ray, plane.inverseModelMatrix);
+  Ray transformedRay = transform(ray, plane.inverseModelMatrix);
 
-	float denominator = dot(plane.normal, transformedRay.direction);
-	float t = dot(plane.origin - transformedRay.origin, plane.normal) / denominator;
-	*intersectionPoint = t;
+  float denominator = dot(plane.normal, transformedRay.direction);
+  float t = dot(plane.origin - transformedRay.origin, plane.normal) / denominator;
+  *intersectionPoint = t;
 
-	return 1 * (t >= 0);
+  return 1 * (t >= 0);
 }
 
 __global__
 void colorFromRay(Tuple* colorOut) {
-	int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-	int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
+  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-	if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
-	Tuple pixel = {
-		(idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-		(idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
-		0.0f, 1.0f
-	};
-	Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
-	Ray ray = {camera[0].position, direction};
-	ray = transform(ray, camera[0].modelMatrix);
+  Tuple pixel = {
+    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
+    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    0.0f, 1.0f
+  };
+  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
+  Ray ray = {camera[0].position, direction};
+  ray = transform(ray, camera[0].modelMatrix);
 
-	int shapeType = 0;
-	int intersectionIndex = -1;
-	float intersectionPoint = 0.0f;
+  int shapeType = 0;
+  int intersectionIndex = -1;
+  float intersectionPoint = 0.0f;
 
-	#pragma unroll
-	for (int x = 0; x < SPHERE_COUNT; x++) {
-		float point;
-		int count = intersectSphere(&point, sphereArray[x], ray);
+  #pragma unroll
+  for (int x = 0; x < SPHERE_COUNT; x++) {
+    float point;
+    int count = intersectSphere(&point, sphereArray[x], ray);
 
-		shapeType = (1 * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (shapeType * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-		intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-		intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-	}
+    shapeType = (1 * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (shapeType * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+    intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+  }
 
-	#pragma unroll
-	for (int x = 0; x < PLANE_COUNT; x++) {
-		float point;
-		int count = intersectPlane(&point, planeArray[x], ray);
+  #pragma unroll
+  for (int x = 0; x < PLANE_COUNT; x++) {
+    float point;
+    int count = intersectPlane(&point, planeArray[x], ray);
 
-		shapeType = (2 * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (shapeType * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-		intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-		intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-	}
+    shapeType = (2 * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (shapeType * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+    intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+  }
 
-	if (intersectionIndex != -1) {
-		Ray transformedRay;
-		Tuple intersectionPosition;
-		Ray lightRay;
+  if (intersectionIndex != -1) {
+    Ray transformedRay;
+    Tuple intersectionPosition;
+    Ray lightRay;
 
-		if (shapeType == 1) {
-			transformedRay = transform(ray, sphereArray[intersectionIndex].inverseModelMatrix);
-			intersectionPosition = project(transformedRay, intersectionPoint);
-			lightRay = {sphereArray[intersectionIndex].modelMatrix * intersectionPosition, normalize(lightArray[0].position - (sphereArray[intersectionIndex].modelMatrix * intersectionPosition))};
-		}
+    if (shapeType == 1) {
+      transformedRay = transform(ray, sphereArray[intersectionIndex].inverseModelMatrix);
+      intersectionPosition = project(transformedRay, intersectionPoint);
+      lightRay = {sphereArray[intersectionIndex].modelMatrix * intersectionPosition, normalize(lightArray[0].position - (sphereArray[intersectionIndex].modelMatrix * intersectionPosition))};
+    }
 
-		if (shapeType == 2) {
-			transformedRay = transform(ray, planeArray[intersectionIndex].inverseModelMatrix);
-			intersectionPosition = project(transformedRay, intersectionPoint);
-			lightRay = {planeArray[intersectionIndex].modelMatrix * intersectionPosition, normalize(lightArray[0].position - (planeArray[intersectionIndex].modelMatrix * intersectionPosition))};
-		}
+    if (shapeType == 2) {
+      transformedRay = transform(ray, planeArray[intersectionIndex].inverseModelMatrix);
+      intersectionPosition = project(transformedRay, intersectionPoint);
+      lightRay = {planeArray[intersectionIndex].modelMatrix * intersectionPosition, normalize(lightArray[0].position - (planeArray[intersectionIndex].modelMatrix * intersectionPosition))};
+    }
 
-		int intersecionCount = 0;
+    int intersecionCount = 0;
 
-		#pragma unroll
-		for (int x = 0; x < SPHERE_COUNT; x++) {
-			float point;
-			intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 1));
-		}
+    #pragma unroll
+    for (int x = 0; x < SPHERE_COUNT; x++) {
+      float point;
+      intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 1));
+    }
 
-		#pragma unroll
-		for (int x = 0; x < PLANE_COUNT; x++) {
-			float point;
-			intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
-		}
+    #pragma unroll
+    for (int x = 0; x < PLANE_COUNT; x++) {
+      float point;
+      intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
+    }
 
-		Tuple color;
-		if (shapeType == 1) {
-			Tuple normal = normalize(intersectionPosition - sphereArray[intersectionIndex].origin);
-			float lightNormalDifference = dot(normal, lightRay.direction);
+    Tuple color;
+    if (shapeType == 1) {
+      Tuple normal = normalize(intersectionPosition - sphereArray[intersectionIndex].origin);
+      float lightNormalDifference = dot(normal, lightRay.direction);
 
-			Tuple lightReflection = reflect(negate(lightRay.direction), normal);
-			Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
+      Tuple lightReflection = reflect(negate(lightRay.direction), normal);
+      Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
 
-			float reflectEyeDifference = dot(lightReflection, eyeDirection);
+      float reflectEyeDifference = dot(lightReflection, eyeDirection);
 
-			color = (0.1f * sphereArray[intersectionIndex].color) + 
-					(0.7f * lightNormalDifference * sphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
-					(0.2f * sphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
-		}
+      color = (0.1f * sphereArray[intersectionIndex].color) + 
+          (0.7f * lightNormalDifference * sphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
+          (0.2f * sphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+    }
 
-		if (shapeType == 2) {
-			Tuple normal = planeArray[intersectionIndex].normal;
-			float lightNormalDifference = dot(normal, lightRay.direction);
+    if (shapeType == 2) {
+      Tuple normal = planeArray[intersectionIndex].normal;
+      float lightNormalDifference = dot(normal, lightRay.direction);
 
-			Tuple lightReflection = reflect(negate(lightRay.direction), normal);
-			Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
+      Tuple lightReflection = reflect(negate(lightRay.direction), normal);
+      Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
 
-			float reflectEyeDifference = dot(lightReflection, eyeDirection);
+      float reflectEyeDifference = dot(lightReflection, eyeDirection);
 
-			color = (0.1f * planeArray[intersectionIndex].color) + 
-					(0.7f * lightNormalDifference * planeArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
-					(0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
-		}
+      color = (0.1f * planeArray[intersectionIndex].color) + 
+          (0.7f * lightNormalDifference * planeArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
+          (0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+    }
 
-		colorOut[(idy*IMAGE_WIDTH)+idx] = color;
-	}
-	else {
-		colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
-	}
+    colorOut[(idy*IMAGE_WIDTH)+idx] = color;
+  }
+  else {
+    colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
+  }
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
-	std::ofstream file;
-	file.open(filename);
-	file << "P3\n" << IMAGE_WIDTH << " " << IMAGE_HEIGHT << "\n255\n";
+  std::ofstream file;
+  file.open(filename);
+  file << "P3\n" << IMAGE_WIDTH << " " << IMAGE_HEIGHT << "\n255\n";
 
-	for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
-		file << int(colorData[x].x) << " ";
-		file << int(colorData[x].y) << " ";
-		file << int(colorData[x].z) << "\n";
-	}
+  for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
+    file << int(colorData[x].x) << " ";
+    file << int(colorData[x].y) << " ";
+    file << int(colorData[x].z) << "\n";
+  }
 
-	file.close();
+  file.close();
 }
 
 int main(int argn, char** argv) {
-	printf("\n");
+  printf("\n");
 
-	Analysis::setAbsoluteStart();
-	Analysis::createLabel(0, "allocate_memory");
-	Analysis::createLabel(1, "execute_kernel");
-	Analysis::createLabel(2, "copy_device");
-	Analysis::createLabel(3, "create_image");
+  Analysis::setAbsoluteStart();
+  Analysis::createLabel(0, "allocate_memory");
+  Analysis::createLabel(1, "execute_kernel");
+  Analysis::createLabel(2, "copy_device");
+  Analysis::createLabel(3, "create_image");
 
-	Analysis::begin();
-	Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
-	initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
-	initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
-	cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
+  Analysis::begin();
+  Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
+  initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
+  initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
+  cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
-	const Light h_lightArray[] = {{{10.0, -10.0, -3.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
-	cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
+  const Light h_lightArray[] = {{{10.0, -10.0, -3.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
+  cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-	Sphere h_sphereArray[] = {
-								{{0.0, 0.0, 0.0, 1.0}, 1.0, {178.5, 255.0, 51.0, 1.0}},
-								{{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 127.5, 1.0}},
-								{{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 51.0, 127.5, 1.0}},
-								{{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 255.0, 1.0}},
-								{{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 76.5, 255.0, 1.0}}
-							};
-	initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(-0.5, -1, 0.5));
-	initializeModelMatrix(&h_sphereArray[1], multiply(createTranslateMatrix(-0.5, -2, 0.5), createScaleMatrix(0.75, 0.75, 0.75)));
-	initializeModelMatrix(&h_sphereArray[2], multiply(createTranslateMatrix(2, -1, 0.5), createScaleMatrix(1.25, 1.25, 1.25)));
-	initializeModelMatrix(&h_sphereArray[3], multiply(createTranslateMatrix(-0.5, -0.25, -1.5), createScaleMatrix(0.5, 0.5, 0.5)));
-	initializeModelMatrix(&h_sphereArray[4], multiply(createTranslateMatrix(-0.5, -2, -2.0), createScaleMatrix(0.25, 0.25, 0.25)));
-	cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
+  Sphere h_sphereArray[] = {
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {178.5, 255.0, 51.0, 1.0}},
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 127.5, 1.0}},
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 51.0, 127.5, 1.0}},
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 255.0, 1.0}},
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 76.5, 255.0, 1.0}}
+              };
+  initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(-0.5, -1, 0.5));
+  initializeModelMatrix(&h_sphereArray[1], multiply(createTranslateMatrix(-0.5, -2, 0.5), createScaleMatrix(0.75, 0.75, 0.75)));
+  initializeModelMatrix(&h_sphereArray[2], multiply(createTranslateMatrix(2, -1, 0.5), createScaleMatrix(1.25, 1.25, 1.25)));
+  initializeModelMatrix(&h_sphereArray[3], multiply(createTranslateMatrix(-0.5, -0.25, -1.5), createScaleMatrix(0.5, 0.5, 0.5)));
+  initializeModelMatrix(&h_sphereArray[4], multiply(createTranslateMatrix(-0.5, -2, -2.0), createScaleMatrix(0.25, 0.25, 0.25)));
+  cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
-	Plane h_planeArray[] = {
-							{{0.0, 0.0, 3.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {229.5, 127.5, 229.5, 1.0}},
-							{{-3.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 0.0}, {229.5, 229.5, 127.5, 1.0}},
-							{{0.0, 0.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 0.0}, {127.5, 229.5, 229.5, 1.0}}
-						};
-	initializeModelMatrix(&h_planeArray[0], createIdentityMatrix());
-	initializeModelMatrix(&h_planeArray[1], createIdentityMatrix());
-	initializeModelMatrix(&h_planeArray[2], createIdentityMatrix());
-	cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
+  Plane h_planeArray[] = {
+              {{0.0, 0.0, 3.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {229.5, 127.5, 229.5, 1.0}},
+              {{-3.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 0.0}, {229.5, 229.5, 127.5, 1.0}},
+              {{0.0, 0.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 0.0}, {127.5, 229.5, 229.5, 1.0}}
+            };
+  initializeModelMatrix(&h_planeArray[0], createIdentityMatrix());
+  initializeModelMatrix(&h_planeArray[1], createIdentityMatrix());
+  initializeModelMatrix(&h_planeArray[2], createIdentityMatrix());
+  cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
-	Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
-	Tuple* d_colorData;
-	cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
-	Analysis::end(0);
+  Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+  Tuple* d_colorData;
+  cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+  Analysis::end(0);
 
-	dim3 block(32, 32);
-	dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
+  dim3 block(32, 32);
+  dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
 
-	Analysis::begin();
-	printf("rendering ray traced image...\n");
-	colorFromRay<<<grid, block>>>(d_colorData);
-	cudaDeviceSynchronize();
-	printf("finished rendering\n");
-	Analysis::end(1);
+  Analysis::begin();
+  printf("rendering ray traced image...\n");
+  colorFromRay<<<grid, block>>>(d_colorData);
+  cudaDeviceSynchronize();
+  printf("finished rendering\n");
+  Analysis::end(1);
 
-	Analysis::begin();
-	cudaMemcpy(h_colorData, d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
-	cudaFree(d_colorData);
-	Analysis::end(2);
+  Analysis::begin();
+  cudaMemcpy(h_colorData, d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
+  cudaFree(d_colorData);
+  Analysis::end(2);
 
-	Analysis::begin();
-	const char* filename = argv[1];
-	writeColorDataToFile(filename, h_colorData);
-	printf("saved image as: [%s]\n", filename);
-	Analysis::end(3);
+  Analysis::begin();
+  const char* filename = argv[1];
+  writeColorDataToFile(filename, h_colorData);
+  printf("saved image as: [%s]\n", filename);
+  Analysis::end(3);
 
-	Analysis::printAll(IMAGE_WIDTH, IMAGE_HEIGHT);
+  Analysis::printAll(IMAGE_WIDTH, IMAGE_HEIGHT);
 
-	cudaDeviceReset();
-	free(h_colorData);
-	printf("\n");
-	return 0;
+  cudaDeviceReset();
+  free(h_colorData);
+  printf("\n");
+  return 0;
 }
