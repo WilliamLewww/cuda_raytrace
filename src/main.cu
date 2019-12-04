@@ -129,8 +129,8 @@ void colorFromRay(Tuple* colorOut) {
       float reflectEyeDifference = dot(lightReflection, eyeDirection);
 
       color = (0.1f * sphereArray[intersectionIndex].color) + 
-          (0.7f * lightNormalDifference * sphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
-          (0.2f * sphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+              (0.7f * lightNormalDifference * sphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
+              (0.2f * sphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
     }
 
     if (shapeType == 2) {
@@ -143,8 +143,8 @@ void colorFromRay(Tuple* colorOut) {
       float reflectEyeDifference = dot(lightReflection, eyeDirection);
 
       color = (0.1f * planeArray[intersectionIndex].color) + 
-          (0.7f * lightNormalDifference * planeArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
-          (0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+              (0.7f * lightNormalDifference * planeArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
+              (0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
     }
 
     colorOut[(idy*IMAGE_WIDTH)+idx] = color;
@@ -215,7 +215,7 @@ int main(int argn, char** argv) {
   cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
   Analysis::end(0);
 
-  dim3 block(32, 32);
+  dim3 block(atoi(argv[2]), atoi(argv[3]));
   dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
 
   Analysis::begin();

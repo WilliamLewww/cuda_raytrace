@@ -13,7 +13,7 @@ MEMCHECK=$(CUDA_PATH)/bin/cuda-memcheck
 CUDA_FLAGS=--gpu-architecture=sm_50
 
 EXEC=raytrace_renderer
-EXEC_ARGS=bin/image.ppm
+EXEC_ARGS=bin/image.ppm 16 16
 
 all: clean $(EXEC) run
 
