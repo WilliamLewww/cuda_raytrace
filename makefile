@@ -10,7 +10,7 @@ NVVP=$(CUDA_PATH)/bin/nvvp
 CUDA_GDB=$(CUDA_PATH)/bin/cuda-gdb
 MEMCHECK=$(CUDA_PATH)/bin/cuda-memcheck
 
-CUDA_FLAGS=--gpu-architecture=sm_50
+CUDA_FLAGS=--gpu-architecture=sm_30
 
 EXEC=raytrace_renderer
 EXEC_ARGS=bin/image.ppm 16 16
