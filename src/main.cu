@@ -48,7 +48,7 @@ int intersectPlane(float* intersectionPoint, Plane plane, Ray ray) {
 }
 
 __global__
-void colorFromRay(Tuple* colorOut) {
+void lighting(Tuple* colorOut) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
@@ -220,7 +220,7 @@ int main(int argn, char** argv) {
 
   Analysis::begin();
   printf("rendering ray traced image...\n");
-  colorFromRay<<<grid, block>>>(d_colorData);
+  lighting<<<grid, block>>>(d_colorData);
   cudaDeviceSynchronize();
   printf("finished rendering\n");
   Analysis::end(1);
