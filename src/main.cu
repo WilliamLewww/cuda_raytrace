@@ -10,6 +10,7 @@
 
 #define SPHERE_COUNT 5
 #define PLANE_COUNT 3
+#define REFLECTIVE_SPHERE_COUNT 1
 
 __constant__ Camera camera[1];
 
@@ -17,6 +18,7 @@ __constant__ Light lightArray[LIGHT_COUNT];
 
 __constant__ Sphere sphereArray[SPHERE_COUNT];
 __constant__ Plane planeArray[PLANE_COUNT];
+__constant__ Sphere reflectiveSphereArray[REFLECTIVE_SPHERE_COUNT];
 
 __device__
 int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
@@ -118,6 +120,12 @@ void lighting(Tuple* colorOut) {
       intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
     }
 
+    #pragma unroll
+    for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
+      float point;
+      intersecionCount += intersectSphere(&point, reflectiveSphereArray[x], lightRay);
+    }
+
     Tuple color;
     if (shapeType == 1) {
       Tuple normal = normalize(intersectionPosition - sphereArray[intersectionIndex].origin);
@@ -147,6 +155,45 @@ void lighting(Tuple* colorOut) {
               (0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
     }
 
+    colorOut[(idy*IMAGE_WIDTH)+idx] = color;
+  }
+  else {
+    colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
+  }
+}
+
+__global__
+void reflections(Tuple* colorOut) {
+  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+
+  Tuple pixel = {
+    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
+    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    0.0f, 1.0f
+  };
+  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
+  Ray ray = {camera[0].position, direction};
+  ray = transform(ray, camera[0].modelMatrix);
+
+  int shapeType = 0;
+  int intersectionIndex = -1;
+  float intersectionPoint = 0.0f;
+
+  #pragma unroll
+  for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
+    float point;
+    int count = intersectSphere(&point, reflectiveSphereArray[x], ray);
+
+    shapeType = (1 * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (shapeType * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+    intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+  }
+
+  if (intersectionIndex != -1) {
+    Tuple color = {255.0f, 255.0f, 255.0f, 1.0f};
     colorOut[(idy*IMAGE_WIDTH)+idx] = color;
   }
   else {
@@ -210,9 +257,16 @@ int main(int argn, char** argv) {
   initializeModelMatrix(&h_planeArray[2], createIdentityMatrix());
   cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
+  Sphere h_reflectiveSphereArray[] = {
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {178.5, 255.0, 51.0, 1.0}}
+  };
+  initializeModelMatrix(&h_reflectiveSphereArray[0], createTranslateMatrix(2.0, 0.0, -2.0));
+  cudaMemcpyToSymbol(reflectiveSphereArray, h_reflectiveSphereArray, REFLECTIVE_SPHERE_COUNT*sizeof(Sphere));
+
   Tuple* h_colorData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
-  Tuple* d_colorData;
-  cudaMalloc((Tuple**)&d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+  Tuple *d_lightingData, *d_reflectionsData;
+  cudaMalloc((Tuple**)&d_lightingData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+  cudaMalloc((Tuple**)&d_reflectionsData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
   Analysis::end(0);
 
   dim3 block(atoi(argv[2]), atoi(argv[3]));
@@ -220,14 +274,16 @@ int main(int argn, char** argv) {
 
   Analysis::begin();
   printf("rendering ray traced image...\n");
-  lighting<<<grid, block>>>(d_colorData);
+  lighting<<<grid, block>>>(d_lightingData);
+  reflections<<<grid, block>>>(d_reflectionsData);
   cudaDeviceSynchronize();
   printf("finished rendering\n");
   Analysis::end(1);
 
   Analysis::begin();
-  cudaMemcpy(h_colorData, d_colorData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
-  cudaFree(d_colorData);
+  cudaMemcpy(h_colorData, d_reflectionsData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
+  cudaFree(d_lightingData);
+  cudaFree(d_reflectionsData);
   Analysis::end(2);
 
   Analysis::begin();
