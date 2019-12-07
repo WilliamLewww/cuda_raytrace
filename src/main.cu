@@ -49,23 +49,9 @@ int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
   return 1 * (t >= 0);
 }
 
-__global__
-void lighting(Tuple* colorOut) {
-  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
-
-  Tuple pixel = {
-    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
-    0.0f, 1.0f
-  };
-  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
-  Ray ray = {camera[0].position, direction};
-  ray = transform(ray, camera[0].modelMatrix);
-
-  int shapeType = 0;
+__device__
+Tuple colorFromRay(Ray ray) {
+int shapeType = 0;
   int intersectionIndex = -1;
   float intersectionMagnitude = 0.0f;
 
@@ -155,15 +141,15 @@ void lighting(Tuple* colorOut) {
               (0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
     }
 
-    colorOut[(idy*IMAGE_WIDTH)+idx] = color;
+    return color;
   }
   else {
-    colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
+    return {0.0f, 0.0f, 0.0f, 1.0f};
   }
 }
 
 __global__
-void reflections(Tuple* colorOut) {
+void lighting(Tuple* colorOut) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
@@ -178,49 +164,12 @@ void reflections(Tuple* colorOut) {
   Ray ray = {camera[0].position, direction};
   ray = transform(ray, camera[0].modelMatrix);
 
-  int shapeType = 0;
-  int intersectionIndex = -1;
-  float intersectionMagnitude = 0.0f;
+  colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromRay(ray);
+}
 
-  #pragma unroll
-  for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
-    float point;
-    int count = intersectSphere(&point, reflectiveSphereArray[x], ray);
+__global__
+void reflections(Tuple* colorOut) {
 
-    shapeType = (1 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-  }
-
-  if (intersectionIndex != -1) {
-    Tuple color;
-    if (shapeType == 1) {
-      Ray transformedRay = transform(ray, reflectiveSphereArray[intersectionIndex].inverseModelMatrix);
-      Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
-      Tuple normal = normalize(intersectionPoint - sphereArray[intersectionIndex].origin);
-
-      Ray reflectedRay = {intersectionPoint, reflect(transformedRay.direction, normal)};
-
-      int count = 0;
-      #pragma unroll
-      for (int x = 0; x < SPHERE_COUNT; x++) {
-        float point;
-        count += intersectSphere(&point, sphereArray[x], reflectedRay);
-      }
-
-      if (count > 0) {
-        color = {0.0f, 255.0f, 0.0f, 1.0f};
-      }
-      else {
-        color = {255.0f, 0.0f, 0.0f, 1.0f};
-      }
-    }
-
-    colorOut[(idy*IMAGE_WIDTH)+idx] = color;
-  }
-  else {
-    colorOut[(idy*IMAGE_WIDTH)+idx] = {0.0f, 0.0f, 0.0f, 1.0f};
-  }
 }
 
 void writeColorDataToFile(const char* filename, Tuple* colorData) {
@@ -303,7 +252,7 @@ int main(int argn, char** argv) {
   Analysis::end(1);
 
   Analysis::begin();
-  cudaMemcpy(h_colorData, d_reflectionsData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
+  cudaMemcpy(h_colorData, d_lightingData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
   cudaFree(d_lightingData);
   cudaFree(d_reflectionsData);
   Analysis::end(2);
