@@ -51,7 +51,8 @@ int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
 
 __device__
 Tuple colorFromRay(Ray ray) {
-int shapeType = 0;
+  Tuple color = {0.0f, 0.0f, 0.0f, 1.0f};
+  int shapeType = 0;
   int intersectionIndex = -1;
   float intersectionMagnitude = 0.0f;
 
@@ -112,7 +113,6 @@ int shapeType = 0;
       intersecionCount += intersectSphere(&point, reflectiveSphereArray[x], lightRay);
     }
 
-    Tuple color;
     if (shapeType == 1) {
       Tuple normal = normalize(intersectionPoint - sphereArray[intersectionIndex].origin);
       float lightNormalDifference = dot(normal, lightRay.direction);
@@ -140,12 +140,9 @@ int shapeType = 0;
               (0.7f * lightNormalDifference * planeArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
               (0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
     }
+  }
 
-    return color;
-  }
-  else {
-    return {0.0f, 0.0f, 0.0f, 1.0f};
-  }
+  return color;
 }
 
 __global__
