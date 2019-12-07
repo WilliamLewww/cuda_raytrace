@@ -217,9 +217,9 @@ void reflections(Tuple* colorOut) {
    if (shapeType == 3) {
     Ray transformedRay = transform(ray, reflectiveSphereArray[intersectionIndex].inverseModelMatrix);
     Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
-    Tuple normal = normalize(intersectionPoint - sphereArray[intersectionIndex].origin);
+    Tuple normal = normalize(intersectionPoint - reflectiveSphereArray[intersectionIndex].origin);
 
-    Ray reflectedRay = {intersectionPoint, reflect(transformedRay.direction, normal)};
+    Ray reflectedRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
     colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromRay(reflectedRay);
   }
 }
