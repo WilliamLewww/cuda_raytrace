@@ -214,19 +214,22 @@ void reflections(Tuple* colorOut) {
     intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
-   if (shapeType == 3) {
+  Tuple color = {0.0f, 0.0f, 0.0f, 0.0f};
+  if (shapeType == 3) {
     Ray transformedRay = transform(ray, reflectiveSphereArray[intersectionIndex].inverseModelMatrix);
     Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
     Tuple normal = normalize(intersectionPoint - reflectiveSphereArray[intersectionIndex].origin);
 
     Ray reflectedRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
-    colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromRay(reflectedRay);
+    color = colorFromRay(reflectedRay);
   }
+
+  colorOut[(idy*IMAGE_WIDTH)+idx] = color;
 }
 
 void tempLayerAdded(Tuple* first, Tuple* second) {
   for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
-    if (second[x].x > 0 || second[x].y > 0 || second[x].z > 0) {
+    if (second[x].w > 0) {
       first[x] = second[x];
     }
   }
