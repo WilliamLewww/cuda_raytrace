@@ -21,7 +21,7 @@ __constant__ Plane planeArray[PLANE_COUNT];
 __constant__ Sphere reflectiveSphereArray[REFLECTIVE_SPHERE_COUNT];
 
 __device__
-int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
+int intersectSphere(float* intersectionMagnitude, Sphere sphere, Ray ray) {
   Ray transformedRay = transform(ray, sphere.inverseModelMatrix);
 
   Tuple sphereToRay = transformedRay.origin - sphere.origin;
@@ -33,18 +33,18 @@ int intersectSphere(float* intersectionPoint, Sphere sphere, Ray ray) {
   float pointA = (-b - sqrt(discriminant)) / (2.0f * a);
   float pointB = (-b + sqrt(discriminant)) / (2.0f * a);
 
-  *intersectionPoint = (pointA * (pointA <= pointB)) + (pointB * (pointB < pointA));
+  *intersectionMagnitude = (pointA * (pointA <= pointB)) + (pointB * (pointB < pointA));
 
   return (discriminant >= 0) * (2 - (pointA == pointB)) * (pointA > 0 && pointB > 0);
 }
 
 __device__
-int intersectPlane(float* intersectionPoint, Plane plane, Ray ray) {
+int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
   Ray transformedRay = transform(ray, plane.inverseModelMatrix);
 
   float denominator = dot(plane.normal, transformedRay.direction);
   float t = dot(plane.origin - transformedRay.origin, plane.normal) / denominator;
-  *intersectionPoint = t;
+  *intersectionMagnitude = t;
 
   return 1 * (t >= 0);
 }
@@ -67,16 +67,16 @@ void lighting(Tuple* colorOut) {
 
   int shapeType = 0;
   int intersectionIndex = -1;
-  float intersectionPoint = 0.0f;
+  float intersectionMagnitude = 0.0f;
 
   #pragma unroll
   for (int x = 0; x < SPHERE_COUNT; x++) {
     float point;
     int count = intersectSphere(&point, sphereArray[x], ray);
 
-    shapeType = (1 * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (shapeType * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-    intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-    intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+    shapeType = (1 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
   #pragma unroll
@@ -84,26 +84,26 @@ void lighting(Tuple* colorOut) {
     float point;
     int count = intersectPlane(&point, planeArray[x], ray);
 
-    shapeType = (2 * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (shapeType * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-    intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-    intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+    shapeType = (2 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
   if (intersectionIndex != -1) {
     Ray transformedRay;
-    Tuple intersectionPosition;
+    Tuple intersectionPoint;
     Ray lightRay;
 
     if (shapeType == 1) {
       transformedRay = transform(ray, sphereArray[intersectionIndex].inverseModelMatrix);
-      intersectionPosition = project(transformedRay, intersectionPoint);
-      lightRay = {sphereArray[intersectionIndex].modelMatrix * intersectionPosition, normalize(lightArray[0].position - (sphereArray[intersectionIndex].modelMatrix * intersectionPosition))};
+      intersectionPoint = project(transformedRay, intersectionMagnitude);
+      lightRay = {sphereArray[intersectionIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (sphereArray[intersectionIndex].modelMatrix * intersectionPoint))};
     }
 
     if (shapeType == 2) {
       transformedRay = transform(ray, planeArray[intersectionIndex].inverseModelMatrix);
-      intersectionPosition = project(transformedRay, intersectionPoint);
-      lightRay = {planeArray[intersectionIndex].modelMatrix * intersectionPosition, normalize(lightArray[0].position - (planeArray[intersectionIndex].modelMatrix * intersectionPosition))};
+      intersectionPoint = project(transformedRay, intersectionMagnitude);
+      lightRay = {planeArray[intersectionIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (planeArray[intersectionIndex].modelMatrix * intersectionPoint))};
     }
 
     int intersecionCount = 0;
@@ -128,7 +128,7 @@ void lighting(Tuple* colorOut) {
 
     Tuple color;
     if (shapeType == 1) {
-      Tuple normal = normalize(intersectionPosition - sphereArray[intersectionIndex].origin);
+      Tuple normal = normalize(intersectionPoint - sphereArray[intersectionIndex].origin);
       float lightNormalDifference = dot(normal, lightRay.direction);
 
       Tuple lightReflection = reflect(negate(lightRay.direction), normal);
@@ -180,20 +180,42 @@ void reflections(Tuple* colorOut) {
 
   int shapeType = 0;
   int intersectionIndex = -1;
-  float intersectionPoint = 0.0f;
+  float intersectionMagnitude = 0.0f;
 
   #pragma unroll
   for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
     float point;
     int count = intersectSphere(&point, reflectiveSphereArray[x], ray);
 
-    shapeType = (1 * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (shapeType * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-    intersectionIndex = (x * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
-    intersectionPoint = (point * (count > 0 && (point < intersectionPoint || intersectionPoint == 0))) + (intersectionPoint * (count <= 0 || (point >= intersectionPoint && intersectionPoint != 0)));
+    shapeType = (1 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
   if (intersectionIndex != -1) {
-    Tuple color = {255.0f, 255.0f, 255.0f, 1.0f};
+    Tuple color;
+    if (shapeType == 1) {
+      Ray transformedRay = transform(ray, reflectiveSphereArray[intersectionIndex].inverseModelMatrix);
+      Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
+      Tuple normal = normalize(intersectionPoint - sphereArray[intersectionIndex].origin);
+
+      Ray reflectedRay = {intersectionPoint, reflect(transformedRay.direction, normal)};
+
+      int count = 0;
+      #pragma unroll
+      for (int x = 0; x < SPHERE_COUNT; x++) {
+        float point;
+        count += intersectSphere(&point, sphereArray[x], reflectedRay);
+      }
+
+      if (count > 0) {
+        color = {0.0f, 255.0f, 0.0f, 1.0f};
+      }
+      else {
+        color = {255.0f, 0.0f, 0.0f, 1.0f};
+      }
+    }
+
     colorOut[(idy*IMAGE_WIDTH)+idx] = color;
   }
   else {
