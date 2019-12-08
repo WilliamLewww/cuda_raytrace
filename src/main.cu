@@ -101,11 +101,11 @@ Tuple colorFromRay(Ray ray) {
       intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 1));
     }
 
-    #pragma unroll
-    for (int x = 0; x < PLANE_COUNT; x++) {
-      float point;
-      intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
-    }
+    // #pragma unroll
+    // for (int x = 0; x < PLANE_COUNT; x++) {
+    //   float point;
+    //   intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
+    // }
 
     #pragma unroll
     for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
@@ -274,27 +274,27 @@ int main(int argn, char** argv) {
                 {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 255.0, 1.0}},
                 {{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 76.5, 255.0, 1.0}}
               };
-  initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(-0.5, -1, 0.5));
-  initializeModelMatrix(&h_sphereArray[1], multiply(createTranslateMatrix(-0.5, -2, 0.5), createScaleMatrix(0.75, 0.75, 0.75)));
+  initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(-0.5, -1, -2.0));
+  initializeModelMatrix(&h_sphereArray[1], multiply(createTranslateMatrix(-0.5, -2, -2.0), createScaleMatrix(0.75, 0.75, 0.75)));
   initializeModelMatrix(&h_sphereArray[2], multiply(createTranslateMatrix(2, -1, 0.5), createScaleMatrix(1.25, 1.25, 1.25)));
-  initializeModelMatrix(&h_sphereArray[3], multiply(createTranslateMatrix(-0.5, -0.25, -1.5), createScaleMatrix(0.5, 0.5, 0.5)));
-  initializeModelMatrix(&h_sphereArray[4], multiply(createTranslateMatrix(-0.5, -2, -2.0), createScaleMatrix(0.25, 0.25, 0.25)));
+  initializeModelMatrix(&h_sphereArray[3], multiply(createTranslateMatrix(2.0, -0.25, -1.5), createScaleMatrix(0.5, 0.5, 0.5)));
+  initializeModelMatrix(&h_sphereArray[4], multiply(createTranslateMatrix(2.25, -2, -2.0), createScaleMatrix(0.25, 0.25, 0.25)));
   cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
   Plane h_planeArray[] = {
-              {{0.0, 0.0, 3.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {229.5, 127.5, 229.5, 1.0}},
-              {{-3.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 0.0}, {229.5, 229.5, 127.5, 1.0}},
+              {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {229.5, 127.5, 229.5, 1.0}},
+              {{0.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 0.0}, {229.5, 229.5, 127.5, 1.0}},
               {{0.0, 0.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 0.0}, {127.5, 229.5, 229.5, 1.0}}
             };
-  initializeModelMatrix(&h_planeArray[0], createIdentityMatrix());
-  initializeModelMatrix(&h_planeArray[1], createIdentityMatrix());
-  initializeModelMatrix(&h_planeArray[2], createIdentityMatrix());
+  initializeModelMatrix(&h_planeArray[0], createTranslateMatrix(0.0, 0.0, 3.0));
+  initializeModelMatrix(&h_planeArray[1], createTranslateMatrix(-3.0, 0.0, 0.0));
+  initializeModelMatrix(&h_planeArray[2], createTranslateMatrix(0.0, 0.0, 0.0));
   cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
   Sphere h_reflectiveSphereArray[] = {
                 {{0.0, 0.0, 0.0, 1.0}, 1.0, {178.5, 255.0, 51.0, 1.0}}
   };
-  initializeModelMatrix(&h_reflectiveSphereArray[0], createTranslateMatrix(2.0, 0.0, -2.0));
+  initializeModelMatrix(&h_reflectiveSphereArray[0], createTranslateMatrix(-0.5, -3.0, 0.5));
   cudaMemcpyToSymbol(reflectiveSphereArray, h_reflectiveSphereArray, REFLECTIVE_SPHERE_COUNT*sizeof(Sphere));
 
   Tuple* h_lightingData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
