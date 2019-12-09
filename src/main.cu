@@ -40,6 +40,7 @@ int intersectSphere(float* intersectionMagnitude, Sphere sphere, Ray ray) {
 
 __device__
 int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
+  // fix inverse intersection
   Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
   normal = plane.modelMatrix * normal;
 
@@ -102,11 +103,11 @@ Tuple colorFromRay(Ray ray) {
       intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 1));
     }
 
-    // #pragma unroll
-    // for (int x = 0; x < PLANE_COUNT; x++) {
-    //   float point;
-    //   intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
-    // }
+    #pragma unroll
+    for (int x = 0; x < PLANE_COUNT; x++) {
+      float point;
+      intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
+    }
 
     #pragma unroll
     for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
@@ -288,8 +289,8 @@ int main(int argn, char** argv) {
               {{0.0, 0.0, 0.0, 1.0}, {229.5, 229.5, 127.5, 1.0}}
             };
   initializeModelMatrix(&h_planeArray[0], createTranslateMatrix(0.0, 0.0, 0.0));
-  initializeModelMatrix(&h_planeArray[1], multiply(createTranslateMatrix(0.0, 0.0, 3.0), createRotationMatrixX(-M_PI / 2)));
-  initializeModelMatrix(&h_planeArray[2], multiply(createTranslateMatrix(-3.0, 0.0, 0.0), createRotationMatrixZ(-M_PI / 2)));
+  initializeModelMatrix(&h_planeArray[1], multiply(createTranslateMatrix(0.0, 0.0, 3.0), createRotationMatrixX(M_PI / 2)));
+  initializeModelMatrix(&h_planeArray[2], multiply(createTranslateMatrix(-3.0, 0.0, 0.0), createRotationMatrixZ(M_PI / 2)));
   cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
   Sphere h_reflectiveSphereArray[] = {
