@@ -40,7 +40,6 @@ int intersectSphere(float* intersectionMagnitude, Sphere sphere, Ray ray) {
 
 __device__
 int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
-  // fix inverse intersection
   Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
   normal = plane.modelMatrix * normal;
 
@@ -266,7 +265,7 @@ int main(int argn, char** argv) {
   initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
   cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
-  const Light h_lightArray[] = {{{10.0, -10.0, -3.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
+  const Light h_lightArray[] = {{{10.0, -10.0, -10.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
   Sphere h_sphereArray[] = {
