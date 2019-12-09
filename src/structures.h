@@ -29,8 +29,7 @@ struct Sphere {
 
 struct Plane {
   Tuple origin;
-  Tuple normal;
-
+  
   Tuple color;
 
   float modelMatrix[16];

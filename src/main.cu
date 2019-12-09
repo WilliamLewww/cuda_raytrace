@@ -129,7 +129,7 @@ Tuple colorFromRay(Ray ray) {
     }
 
     if (shapeType == 2) {
-      Tuple normal = planeArray[intersectionIndex].normal;
+      Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
       float lightNormalDifference = dot(normal, lightRay.direction);
 
       Tuple lightReflection = reflect(negate(lightRay.direction), normal);
@@ -283,9 +283,9 @@ int main(int argn, char** argv) {
   cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
   Plane h_planeArray[] = {
-              {{0.0, 0.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 0.0}, {127.5, 229.5, 229.5, 1.0}},
-              {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {229.5, 127.5, 229.5, 1.0}},
-              {{0.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 0.0}, {229.5, 229.5, 127.5, 1.0}}
+              {{0.0, 0.0, 0.0, 1.0}, {127.5, 229.5, 229.5, 1.0}},
+              {{0.0, 0.0, 0.0, 1.0}, {229.5, 127.5, 229.5, 1.0}},
+              {{0.0, 0.0, 0.0, 1.0}, {229.5, 229.5, 127.5, 1.0}}
             };
   initializeModelMatrix(&h_planeArray[0], createTranslateMatrix(0.0, 0.0, 0.0));
   initializeModelMatrix(&h_planeArray[1], multiply(createTranslateMatrix(0.0, 0.0, 3.0), createRotationMatrixX(-M_PI / 2)));
