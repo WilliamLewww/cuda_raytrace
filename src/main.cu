@@ -40,11 +40,11 @@ int intersectSphere(float* intersectionMagnitude, Sphere sphere, Ray ray) {
 
 __device__
 int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
+  Ray transformedRay = transform(ray, plane.inverseModelMatrix);
   Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
-  normal = plane.modelMatrix * normal;
 
-  float denominator = dot(normal, ray.direction);
-  float t = dot((plane.modelMatrix * plane.origin) - ray.origin, normal) / denominator;
+  float denominator = dot(normal, transformedRay.direction);
+  float t = dot(plane.origin - transformedRay.origin, normal) / denominator;
   *intersectionMagnitude = t;
 
   return 1 * (t >= 0);
@@ -102,12 +102,12 @@ Tuple colorFromRay(Ray ray) {
       intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 1));
     }
 
-    // // causing spotlight effect
-    // #pragma unroll
-    // for (int x = 0; x < PLANE_COUNT; x++) {
-    //   float point;
-    //   intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
-    // }
+    // causing spotlight effect
+    #pragma unroll
+    for (int x = 0; x < PLANE_COUNT; x++) {
+      float point;
+      intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
+    }
 
     #pragma unroll
     for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
