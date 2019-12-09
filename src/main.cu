@@ -40,10 +40,11 @@ int intersectSphere(float* intersectionMagnitude, Sphere sphere, Ray ray) {
 
 __device__
 int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
-  Ray transformedRay = transform(ray, plane.inverseModelMatrix);
+  Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
+  normal = plane.modelMatrix * normal;
 
-  float denominator = dot(plane.normal, transformedRay.direction);
-  float t = dot(plane.origin - transformedRay.origin, plane.normal) / denominator;
+  float denominator = dot(normal, ray.direction);
+  float t = dot((plane.modelMatrix * plane.origin) - ray.origin, normal) / denominator;
   *intersectionMagnitude = t;
 
   return 1 * (t >= 0);
@@ -282,13 +283,13 @@ int main(int argn, char** argv) {
   cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
   Plane h_planeArray[] = {
+              {{0.0, 0.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 0.0}, {127.5, 229.5, 229.5, 1.0}},
               {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, -1.0, 0.0}, {229.5, 127.5, 229.5, 1.0}},
-              {{0.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 0.0}, {229.5, 229.5, 127.5, 1.0}},
-              {{0.0, 0.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 0.0}, {127.5, 229.5, 229.5, 1.0}}
+              {{0.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 0.0}, {229.5, 229.5, 127.5, 1.0}}
             };
-  initializeModelMatrix(&h_planeArray[0], createTranslateMatrix(0.0, 0.0, 3.0));
-  initializeModelMatrix(&h_planeArray[1], createTranslateMatrix(-3.0, 0.0, 0.0));
-  initializeModelMatrix(&h_planeArray[2], createTranslateMatrix(0.0, 0.0, 0.0));
+  initializeModelMatrix(&h_planeArray[0], createTranslateMatrix(0.0, 0.0, 0.0));
+  initializeModelMatrix(&h_planeArray[1], multiply(createTranslateMatrix(0.0, 0.0, 3.0), createRotationMatrixX(-M_PI / 2)));
+  initializeModelMatrix(&h_planeArray[2], multiply(createTranslateMatrix(-3.0, 0.0, 0.0), createRotationMatrixZ(-M_PI / 2)));
   cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
   Sphere h_reflectiveSphereArray[] = {
