@@ -265,7 +265,7 @@ int main(int argn, char** argv) {
   initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
   cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 
-  const Light h_lightArray[] = {{{10.0, -10.0, -10.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
+  const Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
   Sphere h_sphereArray[] = {
