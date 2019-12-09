@@ -102,11 +102,12 @@ Tuple colorFromRay(Ray ray) {
       intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 1));
     }
 
-    #pragma unroll
-    for (int x = 0; x < PLANE_COUNT; x++) {
-      float point;
-      intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
-    }
+    // // causing spotlight effect
+    // #pragma unroll
+    // for (int x = 0; x < PLANE_COUNT; x++) {
+    //   float point;
+    //   intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2));
+    // }
 
     #pragma unroll
     for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
