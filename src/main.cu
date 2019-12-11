@@ -98,14 +98,20 @@ Tuple colorFromRay(Ray ray) {
 
     #pragma unroll
     for (int x = 0; x < SPHERE_COUNT; x++) {
-      float point;
-      intersecionCount += intersectSphere(&point, sphereArray[x], lightRay);
+      float point = 0;
+      intersecionCount += intersectSphere(&point, sphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 1)) * (point < magnitude(lightArray[0].position - intersectionPoint));
+    }
+
+    #pragma unroll
+    for (int x = 0; x < PLANE_COUNT; x++) {
+      float point = 0;
+      intersecionCount += intersectPlane(&point, planeArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 2)) * (point < magnitude(lightArray[0].position - intersectionPoint));
     }
 
     #pragma unroll
     for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
-      float point;
-      intersecionCount += intersectSphere(&point, reflectiveSphereArray[x], lightRay);
+      float point = 0;
+      intersecionCount += intersectSphere(&point, reflectiveSphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 3)) * (point < magnitude(lightArray[0].position - intersectionPoint));
     }
 
     if (shapeType == 1) {
