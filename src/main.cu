@@ -281,7 +281,7 @@ int main(int argn, char** argv) {
   initializeModelMatrix(&h_sphereArray[2], multiply(createTranslateMatrix(2, -1, 0.5), createScaleMatrix(1.25, 1.25, 1.25)));
   initializeModelMatrix(&h_sphereArray[3], multiply(createTranslateMatrix(2.0, -0.25, -1.5), createScaleMatrix(0.5, 0.5, 0.5)));
   initializeModelMatrix(&h_sphereArray[4], multiply(createTranslateMatrix(1.25, -2, -3.0), createScaleMatrix(0.25, 0.25, 0.25)));
-  initializeModelMatrix(&h_sphereArray[5], multiply(createTranslateMatrix(4.0, 0.0, -5.0), createScaleMatrix(2.25, 2.25, 2.25)));
+  initializeModelMatrix(&h_sphereArray[5], multiply(createTranslateMatrix(8.0, -2.0, -7.0), createScaleMatrix(2.25, 2.25, 2.25)));
   cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
   Plane h_planeArray[] = {
