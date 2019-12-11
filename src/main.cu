@@ -108,12 +108,6 @@ Tuple colorFromRay(Ray ray) {
       intersecionCount += intersectSphere(&point, reflectiveSphereArray[x], lightRay);
     }
 
-    // #pragma unroll
-    // for (int x = 0; x < PLANE_COUNT; x++) {
-    //   float point;
-    //   intersecionCount += intersectPlane(&point, planeArray[x], lightRay);
-    // }
-
     if (shapeType == 1) {
       Tuple normal = normalize(intersectionPoint - sphereArray[intersectionIndex].origin);
       float lightNormalDifference = dot(normal, lightRay.direction);
