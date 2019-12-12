@@ -1,5 +1,9 @@
 #include <fstream>
 #include <stdio.h>
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include "structures.h"
 #include "analysis.h"
 
@@ -147,6 +151,14 @@ Tuple colorFromRay(Ray ray) {
 }
 
 __global__
+void testKernel(unsigned int *colorOut) {
+  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+  colorOut[(idy*IMAGE_WIDTH)+idx] = 0;
+}
+
+__global__
 void lighting(Tuple* colorOut) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -249,6 +261,20 @@ void writeColorDataToFile(const char* filename, Tuple* colorData) {
 
   file.close();
 }
+
+extern "C" void renderFrame(void* cuda_dev_render_buffer, struct cudaGraphicsResource* cuda_tex_resource) {
+  dim3 block(16, 16);
+  dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
+  testKernel<<<grid,block>>>((unsigned int *)cuda_dev_render_buffer);
+
+  cudaArray *texture_ptr;
+  cudaGraphicsMapResources(1, &cuda_tex_resource, 0);
+  cudaGraphicsSubResourceGetMappedArray(&texture_ptr, cuda_tex_resource, 0, 0);
+
+  cudaMemcpy2DToArray(texture_ptr, 0, 0, cuda_dev_render_buffer, 0, 1000*4*sizeof(GLubyte), 1000*4*sizeof(GLubyte), cudaMemcpyDeviceToDevice);
+  cudaGraphicsUnmapResources(1, &cuda_tex_resource, 0);
+}
+
 
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) {
   printf("\n");

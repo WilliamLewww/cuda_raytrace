@@ -35,7 +35,7 @@ main.o: ./src/main.cpp
 	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/main.o $(LINKER_ARGUMENTS)
 
 renderer.o: ./src/renderer.cu
-	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/renderer.o
+	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/renderer.o $(LINKER_ARGUMENTS)
 
 run:
 	$(BIN_PATH)/$(EXEC) $(EXEC_ARGS)
