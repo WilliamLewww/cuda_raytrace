@@ -62,6 +62,7 @@ int main(int argn, char** argv) {
   glBindVertexArray(0);
 
   while (!glfwWindowShouldClose(window)) {
+    renderFrame();
     glfwPollEvents();
 
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -83,6 +84,19 @@ int main(int argn, char** argv) {
   glfwDestroyWindow(window);
   glfwTerminate();
   return 0;
+}
+
+void renderFrame() {
+  dim3 block(16, 16);
+  dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
+  launch_cudaRender(grid, block, 0, (unsigned int *)cuda_dev_render_buffer, WIDTH);
+
+  cudaArray *texture_ptr;
+  cudaGraphicsMapResources(1, &cuda_tex_resource, 0);
+  cudaGraphicsSubResourceGetMappedArray(&texture_ptr, cuda_tex_resource, 0, 0);
+
+  cudaMemcpyToArray(texture_ptr, 0, 0, cuda_dev_render_buffer, 1000*1000*4*sizeof(GLubyte), cudaMemcpyDeviceToDevice);
+  cudaGraphicsUnmapResources(1, &cuda_tex_resource, 0);
 }
 
 std::string readShaderSource(const char* filepath) {
