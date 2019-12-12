@@ -1,5 +1,10 @@
 BIN_PATH=./bin/
 CUDA_PATH=/usr/local/cuda-10.1
+
+GLFW_PATH=/usr/local/glfw-3.3
+GLFW_LIBRARY_PATH=$(GLFW_PATH)/glfw-build/src
+GLFW_INCLUDE_PATH=$(GLFW_PATH)/include/
+
 CURRENT_PATH=$(shell pwd)
 
 CC=g++
@@ -17,11 +22,14 @@ EXEC_ARGS=bin/image.ppm 16 16
 
 all: clean $(EXEC) run
 
-$(EXEC): main.o
+$(EXEC): main.o renderer.o
 	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)*.o -o $(BIN_PATH)$(EXEC)
 
 main.o: ./src/main.cu
 	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)main.o
+
+renderer.o: ./src/renderer.cu
+	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)renderer.o
 
 run:
 	$(BIN_PATH)$(EXEC) $(EXEC_ARGS)
