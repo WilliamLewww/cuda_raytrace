@@ -5,6 +5,10 @@ GLFW_PATH=/usr/local/glfw-3.3
 GLFW_LIBRARY_PATH=$(GLFW_PATH)/glfw-build/src
 GLFW_INCLUDE_PATH=$(GLFW_PATH)/include
 
+GLEW_PATH=/usr/local/glew-2.1.0
+GLEW_LIBRARY_PATH=$(GLEW_PATH)/lib
+GLEW_INCLUDE_PATH=$(GLEW_PATH)/include
+
 CURRENT_PATH=$(shell pwd)
 
 CC=g++
@@ -16,7 +20,8 @@ CUDA_GDB=$(CUDA_PATH)/bin/cuda-gdb
 MEMCHECK=$(CUDA_PATH)/bin/cuda-memcheck
 
 CUDA_FLAGS=--gpu-architecture=sm_30
-LIBRARIES=-lglfw3 -lGL -lGLU -lXrandr -lXext -lX11
+LIBRARIES=-lglfw3 -lGLEW -lGL -lGLU -lXrandr -lXext -lX11
+LINKER_ARGUMENTS=-L$(GLFW_LIBRARY_PATH) -L$(GLEW_LIBRARY_PATH) -I$(GLFW_INCLUDE_PATH) -I$(GLEW_INCLUDE_PATH) $(LIBRARIES)
 
 EXEC=raytrace_renderer
 EXEC_ARGS=bin/image.ppm 16 16
@@ -24,10 +29,10 @@ EXEC_ARGS=bin/image.ppm 16 16
 all: clean $(EXEC) run
 
 $(EXEC): main.o renderer.o
-	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)/*.o -o $(BIN_PATH)/$(EXEC) -L$(GLFW_LIBRARY_PATH) -I$(GLFW_INCLUDE_PATH) $(LIBRARIES)
+	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)/*.o -o $(BIN_PATH)/$(EXEC) $(LINKER_ARGUMENTS)
 
 main.o: ./src/main.cpp
-	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/main.o -L$(GLFW_LIBRARY_PATH) -I$(GLFW_INCLUDE_PATH) $(LIBRARIES)
+	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/main.o $(LINKER_ARGUMENTS)
 
 renderer.o: ./src/renderer.cu
 	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/renderer.o
