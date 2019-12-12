@@ -1,9 +1,9 @@
-BIN_PATH=./bin/
+BIN_PATH=./bin
 CUDA_PATH=/usr/local/cuda-10.1
 
 GLFW_PATH=/usr/local/glfw-3.3
 GLFW_LIBRARY_PATH=$(GLFW_PATH)/glfw-build/src
-GLFW_INCLUDE_PATH=$(GLFW_PATH)/include/
+GLFW_INCLUDE_PATH=$(GLFW_PATH)/include
 
 CURRENT_PATH=$(shell pwd)
 
@@ -16,6 +16,7 @@ CUDA_GDB=$(CUDA_PATH)/bin/cuda-gdb
 MEMCHECK=$(CUDA_PATH)/bin/cuda-memcheck
 
 CUDA_FLAGS=--gpu-architecture=sm_30
+LIBRARIES=-lglfw3 -lGL -lGLU -lXrandr -lXext -lX11
 
 EXEC=raytrace_renderer
 EXEC_ARGS=bin/image.ppm 16 16
@@ -23,31 +24,31 @@ EXEC_ARGS=bin/image.ppm 16 16
 all: clean $(EXEC) run
 
 $(EXEC): main.o renderer.o
-	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)*.o -o $(BIN_PATH)$(EXEC)
+	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)/*.o -o $(BIN_PATH)/$(EXEC) -L$(GLFW_LIBRARY_PATH) -I$(GLFW_INCLUDE_PATH) $(LIBRARIES)
 
 main.o: ./src/main.cpp
-	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)main.o
+	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/main.o -L$(GLFW_LIBRARY_PATH) -I$(GLFW_INCLUDE_PATH) $(LIBRARIES)
 
 renderer.o: ./src/renderer.cu
-	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)renderer.o
+	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/renderer.o
 
 run:
-	$(BIN_PATH)$(EXEC) $(EXEC_ARGS)
+	$(BIN_PATH)/$(EXEC) $(EXEC_ARGS)
 
 profile:
-	sudo $(NVPROF) $(BIN_PATH)$(EXEC) $(EXEC_ARGS) 2>$(BIN_PATH)profile.log; cat $(BIN_PATH)profile.log;
+	sudo $(NVPROF) $(BIN_PATH)/$(EXEC) $(EXEC_ARGS) 2>$(BIN_PATH)/profile.log; cat $(BIN_PATH)/profile.log;
 
 nvvp:
 	sudo $(NVVP) $(CURRENT_PATH)/bin/$(EXEC) $(EXEC_ARGS) -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 
 cuda-gdb:
-	$(CUDA_GDB) $(BIN_PATH)$(EXEC)
+	$(CUDA_GDB) $(BIN_PATH)/$(EXEC)
 
 memory-check:
-	$(MEMCHECK) $(BIN_PATH)$(EXEC) $(EXEC_ARGS) 2>$(BIN_PATH)memory-check.log; cat $(BIN_PATH)memory-check.log;
+	$(MEMCHECK) $(BIN_PATH)/$(EXEC) $(EXEC_ARGS) 2>$(BIN_PATH)/memory-check.log; cat $(BIN_PATH)/memory-check.log;
 
 open:
 	xdg-open bin/image.ppm
 
 clean:
-	rm -rf $(BIN_PATH)*
+	rm -rf $(BIN_PATH)/*
