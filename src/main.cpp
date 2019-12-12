@@ -8,17 +8,18 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
-extern "C" void renderFrame(void* cuda_dev_render_buffer, struct cudaGraphicsResource* cuda_tex_resource);
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename);
 
 std::string readShaderSource(const char* filepath);
 GLuint createShaderProgram(std::string vertexShaderString, std::string fragmentShaderString);
 
 GLfloat vertices[] = {
-  1.0f, 1.0f, 0.5f, 1.0f, 1.0f,
-  1.0f, -1.0f, 0.5f, 1.0f, 0.0f,
-  -1.0f, -1.0f, 0.5f, 0.0f, 0.0f,
-  -1.0f, 1.0f, 0.5f, 0.0f, 1.0f,
+  0.0, 0.0,
+  1.0, 0.0,
+  0.0, 1.0,
+  0.0, 1.0,
+  1.0, 0.0,
+  1.0, 1.0,
 };
 
 int main(int argn, char** argv) {
@@ -28,42 +29,16 @@ int main(int argn, char** argv) {
   glfwMakeContextCurrent(window);
   glewInit();
 
-  GLuint opengl_tex_cuda;
-  void* cuda_dev_render_buffer;
-  struct cudaGraphicsResource* cuda_tex_resource;
-
-  glGenTextures(1, &opengl_tex_cuda);
-  glBindTexture(GL_TEXTURE_2D, opengl_tex_cuda);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI_EXT, 1000, 1000, 0, GL_RGBA_INTEGER_EXT, GL_UNSIGNED_BYTE, NULL);
-  cudaGraphicsGLRegisterImage(&cuda_tex_resource, opengl_tex_cuda, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard);
-
   GLuint shaderProgramHandle;
   std::string vertexShaderString = readShaderSource("shaders/basic.vertex");
   std::string fragmentShaderString = readShaderSource("shaders/basic.fragment");
   shaderProgramHandle = createShaderProgram(vertexShaderString, fragmentShaderString);
 
-  cudaMalloc(&cuda_dev_render_buffer, 1000*1000*4*sizeof(GLubyte));
-
   GLuint vao, vbo;
   glGenVertexArrays(1, &vao);
   glGenBuffers(1, &vbo);
 
-  glBindVertexArray(vao);
-
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-  glEnableVertexAttribArray(0);
-
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(1);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
   while (!glfwWindowShouldClose(window)) {
-    renderFrame(cuda_dev_render_buffer, cuda_tex_resource);
     glfwPollEvents();
 
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -71,13 +46,13 @@ int main(int argn, char** argv) {
 
     glUseProgram(shaderProgramHandle);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, opengl_tex_cuda);
-    glUniform1i(glGetUniformLocation(shaderProgramHandle, "u_textureSampler"), 0);
-
     glBindVertexArray(vao);
+
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
 
     glfwSwapBuffers(window);
   }

@@ -1,11 +1,5 @@
 #version 460
 
-in vec2 i_textureCoordinate;
-out vec4 o_color;
-
-uniform usampler2D u_textureSampler;
-
 void main() {
-  vec4 color = texture(u_textureSampler, i_textureCoordinate);
-  o_color = vec4(1.0, 1.0, 1.0, 1.0);
+  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }
