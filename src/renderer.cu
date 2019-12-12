@@ -250,7 +250,7 @@ void writeColorDataToFile(const char* filename, Tuple* colorData) {
   file.close();
 }
 
-extern "C" void runKernel(int blockDimX, int blockDimY, const char* filename) {
+extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) {
   printf("\n");
 
   Analysis::setAbsoluteStart();
