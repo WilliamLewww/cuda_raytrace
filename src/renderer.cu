@@ -250,7 +250,7 @@ void writeColorDataToFile(const char* filename, Tuple* colorData) {
   file.close();
 }
 
-int main(int argn, char** argv) {
+extern "C" void runKernel(int blockDimX, int blockDimY, const char* filename) {
   printf("\n");
 
   Analysis::setAbsoluteStart();
@@ -307,7 +307,7 @@ int main(int argn, char** argv) {
   cudaMalloc((Tuple**)&d_reflectionsData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
   Analysis::end(0);
 
-  dim3 block(atoi(argv[2]), atoi(argv[3]));
+  dim3 block(blockDimX, blockDimY);
   dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
 
   Analysis::begin();
@@ -327,7 +327,6 @@ int main(int argn, char** argv) {
   Analysis::end(2);
 
   Analysis::begin();
-  const char* filename = argv[1];
   writeColorDataToFile(filename, h_lightingData);
   printf("saved image as: [%s]\n", filename);
   Analysis::end(3);
@@ -338,5 +337,4 @@ int main(int argn, char** argv) {
   free(h_lightingData);
   free(h_reflectionsData);
   printf("\n");
-  return 0;
 }
