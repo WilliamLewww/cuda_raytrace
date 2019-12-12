@@ -5,8 +5,6 @@
 
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename);
 
-GLuint pbo;
-
 int main(int argn, char** argv) {
   glfwInit();
 
