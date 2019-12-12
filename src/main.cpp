@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename);
 
 int main(int argn, char** argv) {

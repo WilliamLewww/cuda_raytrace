@@ -25,7 +25,7 @@ all: clean $(EXEC) run
 $(EXEC): main.o renderer.o
 	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)*.o -o $(BIN_PATH)$(EXEC)
 
-main.o: ./src/main.cu
+main.o: ./src/main.cpp
 	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)main.o
 
 renderer.o: ./src/renderer.cu
