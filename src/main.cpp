@@ -149,6 +149,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       cameraPositionVelocity.x = cos(-cameraRotation) * 0.1;
       cameraPositionVelocity.z = sin(-cameraRotation) * 0.1;
     }
+    if (key == 82) {
+      cameraPositionVelocity.y = -0.05;
+    }
+    if (key == 70) {
+      cameraPositionVelocity.y = 0.05;
+    }
     if (key == 69) {
       cameraRotationVelocity = 0.01;
     }
@@ -161,6 +167,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (key == 87 || key == 83 ||key == 65 || key == 68) {
       cameraPositionVelocity.x = 0.0;
       cameraPositionVelocity.z = 0.0;
+    }
+    if (key == 82 || key == 70) {
+      cameraPositionVelocity.y = 0.0;
     }
     if (key == 69 || key == 81) {
       cameraRotationVelocity = 0.0;
