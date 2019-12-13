@@ -47,6 +47,8 @@ int main(int argn, char** argv) {
   glGenVertexArrays(1, &vao);
   glGenBuffers(2, vbo);
 
+  GLuint textureHandle = glGetUniformLocation(shaderProgramHandle, "u_texture");
+
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
 
@@ -66,6 +68,8 @@ int main(int argn, char** argv) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
     glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), textureCoordinates, GL_STATIC_DRAW);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    glUniform1i(textureHandle, 0);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 

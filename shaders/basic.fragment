@@ -2,6 +2,9 @@
 
 in vec2 o_textureCoordinates;
 
+uniform usampler2D u_texture;
+
 void main() {
-  gl_FragColor = vec4(o_textureCoordinates, 1.0, 1.0);
+  vec4 color = texture(u_texture, o_textureCoordinates);
+  gl_FragColor = color / 255.0;
 }
