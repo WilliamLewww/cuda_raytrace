@@ -17,7 +17,7 @@ struct Tuple {
   float w;
 };
 
-extern "C" void updateCamera(double x, double y, double z, double rotation) ;
+extern "C" void updateCamera(double x, double y, double z, double rotationX, double rotationY) ;
 extern "C" void initializeScene();
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
 
@@ -47,8 +47,8 @@ GLfloat textureCoordinates[] = {
 
 Tuple cameraPositionVelocity = {0.0, 0.0, 0.0, 0.0};
 Tuple cameraPosition = {5.0, -3.5, -6.0, 1.0};
-double cameraRotationVelocity = 0.0;
-double cameraRotation = -M_PI / 4.5;
+Tuple cameraRotationVelocity = {0.0, 0.0, 0.0, 0.0};
+Tuple cameraRotation = {-M_PI / 12.0, -M_PI / 4.5, 0.0, 0.0};
 
 int main(int argn, char** argv) {
   glfwInit();
@@ -93,9 +93,11 @@ int main(int argn, char** argv) {
     cameraPosition.x += cameraPositionVelocity.x;
     cameraPosition.y += cameraPositionVelocity.y;
     cameraPosition.z += cameraPositionVelocity.z;
-    cameraRotation += cameraRotationVelocity;
+    cameraRotation.x += cameraRotationVelocity.x;
+    cameraRotation.y += cameraRotationVelocity.y;
+    cameraRotation.z += cameraRotationVelocity.z;
 
-    updateCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation);
+    updateCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y);
     renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
     glfwPollEvents();
 
@@ -134,45 +136,54 @@ int main(int argn, char** argv) {
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   if (action == GLFW_PRESS) {
     if (key == 87) {
-      cameraPositionVelocity.x = cos(-cameraRotation + (M_PI / 2)) * 0.1;
-      cameraPositionVelocity.z = sin(-cameraRotation + (M_PI / 2)) * 0.1;
+      cameraPositionVelocity.x = cos(-cameraRotation.y + (M_PI / 2)) * 0.1;
+      cameraPositionVelocity.z = sin(-cameraRotation.y + (M_PI / 2)) * 0.1;
     }
     if (key == 83) {
-      cameraPositionVelocity.x = -cos(-cameraRotation + (M_PI / 2)) * 0.1;
-      cameraPositionVelocity.z = -sin(-cameraRotation + (M_PI / 2)) * 0.1;
+      cameraPositionVelocity.x = -cos(-cameraRotation.y + (M_PI / 2)) * 0.1;
+      cameraPositionVelocity.z = -sin(-cameraRotation.y + (M_PI / 2)) * 0.1;
     }
     if (key == 65) {
-      cameraPositionVelocity.x = -cos(-cameraRotation) * 0.1;
-      cameraPositionVelocity.z = -sin(-cameraRotation) * 0.1;
+      cameraPositionVelocity.x = -cos(-cameraRotation.y) * 0.1;
+      cameraPositionVelocity.z = -sin(-cameraRotation.y) * 0.1;
     }
     if (key == 68) {
-      cameraPositionVelocity.x = cos(-cameraRotation) * 0.1;
-      cameraPositionVelocity.z = sin(-cameraRotation) * 0.1;
+      cameraPositionVelocity.x = cos(-cameraRotation.y) * 0.1;
+      cameraPositionVelocity.z = sin(-cameraRotation.y) * 0.1;
     }
-    if (key == 82) {
-      cameraPositionVelocity.y = -0.05;
-    }
-    if (key == 70) {
+    if (key == 341) {
       cameraPositionVelocity.y = 0.05;
     }
+    if (key == 32) {
+      cameraPositionVelocity.y = -0.05;
+    }
+    if (key == 82) {
+      cameraRotationVelocity.x = 0.01;
+    }
+    if (key == 70) {
+      cameraRotationVelocity.x = -0.01;
+    }
     if (key == 69) {
-      cameraRotationVelocity = 0.01;
+      cameraRotationVelocity.y = 0.01;
     }
     if (key == 81) {
-      cameraRotationVelocity = -0.01;
+      cameraRotationVelocity.y = -0.01;
     }
   }
 
   if (action == GLFW_RELEASE) {
-    if (key == 87 || key == 83 ||key == 65 || key == 68) {
+    if (key == 87 || key == 83 || key == 65 || key == 68) {
       cameraPositionVelocity.x = 0.0;
       cameraPositionVelocity.z = 0.0;
     }
-    if (key == 82 || key == 70) {
+    if (key == 341 || key == 32) {
       cameraPositionVelocity.y = 0.0;
     }
+    if (key == 82 || key == 70) {
+      cameraRotationVelocity.x = 0.0;
+    }
     if (key == 69 || key == 81) {
-      cameraRotationVelocity = 0.0;
+      cameraRotationVelocity.y = 0.0;
     }
   }
 }
