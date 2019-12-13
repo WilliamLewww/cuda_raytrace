@@ -261,7 +261,11 @@ void testKernel(unsigned int* cudaBuffer) {
 
   if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
-  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (255 << 16) | (255 << 8) | 255;
+  int red = idx % 255;
+  int green = idy % 255;
+  int blue = (idx + idy) % 255;
+
+  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (red << 16) | (green << 8) | blue;
 }
 
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
