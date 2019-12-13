@@ -232,7 +232,7 @@ void reflections(Tuple* colorOut) {
   colorOut[(idy*IMAGE_WIDTH)+idx] = color;
 }
 
-void tempLayerAdded(Tuple* first, Tuple* second) {
+void combineLightingReflections(Tuple* first, Tuple* second) {
   for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
     if (second[x].w > 0) {
       first[x] = second[x];
@@ -268,10 +268,153 @@ void testKernel(unsigned int* cudaBuffer) {
   cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (red << 16) | (green << 8) | blue;
 }
 
+__global__
+void lighting(unsigned int* cudaBuffer) {
+  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+
+  Tuple pixel = {
+    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
+    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    0.0f, 1.0f
+  };
+  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
+  Ray ray = {camera[0].position, direction};
+  ray = transform(ray, camera[0].modelMatrix);
+
+  Tuple color = colorFromRay(ray);
+  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (int(color.z) << 16) | (int(color.y) << 8) | int(color.x);
+}
+
+__global__
+void reflections(unsigned int* cudaBuffer) {
+  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+
+  Tuple pixel = {
+    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
+    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    0.0f, 1.0f
+  };
+  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
+  Ray ray = {camera[0].position, direction};
+  ray = transform(ray, camera[0].modelMatrix);
+
+  int shapeType = 0;
+  int intersectionIndex = -1;
+  float intersectionMagnitude = 0.0f;
+
+  #pragma unroll
+  for (int x = 0; x < SPHERE_COUNT; x++) {
+    float point;
+    int count = intersectSphere(&point, sphereArray[x], ray);
+
+    shapeType = (1 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+  }
+
+  #pragma unroll
+  for (int x = 0; x < PLANE_COUNT; x++) {
+    float point;
+    int count = intersectPlane(&point, planeArray[x], ray);
+
+    shapeType = (2 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+  }
+
+  #pragma unroll
+  for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
+    float point;
+    int count = intersectSphere(&point, reflectiveSphereArray[x], ray);
+
+    shapeType = (3 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+  }
+
+  Tuple color = {0.0f, 0.0f, 0.0f, 0.0f};
+  if (shapeType == 3) {
+    Ray transformedRay = transform(ray, reflectiveSphereArray[intersectionIndex].inverseModelMatrix);
+    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
+    Tuple normal = normalize(intersectionPoint - reflectiveSphereArray[intersectionIndex].origin);
+
+    Ray reflectedRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
+    color = colorFromRay(reflectedRay);
+  }
+
+  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (int(color.z) << 16) | (int(color.y) << 8) | int(color.x);
+}
+
+__global__
+void combineLightingReflectionBuffers(unsigned int* cudaBuffer, unsigned int* lightingBuffer, unsigned int* reflectionsBuffer) {
+  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+
+  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = lightingBuffer[(idy*IMAGE_WIDTH)+idx];
+}
+
+unsigned int* lightingBuffer;
+unsigned int* reflectionsBuffer;
+
+extern "C" void initializeScene() {
+  cudaMalloc(&lightingBuffer, 1000*1000*4*sizeof(GLubyte));
+  cudaMalloc(&reflectionsBuffer, 1000*1000*4*sizeof(GLubyte));
+
+  Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
+  initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
+  initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
+  cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
+
+  const Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
+  cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
+
+  Sphere h_sphereArray[] = {
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {178.5, 255.0, 51.0, 1.0}},
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 127.5, 1.0}},
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 51.0, 127.5, 1.0}},
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 255.0, 1.0}},
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 76.5, 255.0, 1.0}},
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.5, 76.5, 255.0, 1.0}}
+              };
+  initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(-0.5, -1, -2.0));
+  initializeModelMatrix(&h_sphereArray[1], multiply(createTranslateMatrix(-0.5, -2, -2.0), createScaleMatrix(0.75, 0.75, 0.75)));
+  initializeModelMatrix(&h_sphereArray[2], multiply(createTranslateMatrix(2, -1, 0.5), createScaleMatrix(1.25, 1.25, 1.25)));
+  initializeModelMatrix(&h_sphereArray[3], multiply(createTranslateMatrix(2.0, -0.25, -1.5), createScaleMatrix(0.5, 0.5, 0.5)));
+  initializeModelMatrix(&h_sphereArray[4], multiply(createTranslateMatrix(1.25, -2, -3.0), createScaleMatrix(0.25, 0.25, 0.25)));
+  initializeModelMatrix(&h_sphereArray[5], multiply(createTranslateMatrix(8.0, -2.0, -7.0), createScaleMatrix(2.25, 2.25, 2.25)));
+  cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
+
+  Plane h_planeArray[] = {
+              {{0.0, 0.0, 0.0, 1.0}, {127.5, 229.5, 229.5, 1.0}},
+              {{0.0, 0.0, 0.0, 1.0}, {229.5, 127.5, 229.5, 1.0}},
+              {{0.0, 0.0, 0.0, 1.0}, {229.5, 229.5, 127.5, 1.0}}
+            };
+  initializeModelMatrix(&h_planeArray[0], createTranslateMatrix(0.0, 0.0, 0.0));
+  initializeModelMatrix(&h_planeArray[1], multiply(createTranslateMatrix(0.0, 0.0, 3.0), createRotationMatrixX(M_PI / 2)));
+  initializeModelMatrix(&h_planeArray[2], multiply(createTranslateMatrix(-3.0, 0.0, 0.0), createRotationMatrixZ(M_PI / 2)));
+  cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
+
+  Sphere h_reflectiveSphereArray[] = {
+                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 255.0, 1.0}}
+  };
+  initializeModelMatrix(&h_reflectiveSphereArray[0], createTranslateMatrix(-0.5, -3.0, 0.5));
+  cudaMemcpyToSymbol(reflectiveSphereArray, h_reflectiveSphereArray, REFLECTIVE_SPHERE_COUNT*sizeof(Sphere));
+}
+
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
   dim3 block(blockDimX, blockDimY);
   dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
-  testKernel<<<grid, block>>>((unsigned int *)cudaBuffer);
+  lighting<<<grid, block>>>(lightingBuffer);
+  reflections<<<grid, block>>>(reflectionsBuffer);
+  combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)cudaBuffer, lightingBuffer, reflectionsBuffer);
 
   cudaArray *texture_ptr;
   cudaGraphicsMapResources(1, cudaTextureResource, 0);
@@ -353,7 +496,7 @@ extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) 
   Analysis::begin();
   cudaMemcpy(h_lightingData, d_lightingData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
   cudaMemcpy(h_reflectionsData, d_reflectionsData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
-  tempLayerAdded(h_lightingData, h_reflectionsData);
+  combineLightingReflections(h_lightingData, h_reflectionsData);
   cudaFree(d_lightingData);
   cudaFree(d_reflectionsData);
   Analysis::end(2);

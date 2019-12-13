@@ -8,7 +8,9 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
+extern "C" void initializeScene();
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
+
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename);
 
 std::string readShaderSource(const char* filepath);
@@ -60,6 +62,8 @@ int main(int argn, char** argv) {
 
   void* cudaBuffer;
   cudaMalloc(&cudaBuffer, 1000*1000*4*sizeof(GLubyte));
+
+  initializeScene();
 
   GLuint vao, vbo[2];
   glGenVertexArrays(1, &vao);
