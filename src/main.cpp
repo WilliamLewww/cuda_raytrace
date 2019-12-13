@@ -133,31 +133,36 @@ int main(int argn, char** argv) {
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   if (action == GLFW_PRESS) {
-    if (key == 264) {
-      cameraPositionVelocity.x = 0.05;
+    if (key == 87) {
+      cameraPositionVelocity.x = cos(-cameraRotation + (M_PI / 2)) * 0.1;
+      cameraPositionVelocity.z = sin(-cameraRotation + (M_PI / 2)) * 0.1;
     }
-    if (key == 265) {
-      cameraPositionVelocity.x = -0.05;
+    if (key == 83) {
+      cameraPositionVelocity.x = -cos(-cameraRotation + (M_PI / 2)) * 0.1;
+      cameraPositionVelocity.z = -sin(-cameraRotation + (M_PI / 2)) * 0.1;
     }
-    if (key == 262) {
+    if (key == 65) {
+      cameraPositionVelocity.x = -cos(-cameraRotation) * 0.1;
+      cameraPositionVelocity.z = -sin(-cameraRotation) * 0.1;
+    }
+    if (key == 68) {
+      cameraPositionVelocity.x = cos(-cameraRotation) * 0.1;
+      cameraPositionVelocity.z = sin(-cameraRotation) * 0.1;
+    }
+    if (key == 69) {
       cameraRotationVelocity = 0.01;
     }
-    if (key == 263) {
+    if (key == 81) {
       cameraRotationVelocity = -0.01;
     }
   }
 
   if (action == GLFW_RELEASE) {
-    if (key == 264) {
+    if (key == 87 || key == 83 ||key == 65 || key == 68) {
       cameraPositionVelocity.x = 0.0;
+      cameraPositionVelocity.z = 0.0;
     }
-    if (key == 265) {
-      cameraPositionVelocity.x = 0.0;
-    }
-    if (key == 262) {
-      cameraRotationVelocity = 0.0;
-    }
-    if (key == 263) {
+    if (key == 69 || key == 81) {
       cameraRotationVelocity = 0.0;
     }
   }
