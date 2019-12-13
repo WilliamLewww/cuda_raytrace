@@ -159,7 +159,7 @@ void lighting(Tuple* colorOut) {
 
   Tuple pixel = {
     (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    ((IMAGE_HEIGHT / 2.0f) - idy) / IMAGE_HEIGHT, 
     0.0f, 1.0f
   };
   Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
@@ -178,7 +178,7 @@ void reflections(Tuple* colorOut) {
 
   Tuple pixel = {
     (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    ((IMAGE_HEIGHT / 2.0f) - idy) / IMAGE_HEIGHT, 
     0.0f, 1.0f
   };
   Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
