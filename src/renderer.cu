@@ -269,104 +269,29 @@ void testKernel(unsigned int* cudaBuffer) {
 }
 
 __global__
-void lighting(unsigned int* cudaBuffer) {
+void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingBuffer, Tuple* reflectionsBuffer) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
   if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
 
-  Tuple pixel = {
-    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
-    0.0f, 1.0f
-  };
-  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
-  Ray ray = {camera[0].position, direction};
-  ray = transform(ray, camera[0].modelMatrix);
-
-  Tuple color = colorFromRay(ray);
-  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (int(color.z) << 16) | (int(color.y) << 8) | int(color.x);
-}
-
-__global__
-void reflections(unsigned int* cudaBuffer) {
-  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
-
-  Tuple pixel = {
-    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
-    0.0f, 1.0f
-  };
-  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
-  Ray ray = {camera[0].position, direction};
-  ray = transform(ray, camera[0].modelMatrix);
-
-  int shapeType = 0;
-  int intersectionIndex = -1;
-  float intersectionMagnitude = 0.0f;
-
-  #pragma unroll
-  for (int x = 0; x < SPHERE_COUNT; x++) {
-    float point;
-    int count = intersectSphere(&point, sphereArray[x], ray);
-
-    shapeType = (1 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+  Tuple color;
+  if (reflectionsBuffer[(idy*IMAGE_WIDTH)+idx].w > 0) {
+    color = reflectionsBuffer[(idy*IMAGE_WIDTH)+idx];
   }
-
-  #pragma unroll
-  for (int x = 0; x < PLANE_COUNT; x++) {
-    float point;
-    int count = intersectPlane(&point, planeArray[x], ray);
-
-    shapeType = (2 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-  }
-
-  #pragma unroll
-  for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
-    float point;
-    int count = intersectSphere(&point, reflectiveSphereArray[x], ray);
-
-    shapeType = (3 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-  }
-
-  Tuple color = {0.0f, 0.0f, 0.0f, 0.0f};
-  if (shapeType == 3) {
-    Ray transformedRay = transform(ray, reflectiveSphereArray[intersectionIndex].inverseModelMatrix);
-    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
-    Tuple normal = normalize(intersectionPoint - reflectiveSphereArray[intersectionIndex].origin);
-
-    Ray reflectedRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
-    color = colorFromRay(reflectedRay);
+  else {
+    color = lightingBuffer[(idy*IMAGE_WIDTH)+idx];
   }
 
   cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (int(color.z) << 16) | (int(color.y) << 8) | int(color.x);
 }
 
-__global__
-void combineLightingReflectionBuffers(unsigned int* cudaBuffer, unsigned int* lightingBuffer, unsigned int* reflectionsBuffer) {
-  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
-
-  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = lightingBuffer[(idy*IMAGE_WIDTH)+idx];
-}
-
-unsigned int* lightingBuffer;
-unsigned int* reflectionsBuffer;
+Tuple* lightingBuffer;
+Tuple* reflectionsBuffer;
 
 extern "C" void initializeScene() {
-  cudaMalloc(&lightingBuffer, 1000*1000*4*sizeof(GLubyte));
-  cudaMalloc(&reflectionsBuffer, 1000*1000*4*sizeof(GLubyte));
+  cudaMalloc(&lightingBuffer, 1000*1000*sizeof(Tuple));
+  cudaMalloc(&reflectionsBuffer, 1000*1000*sizeof(Tuple));
 
   Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
   initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
