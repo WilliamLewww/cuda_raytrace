@@ -151,14 +151,6 @@ Tuple colorFromRay(Ray ray) {
 }
 
 __global__
-void testKernel(unsigned int *colorOut) {
-  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-  colorOut[(idy*IMAGE_WIDTH)+idx] = 0;
-}
-
-__global__
 void lighting(Tuple* colorOut) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -260,6 +252,30 @@ void writeColorDataToFile(const char* filename, Tuple* colorData) {
   }
 
   file.close();
+}
+
+__global__
+void testKernel(unsigned int* cudaBuffer) {
+  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+
+  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = 255;
+}
+
+extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
+  dim3 block(blockDimX, blockDimY);
+  dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
+  testKernel<<<grid, block>>>((unsigned int *)cudaBuffer);
+
+  cudaArray *texture_ptr;
+  cudaGraphicsMapResources(1, cudaTextureResource, 0);
+  cudaGraphicsSubResourceGetMappedArray(&texture_ptr, *cudaTextureResource, 0, 0);
+
+  // cudaMemcpyToArray(texture_ptr, 0, 0, cudaBuffer, 1000*1000*4*sizeof(GLubyte), cudaMemcpyDeviceToDevice);
+  cudaMemcpy2DToArray(texture_ptr, 0, 0,  cudaBuffer, 1000*4*sizeof(GLubyte), 1000*4*sizeof(GLubyte), 1000, cudaMemcpyDeviceToDevice);
+  cudaGraphicsUnmapResources(1, cudaTextureResource, 0);
 }
 
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) {

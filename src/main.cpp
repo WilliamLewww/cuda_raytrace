@@ -8,6 +8,7 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
+extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename);
 
 std::string readShaderSource(const char* filepath);
@@ -43,6 +44,23 @@ int main(int argn, char** argv) {
   std::string fragmentShaderString = readShaderSource("shaders/basic.fragment");
   shaderProgramHandle = createShaderProgram(vertexShaderString, fragmentShaderString);
 
+  struct cudaGraphicsResource* cudaTextureResource;
+  GLuint textureResource;
+
+  glGenTextures(1, &textureResource);
+  glBindTexture(GL_TEXTURE_2D, textureResource);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI_EXT, 1000, 1000, 0, GL_RGBA_INTEGER_EXT, GL_UNSIGNED_BYTE, NULL);
+
+  cudaGraphicsGLRegisterImage(&cudaTextureResource, textureResource, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard);
+
+  void* cudaBuffer;
+  cudaMalloc(&cudaBuffer, 1000*1000*4*sizeof(GLubyte));
+
   GLuint vao, vbo[2];
   glGenVertexArrays(1, &vao);
   glGenBuffers(2, vbo);
@@ -50,10 +68,14 @@ int main(int argn, char** argv) {
   GLuint textureHandle = glGetUniformLocation(shaderProgramHandle, "u_texture");
 
   while (!glfwWindowShouldClose(window)) {
+    renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
     glfwPollEvents();
 
     glClearColor(0.0, 0.0, 0.0, 0.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureResource);
 
     glUseProgram(shaderProgramHandle);
 
