@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <fstream>
 #include <string>
 
@@ -13,6 +14,7 @@ extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cuda
 
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename);
 
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 std::string readShaderSource(const char* filepath);
 GLuint createShaderProgram(std::string vertexShaderString, std::string fragmentShaderString);
 
@@ -40,6 +42,8 @@ int main(int argn, char** argv) {
   GLFWwindow* window = glfwCreateWindow(1000, 1000, "cuda_raytrace", NULL, NULL);
   glfwMakeContextCurrent(window);
   glewInit();
+
+  glfwSetKeyCallback(window, keyCallback);
 
   GLuint shaderProgramHandle;
   std::string vertexShaderString = readShaderSource("shaders/basic.vertex");
@@ -105,6 +109,10 @@ int main(int argn, char** argv) {
   glfwDestroyWindow(window);
   glfwTerminate();
   return 0;
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+  
 }
 
 std::string readShaderSource(const char* filepath) {
