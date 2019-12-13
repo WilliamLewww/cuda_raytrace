@@ -1,7 +1,11 @@
 #version 460
 
-layout (location = 0) in vec2 i_position;
+layout (location = 0) in vec2 a_position;
+layout (location = 1) in vec2 a_textureCoordinates;
+
+out vec2 o_textureCoordinates;
 
 void main() {
-  gl_Position = vec4(i_position, 0.0f, 1.0f);
+  o_textureCoordinates = a_textureCoordinates;
+  gl_Position = vec4(a_position, 0.0f, 1.0f);
 }
