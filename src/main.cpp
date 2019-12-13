@@ -2,12 +2,20 @@
 #include <stdio.h>
 #include <fstream>
 #include <string>
+#include <math.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
+
+struct Tuple {
+  float x;
+  float y;
+  float z;
+  float w;
+};
 
 extern "C" void updateCamera(double x, double y, double z, double rotation) ;
 extern "C" void initializeScene();
@@ -36,6 +44,11 @@ GLfloat textureCoordinates[] = {
   1.0, 0.0,
   1.0, 1.0,
 };
+
+Tuple cameraPositionVelocity = {0.0, 0.0, 0.0, 0.0};
+Tuple cameraPosition = {5.0, -3.5, -6.0, 1.0};
+double cameraRotationVelocity = 0.0;
+double cameraRotation = -M_PI / 4.5;
 
 int main(int argn, char** argv) {
   glfwInit();
@@ -77,6 +90,12 @@ int main(int argn, char** argv) {
   GLuint textureHandle = glGetUniformLocation(shaderProgramHandle, "u_texture");
 
   while (!glfwWindowShouldClose(window)) {
+    cameraPosition.x += cameraPositionVelocity.x;
+    cameraPosition.y += cameraPositionVelocity.y;
+    cameraPosition.z += cameraPositionVelocity.z;
+    cameraRotation += cameraRotationVelocity;
+
+    updateCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation);
     renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
     glfwPollEvents();
 
@@ -112,23 +131,35 @@ int main(int argn, char** argv) {
   return 0;
 }
 
-double offsetX, rotation;
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   if (action == GLFW_PRESS) {
-    // printf("%d\n", key);
     if (key == 264) {
-      offsetX += 0.2;
+      cameraPositionVelocity.x = 0.05;
     }
     if (key == 265) {
-      offsetX -= 0.2;
+      cameraPositionVelocity.x = -0.05;
     }
     if (key == 262) {
-      rotation += 0.1;
+      cameraRotationVelocity = 0.01;
     }
     if (key == 263) {
-      rotation -= 0.1;
+      cameraRotationVelocity = -0.01;
     }
-    updateCamera(offsetX,0,0, rotation);
+  }
+
+  if (action == GLFW_RELEASE) {
+    if (key == 264) {
+      cameraPositionVelocity.x = 0.0;
+    }
+    if (key == 265) {
+      cameraPositionVelocity.x = 0.0;
+    }
+    if (key == 262) {
+      cameraRotationVelocity = 0.0;
+    }
+    if (key == 263) {
+      cameraRotationVelocity = 0.0;
+    }
   }
 }
 
