@@ -9,6 +9,7 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
+extern "C" void updateCamera(double x, double y, double z, double rotation) ;
 extern "C" void initializeScene();
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
 
@@ -111,8 +112,24 @@ int main(int argn, char** argv) {
   return 0;
 }
 
+double offsetX, rotation;
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  
+  if (action == GLFW_PRESS) {
+    // printf("%d\n", key);
+    if (key == 264) {
+      offsetX += 0.2;
+    }
+    if (key == 265) {
+      offsetX -= 0.2;
+    }
+    if (key == 262) {
+      rotation += 0.1;
+    }
+    if (key == 263) {
+      rotation -= 0.1;
+    }
+    updateCamera(offsetX,0,0, rotation);
+  }
 }
 
 std::string readShaderSource(const char* filepath) {
