@@ -37,12 +37,12 @@ GLfloat vertices[] = {
 };
 
 GLfloat textureCoordinates[] = {
-  0.0, 0.0,
-  1.0, 0.0,
   0.0, 1.0,
-  0.0, 1.0,
-  1.0, 0.0,
   1.0, 1.0,
+  0.0, 0.0,
+  0.0, 0.0,
+  1.0, 1.0,
+  1.0, 0.0,
 };
 
 Tuple cameraPositionVelocity = {0.0, 0.0, 0.0, 0.0};

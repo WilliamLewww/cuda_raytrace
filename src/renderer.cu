@@ -159,7 +159,7 @@ void lighting(Tuple* colorOut) {
 
   Tuple pixel = {
     (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    ((IMAGE_HEIGHT / 2.0f) - idy) / IMAGE_HEIGHT, 
+    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
     0.0f, 1.0f
   };
   Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
@@ -178,7 +178,7 @@ void reflections(Tuple* colorOut) {
 
   Tuple pixel = {
     (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    ((IMAGE_HEIGHT / 2.0f) - idy) / IMAGE_HEIGHT, 
+    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
     0.0f, 1.0f
   };
   Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
@@ -252,20 +252,6 @@ void writeColorDataToFile(const char* filename, Tuple* colorData) {
   }
 
   file.close();
-}
-
-__global__
-void testKernel(unsigned int* cudaBuffer) {
-  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
-
-  int red = idx % 255;
-  int green = idy % 255;
-  int blue = (idx + idy) % 255;
-
-  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (red << 16) | (green << 8) | blue;
 }
 
 __global__
