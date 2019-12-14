@@ -158,16 +158,16 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       cameraPositionVelocity.y = -0.05;
     }
     if (key == 82) {
-      cameraRotationVelocity.x = 0.01;
+      cameraRotationVelocity.x = 0.02;
     }
     if (key == 70) {
-      cameraRotationVelocity.x = -0.01;
+      cameraRotationVelocity.x = -0.02;
     }
     if (key == 69) {
-      cameraRotationVelocity.y = 0.01;
+      cameraRotationVelocity.y = 0.02;
     }
     if (key == 81) {
-      cameraRotationVelocity.y = -0.01;
+      cameraRotationVelocity.y = -0.02;
     }
   }
 
