@@ -275,11 +275,16 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
 Tuple* lightingBuffer;
 Tuple* reflectionsBuffer;
 
-extern "C" void updateCamera(double x, double y, double z, double rotationX, double rotationY) {
+extern "C" void updateCamera(float x, float y, float z, float rotationX, float rotationY) {
   Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
   initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(x, y, z), createRotationMatrixY(rotationY)), createRotationMatrixX(rotationX)));
   initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
   cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
+}
+
+extern "C" void updateLight(float x, float y, float z) {
+  Light h_lightArray[] = {{{x, y, z, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
+  cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 }
 
 extern "C" void initializeScene() {
