@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <math.h>
 
 #include <GL/glew.h>
@@ -24,6 +25,10 @@ extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cuda
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename);
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+bool checkKeyDown(int key);
+
+void update();
+
 std::string readShaderSource(const char* filepath);
 GLuint createShaderProgram(std::string vertexShaderString, std::string fragmentShaderString);
 
@@ -90,14 +95,7 @@ int main(int argn, char** argv) {
   GLuint textureHandle = glGetUniformLocation(shaderProgramHandle, "u_texture");
 
   while (!glfwWindowShouldClose(window)) {
-    cameraPosition.x += cameraPositionVelocity.x;
-    cameraPosition.y += cameraPositionVelocity.y;
-    cameraPosition.z += cameraPositionVelocity.z;
-    cameraRotation.x += cameraRotationVelocity.x;
-    cameraRotation.y += cameraRotationVelocity.y;
-    cameraRotation.z += cameraRotationVelocity.z;
-
-    updateCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y);
+    update();
     renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
     glfwPollEvents();
 
@@ -133,59 +131,78 @@ int main(int argn, char** argv) {
   return 0;
 }
 
+std::vector<int> keyDownList;
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   if (action == GLFW_PRESS) {
-    if (key == 87) {
-      cameraPositionVelocity.x = cos(-cameraRotation.y + (M_PI / 2)) * 0.1;
-      cameraPositionVelocity.z = sin(-cameraRotation.y + (M_PI / 2)) * 0.1;
-    }
-    if (key == 83) {
-      cameraPositionVelocity.x = -cos(-cameraRotation.y + (M_PI / 2)) * 0.1;
-      cameraPositionVelocity.z = -sin(-cameraRotation.y + (M_PI / 2)) * 0.1;
-    }
-    if (key == 65) {
-      cameraPositionVelocity.x = -cos(-cameraRotation.y) * 0.1;
-      cameraPositionVelocity.z = -sin(-cameraRotation.y) * 0.1;
-    }
-    if (key == 68) {
-      cameraPositionVelocity.x = cos(-cameraRotation.y) * 0.1;
-      cameraPositionVelocity.z = sin(-cameraRotation.y) * 0.1;
-    }
-    if (key == 341) {
-      cameraPositionVelocity.y = 0.05;
-    }
-    if (key == 32) {
-      cameraPositionVelocity.y = -0.05;
-    }
-    if (key == 82) {
-      cameraRotationVelocity.x = 0.02;
-    }
-    if (key == 70) {
-      cameraRotationVelocity.x = -0.02;
-    }
-    if (key == 69) {
-      cameraRotationVelocity.y = 0.02;
-    }
-    if (key == 81) {
-      cameraRotationVelocity.y = -0.02;
-    }
+    keyDownList.push_back(key);
   }
 
   if (action == GLFW_RELEASE) {
-    if (key == 87 || key == 83 || key == 65 || key == 68) {
-      cameraPositionVelocity.x = 0.0;
-      cameraPositionVelocity.z = 0.0;
-    }
-    if (key == 341 || key == 32) {
-      cameraPositionVelocity.y = 0.0;
-    }
-    if (key == 82 || key == 70) {
-      cameraRotationVelocity.x = 0.0;
-    }
-    if (key == 69 || key == 81) {
-      cameraRotationVelocity.y = 0.0;
+    for (int x = 0; x < keyDownList.size(); x++) {
+      if (key == keyDownList[x]) {
+        keyDownList.erase(keyDownList.begin() + x);
+      }
     }
   }
+}
+
+void update() {
+  cameraPositionVelocity = {0.0, 0.0, 0.0, 0.0};
+  cameraRotationVelocity = {0.0, 0.0, 0.0, 0.0};
+
+  if (checkKeyDown(87)) {
+    cameraPositionVelocity.x += cos(-cameraRotation.y + (M_PI / 2)) * 0.1;
+    cameraPositionVelocity.z += sin(-cameraRotation.y + (M_PI / 2)) * 0.1;
+  }
+  if (checkKeyDown(83)) {
+    cameraPositionVelocity.x += -cos(-cameraRotation.y + (M_PI / 2)) * 0.1;
+    cameraPositionVelocity.z += -sin(-cameraRotation.y + (M_PI / 2)) * 0.1;
+  }
+  if (checkKeyDown(65)) {
+    cameraPositionVelocity.x += -cos(-cameraRotation.y) * 0.1;
+    cameraPositionVelocity.z += -sin(-cameraRotation.y) * 0.1;
+  }
+  if (checkKeyDown(68)) {
+    cameraPositionVelocity.x += cos(-cameraRotation.y) * 0.1;
+    cameraPositionVelocity.z += sin(-cameraRotation.y) * 0.1;
+  }
+  if (checkKeyDown(341)) {
+    cameraPositionVelocity.y += 0.05;
+  }
+  if (checkKeyDown(32)) {
+    cameraPositionVelocity.y += -0.05;
+  }
+  if (checkKeyDown(82)) {
+    cameraRotationVelocity.x += 0.02;
+  }
+  if (checkKeyDown(70)) {
+    cameraRotationVelocity.x += -0.02;
+  }
+  if (checkKeyDown(69)) {
+    cameraRotationVelocity.y += 0.02;
+  }
+  if (checkKeyDown(81)) {
+    cameraRotationVelocity.y += -0.02;
+  }
+
+  cameraPosition.x += cameraPositionVelocity.x;
+  cameraPosition.y += cameraPositionVelocity.y;
+  cameraPosition.z += cameraPositionVelocity.z;
+  cameraRotation.x += cameraRotationVelocity.x;
+  cameraRotation.y += cameraRotationVelocity.y;
+  cameraRotation.z += cameraRotationVelocity.z;
+
+  updateCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y);
+}
+
+bool checkKeyDown(int key) {
+  for (int x = 0; x < keyDownList.size(); x++) {
+    if (key == keyDownList[x]) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 std::string readShaderSource(const char* filepath) {
