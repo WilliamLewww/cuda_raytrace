@@ -28,7 +28,7 @@ EXEC_ARGS=bin/image.ppm 16 16
 
 all: clean $(EXEC) run
 
-$(EXEC): main.o engine.o input.o renderer.o
+$(EXEC): main.o engine.o input.o joiner.o renderer.o
 	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)/*.o -o $(BIN_PATH)/$(EXEC) $(LINKER_ARGUMENTS)
 
 main.o: ./src/main.cpp
@@ -36,6 +36,9 @@ main.o: ./src/main.cpp
 
 engine.o: ./src/engine.cpp
 	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/engine.o $(LINKER_ARGUMENTS)
+
+joiner.o: ./src/joiner.cpp
+	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/joiner.o $(LINKER_ARGUMENTS)
 
 input.o: ./src/input.cpp
 	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/input.o $(LINKER_ARGUMENTS)

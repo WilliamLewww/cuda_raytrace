@@ -10,6 +10,5 @@ private:
   static std::vector<int> keyDownList;
 public:
   static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-  
-  bool checkKeyDown(int key);
+  static bool checkKeyDown(int key);
 };

@@ -11,6 +11,7 @@
 #include <cuda_gl_interop.h>
 
 #include "input.h"
+#include "joiner.h"
 
 class Engine {
 private:
@@ -18,13 +19,7 @@ private:
   GLuint shaderProgramHandle;
 
   Input* input;
-
-  struct cudaGraphicsResource* cudaTextureResource;
-  GLuint textureResource;
-  void* cudaBuffer;
-
-  GLuint vao, vbo[2];
-  GLuint textureHandle;
+  Joiner* joiner;
 
   void update();
   void render();
