@@ -6,12 +6,12 @@ void Engine::initialize() {
   glfwMakeContextCurrent(window);
   glewInit();
 
-  input = new Input();
-  glfwSetKeyCallback(window, Input::keyCallback);
-
   std::string vertexShaderString = readShaderSource("shaders/basic.vertex");
   std::string fragmentShaderString = readShaderSource("shaders/basic.fragment");
   shaderProgramHandle = createShaderProgram(vertexShaderString, fragmentShaderString);
+
+  input = new Input();
+  glfwSetKeyCallback(window, Input::keyCallback);
 
   joiner = new Joiner();
   joiner->initialize(&shaderProgramHandle);
