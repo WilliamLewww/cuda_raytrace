@@ -81,6 +81,16 @@ Tuple colorFromRay(Ray ray) {
     intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
+  #pragma unroll
+  for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
+    float point;
+    int count = intersectSphere(&point, reflectiveSphereArray[x], ray);
+
+    shapeType = (3 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+  }
+
   if (intersectionIndex != -1) {
     Ray transformedRay;
     Tuple intersectionPoint;
@@ -96,6 +106,12 @@ Tuple colorFromRay(Ray ray) {
       transformedRay = transform(ray, planeArray[intersectionIndex].inverseModelMatrix);
       intersectionPoint = project(transformedRay, intersectionMagnitude);
       lightRay = {planeArray[intersectionIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (planeArray[intersectionIndex].modelMatrix * intersectionPoint))};
+    }
+
+    if (shapeType == 3) {
+      transformedRay = transform(ray, reflectiveSphereArray[intersectionIndex].inverseModelMatrix);
+      intersectionPoint = project(transformedRay, intersectionMagnitude);
+      lightRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint))};
     }
 
     int intersecionCount = 0;
@@ -144,6 +160,20 @@ Tuple colorFromRay(Ray ray) {
       color = (0.1f * planeArray[intersectionIndex].color) + 
               (0.7f * lightNormalDifference * planeArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
               (0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+    }
+
+    if (shapeType == 3) {
+      Tuple normal = normalize(intersectionPoint - reflectiveSphereArray[intersectionIndex].origin);
+      float lightNormalDifference = dot(normal, lightRay.direction);
+
+      Tuple lightReflection = reflect(negate(lightRay.direction), normal);
+      Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
+
+      float reflectEyeDifference = dot(lightReflection, eyeDirection);
+
+      color = (0.1f * reflectiveSphereArray[intersectionIndex].color) + 
+              (0.7f * lightNormalDifference * reflectiveSphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
+              (0.2f * reflectiveSphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
     }
   }
 
@@ -263,7 +293,7 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
 
   Tuple color;
   if (reflectionsBuffer[(idy*IMAGE_WIDTH)+idx].w > 0) {
-    color = reflectionsBuffer[(idy*IMAGE_WIDTH)+idx];
+    color = (0.2 * reflectionsBuffer[(idy*IMAGE_WIDTH)+idx]) + lightingBuffer[(idy*IMAGE_WIDTH)+idx];
   }
   else {
     color = lightingBuffer[(idy*IMAGE_WIDTH)+idx];
@@ -343,7 +373,6 @@ extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cuda
   cudaGraphicsMapResources(1, cudaTextureResource, 0);
   cudaGraphicsSubResourceGetMappedArray(&texture_ptr, *cudaTextureResource, 0, 0);
 
-  // cudaMemcpyToArray(texture_ptr, 0, 0, cudaBuffer, 1000*1000*4*sizeof(GLubyte), cudaMemcpyDeviceToDevice);
   cudaMemcpy2DToArray(texture_ptr, 0, 0,  cudaBuffer, 1000*4*sizeof(GLubyte), 1000*4*sizeof(GLubyte), 1000, cudaMemcpyDeviceToDevice);
   cudaGraphicsUnmapResources(1, cudaTextureResource, 0);
 }
