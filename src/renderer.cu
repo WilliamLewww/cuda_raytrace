@@ -299,7 +299,7 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
     color = lightingBuffer[(idy*IMAGE_WIDTH)+idx];
   }
 
-  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (int(color.z) << 16) | (int(color.y) << 8) | int(color.x);
+  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | int(fmaxf(0, fminf(255, color.x)));
 }
 
 Tuple* lightingBuffer;
