@@ -1,4 +1,7 @@
-BIN_PATH=./bin
+CURRENT_PATH=$(shell pwd)
+
+BIN_PATH=$(CURRENT_PATH)/bin
+SRC_PATH=$(CURRENT_PATH)/src
 CUDA_PATH=/usr/local/cuda-10.1
 
 GLFW_PATH=/usr/local/glfw-3.3
@@ -8,8 +11,6 @@ GLFW_INCLUDE_PATH=$(GLFW_PATH)/include
 GLEW_PATH=/usr/local/glew-2.1.0
 GLEW_LIBRARY_PATH=$(GLEW_PATH)/lib
 GLEW_INCLUDE_PATH=$(GLEW_PATH)/include
-
-CURRENT_PATH=$(shell pwd)
 
 CC=g++
 NVCC=$(CUDA_PATH)/bin/nvcc
@@ -28,23 +29,20 @@ EXEC_ARGS=bin/image.ppm 16 16
 
 all: clean $(EXEC) run
 
-$(EXEC): main.o engine.o input.o joiner.o renderer.o
+SRCS := main.cpp engine.cpp joiner.cpp input.cpp
+OBJS := $(SRCS:%.cpp=%.o)
+
+CUDA_SRCS := renderer.cu
+CUDA_OBJS := $(CUDA_SRCS:%.cu=%.o)
+
+$(EXEC): $(OBJS) $(CUDA_OBJS)
 	$(NVCC) $(CUDA_FLAGS) $(BIN_PATH)/*.o -o $(BIN_PATH)/$(EXEC) $(LINKER_ARGUMENTS)
 
-main.o: ./src/main.cpp
-	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/main.o $(LINKER_ARGUMENTS)
+%.o: $(SRC_PATH)/%.cpp
+	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/$@ $(LINKER_ARGUMENTS)
 
-engine.o: ./src/engine.cpp
-	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/engine.o $(LINKER_ARGUMENTS)
-
-joiner.o: ./src/joiner.cpp
-	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/joiner.o $(LINKER_ARGUMENTS)
-
-input.o: ./src/input.cpp
-	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/input.o $(LINKER_ARGUMENTS)
-
-renderer.o: ./src/renderer.cu
-	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/renderer.o $(LINKER_ARGUMENTS)
+%.o: $(SRC_PATH)/%.cu
+	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BIN_PATH)/$@ $(LINKER_ARGUMENTS)
 
 run:
 	$(BIN_PATH)/$(EXEC) $(EXEC_ARGS)
