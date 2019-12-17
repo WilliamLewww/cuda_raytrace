@@ -222,41 +222,8 @@ Tuple colorFromRay(Ray ray) {
   return color;
 }
 
-__global__
-void lighting(Tuple* colorOut) {
-  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
-
-  Tuple pixel = {
-    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
-    0.0f, 1.0f
-  };
-  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
-  Ray ray = {camera[0].position, direction};
-  ray = transform(ray, camera[0].modelMatrix);
-
-  colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromRay(ray);
-}
-
-__global__
-void reflections(Tuple* colorOut) {
-  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
-
-  Tuple pixel = {
-    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
-    0.0f, 1.0f
-  };
-  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
-  Ray ray = {camera[0].position, direction};
-  ray = transform(ray, camera[0].modelMatrix);
-
+__device__
+Tuple colorFromReflection(Ray ray, int recursionCount = 0) {
   int shapeType = 0;
   int intersectionIndex = -1;
   float intersectionMagnitude = 0.0f;
@@ -320,7 +287,45 @@ void reflections(Tuple* colorOut) {
     color = colorFromRay(reflectedRay);
   }
 
-  colorOut[(idy*IMAGE_WIDTH)+idx] = color;
+  return color;
+}
+
+__global__
+void lighting(Tuple* colorOut) {
+  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+
+  Tuple pixel = {
+    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
+    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    0.0f, 1.0f
+  };
+  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
+  Ray ray = {camera[0].position, direction};
+  ray = transform(ray, camera[0].modelMatrix);
+
+  colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromRay(ray);
+}
+
+__global__
+void reflections(Tuple* colorOut) {
+  int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+
+  Tuple pixel = {
+    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
+    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    0.0f, 1.0f
+  };
+  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
+  Ray ray = {camera[0].position, direction};
+  ray = transform(ray, camera[0].modelMatrix);
+
+  colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromReflection(ray);
 }
 
 void combineLightingReflections(Tuple* first, Tuple* second) {
