@@ -13,8 +13,10 @@
 #define LIGHT_COUNT 1
 
 #define SPHERE_COUNT 6
-#define PLANE_COUNT 3
+#define PLANE_COUNT 2
+
 #define REFLECTIVE_SPHERE_COUNT 1
+#define REFLECTIVE_PLANE_COUNT 1
 
 __constant__ Camera camera[1];
 
@@ -22,7 +24,9 @@ __constant__ Light lightArray[LIGHT_COUNT];
 
 __constant__ Sphere sphereArray[SPHERE_COUNT];
 __constant__ Plane planeArray[PLANE_COUNT];
+
 __constant__ Sphere reflectiveSphereArray[REFLECTIVE_SPHERE_COUNT];
+__constant__ Plane reflectivePlaneArray[REFLECTIVE_PLANE_COUNT];
 
 __device__
 int intersectSphere(float* intersectionMagnitude, Sphere sphere, Ray ray) {
@@ -91,6 +95,16 @@ Tuple colorFromRay(Ray ray) {
     intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
+  #pragma unroll
+  for (int x = 0; x < REFLECTIVE_PLANE_COUNT; x++) {
+    float point;
+    int count = intersectPlane(&point, reflectivePlaneArray[x], ray);
+
+    shapeType = (4 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+  }
+
   if (intersectionIndex != -1) {
     Ray transformedRay;
     Tuple intersectionPoint;
@@ -114,6 +128,12 @@ Tuple colorFromRay(Ray ray) {
       lightRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint))};
     }
 
+    if (shapeType == 4) {
+      transformedRay = transform(ray, reflectivePlaneArray[intersectionIndex].inverseModelMatrix);
+      intersectionPoint = project(transformedRay, intersectionMagnitude);
+      lightRay = {reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint))};
+    }
+
     int intersecionCount = 0;
 
     #pragma unroll
@@ -132,6 +152,12 @@ Tuple colorFromRay(Ray ray) {
     for (int x = 0; x < REFLECTIVE_SPHERE_COUNT; x++) {
       float point = 0;
       intersecionCount += intersectSphere(&point, reflectiveSphereArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 3)) * (point < magnitude(lightArray[0].position - intersectionPoint));
+    }
+
+    #pragma unroll
+    for (int x = 0; x < REFLECTIVE_PLANE_COUNT; x++) {
+      float point = 0;
+      intersecionCount += intersectPlane(&point, reflectivePlaneArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 4)) * (point < magnitude(lightArray[0].position - intersectionPoint));
     }
 
     if (shapeType == 1) {
@@ -174,6 +200,20 @@ Tuple colorFromRay(Ray ray) {
       color = (0.1f * reflectiveSphereArray[intersectionIndex].color) + 
               (0.7f * lightNormalDifference * reflectiveSphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
               (0.2f * reflectiveSphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+    }
+
+    if (shapeType == 4) {
+      Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
+      float lightNormalDifference = dot(normal, lightRay.direction);
+
+      Tuple lightReflection = reflect(negate(lightRay.direction), normal);
+      Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
+
+      float reflectEyeDifference = dot(lightReflection, eyeDirection);
+
+      color = (0.1f * reflectivePlaneArray[intersectionIndex].color) + 
+              (0.7f * lightNormalDifference * reflectivePlaneArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
+              (0.2f * reflectivePlaneArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
     }
   }
 
@@ -249,6 +289,16 @@ void reflections(Tuple* colorOut) {
     intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
+  #pragma unroll
+  for (int x = 0; x < REFLECTIVE_PLANE_COUNT; x++) {
+    float point;
+    int count = intersectPlane(&point, reflectivePlaneArray[x], ray);
+
+    shapeType = (4 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+  }
+
   Tuple color = {0.0f, 0.0f, 0.0f, 0.0f};
   if (shapeType == 3) {
     Ray transformedRay = transform(ray, reflectiveSphereArray[intersectionIndex].inverseModelMatrix);
@@ -256,6 +306,15 @@ void reflections(Tuple* colorOut) {
     Tuple normal = normalize(intersectionPoint - reflectiveSphereArray[intersectionIndex].origin);
 
     Ray reflectedRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
+    color = colorFromRay(reflectedRay);
+  }
+
+  if (shapeType == 4) {
+    Ray transformedRay = transform(ray, reflectivePlaneArray[intersectionIndex].inverseModelMatrix);
+    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
+    Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
+
+    Ray reflectedRay = {reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
     color = colorFromRay(reflectedRay);
   }
 
@@ -293,7 +352,7 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
 
   Tuple color;
   if (reflectionsBuffer[(idy*IMAGE_WIDTH)+idx].w > 0) {
-    color = (0.1 * reflectionsBuffer[(idy*IMAGE_WIDTH)+idx]) + lightingBuffer[(idy*IMAGE_WIDTH)+idx];
+    color = (0.2 * reflectionsBuffer[(idy*IMAGE_WIDTH)+idx]) + lightingBuffer[(idy*IMAGE_WIDTH)+idx];
   }
   else {
     color = lightingBuffer[(idy*IMAGE_WIDTH)+idx];
@@ -346,13 +405,11 @@ extern "C" void initializeScene() {
   cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
 
   Plane h_planeArray[] = {
-              {{0.0, 0.0, 0.0, 1.0}, {127.5, 229.5, 229.5, 1.0}},
               {{0.0, 0.0, 0.0, 1.0}, {229.5, 127.5, 229.5, 1.0}},
               {{0.0, 0.0, 0.0, 1.0}, {229.5, 229.5, 127.5, 1.0}}
             };
-  initializeModelMatrix(&h_planeArray[0], createTranslateMatrix(0.0, 0.0, 0.0));
-  initializeModelMatrix(&h_planeArray[1], multiply(createTranslateMatrix(0.0, 0.0, 3.0), createRotationMatrixX(M_PI / 2)));
-  initializeModelMatrix(&h_planeArray[2], multiply(createTranslateMatrix(-3.0, 0.0, 0.0), createRotationMatrixZ(M_PI / 2)));
+  initializeModelMatrix(&h_planeArray[0], multiply(createTranslateMatrix(0.0, 0.0, 3.0), createRotationMatrixX(M_PI / 2)));
+  initializeModelMatrix(&h_planeArray[1], multiply(createTranslateMatrix(-3.0, 0.0, 0.0), createRotationMatrixZ(M_PI / 2)));
   cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
 
   Sphere h_reflectiveSphereArray[] = {
@@ -360,6 +417,12 @@ extern "C" void initializeScene() {
   };
   initializeModelMatrix(&h_reflectiveSphereArray[0], createTranslateMatrix(-0.5, -3.0, 0.5));
   cudaMemcpyToSymbol(reflectiveSphereArray, h_reflectiveSphereArray, REFLECTIVE_SPHERE_COUNT*sizeof(Sphere));
+
+  Plane h_reflectivePlaneArray[] = {
+            {{0.0, 0.0, 0.0, 1.0}, {127.5, 229.5, 229.5, 1.0}},
+          };
+  initializeModelMatrix(&h_reflectivePlaneArray[0], createTranslateMatrix(0.0, 0.0, 0.0));
+  cudaMemcpyToSymbol(reflectivePlaneArray, h_reflectivePlaneArray, REFLECTIVE_PLANE_COUNT*sizeof(Plane));
 }
 
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
