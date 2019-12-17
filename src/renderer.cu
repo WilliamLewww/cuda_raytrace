@@ -293,7 +293,7 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
 
   Tuple color;
   if (reflectionsBuffer[(idy*IMAGE_WIDTH)+idx].w > 0) {
-    color = (0.2 * reflectionsBuffer[(idy*IMAGE_WIDTH)+idx]) + lightingBuffer[(idy*IMAGE_WIDTH)+idx];
+    color = (0.1 * reflectionsBuffer[(idy*IMAGE_WIDTH)+idx]) + lightingBuffer[(idy*IMAGE_WIDTH)+idx];
   }
   else {
     color = lightingBuffer[(idy*IMAGE_WIDTH)+idx];
