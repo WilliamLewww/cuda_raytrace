@@ -62,7 +62,7 @@ int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
 
 __device__
 Tuple colorFromRay(Ray ray) {
-  Tuple color = {0.0f, 0.0f, 0.0f, 1.0f};
+  Tuple color = {0.0f, 0.0f, 0.0f, 0.0f};
   int shapeType = 0;
   int intersectionIndex = -1;
   float intersectionMagnitude = 0.0f;
@@ -223,7 +223,7 @@ Tuple colorFromRay(Ray ray) {
 }
 
 __device__
-Tuple colorFromReflection(Ray ray, int recursionCount = 0) {
+Ray rayFromReflection(Ray ray, int recursionCount = 0) {
   int shapeType = 0;
   int intersectionIndex = -1;
   float intersectionMagnitude = 0.0f;
@@ -268,14 +268,13 @@ Tuple colorFromReflection(Ray ray, int recursionCount = 0) {
     intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
-  Tuple color = {0.0f, 0.0f, 0.0f, 0.0f};
+  Ray reflectedRay;
   if (shapeType == 3) {
     Ray transformedRay = transform(ray, reflectiveSphereArray[intersectionIndex].inverseModelMatrix);
     Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
     Tuple normal = normalize(intersectionPoint - reflectiveSphereArray[intersectionIndex].origin);
 
-    Ray reflectedRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
-    color = colorFromRay(reflectedRay);
+    reflectedRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
   }
 
   if (shapeType == 4) {
@@ -283,11 +282,10 @@ Tuple colorFromReflection(Ray ray, int recursionCount = 0) {
     Tuple intersectionPoint = project(transformedRay, intersectionMagnitude - REFLECTIVE_RAY_EPILSON);
     Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
 
-    Ray reflectedRay = {reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
-    color = colorFromRay(reflectedRay);
+    reflectedRay = {reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
   }
 
-  return color;
+  return reflectedRay;
 }
 
 __global__
@@ -325,7 +323,7 @@ void reflections(Tuple* colorOut) {
   Ray ray = {camera[0].position, direction};
   ray = transform(ray, camera[0].modelMatrix);
 
-  colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromReflection(ray);
+  colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromRay(rayFromReflection(ray));
 }
 
 void combineLightingReflections(Tuple* first, Tuple* second) {
