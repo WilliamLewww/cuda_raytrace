@@ -18,6 +18,8 @@
 #define REFLECTIVE_SPHERE_COUNT 1
 #define REFLECTIVE_PLANE_COUNT 1
 
+#define REFLECTIVE_RAY_EPILSON 0.0001
+
 __constant__ Camera camera[1];
 
 __constant__ Light lightArray[LIGHT_COUNT];
@@ -311,7 +313,7 @@ void reflections(Tuple* colorOut) {
 
   if (shapeType == 4) {
     Ray transformedRay = transform(ray, reflectivePlaneArray[intersectionIndex].inverseModelMatrix);
-    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
+    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude - REFLECTIVE_RAY_EPILSON);
     Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
 
     Ray reflectedRay = {reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
