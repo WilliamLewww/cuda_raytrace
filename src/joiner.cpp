@@ -1,8 +1,10 @@
 #include "joiner.h"
 
-extern "C" void initializeScene();
-extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
-extern "C" void updateCamera(float x, float y, float z, float rotationX, float rotationY);
+extern "C" {
+  void initializeScene();
+  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
+  void updateCamera(float x, float y, float z, float rotationX, float rotationY);
+}
 
 GLfloat vertices[] = {
   -1.0, -1.0,
