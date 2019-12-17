@@ -63,8 +63,6 @@ void Joiner::initialize(GLuint* shaderProgramHandle) {
 }
 
 void Joiner::update() {
-  renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
-
   cameraPositionVelocity = {0.0, 0.0, 0.0, 0.0};
   cameraRotationVelocity = {0.0, 0.0, 0.0, 0.0};
 
@@ -134,6 +132,8 @@ void Joiner::update() {
 }
 
 void Joiner::render() {
+  renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
+  
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, textureResource);
 
