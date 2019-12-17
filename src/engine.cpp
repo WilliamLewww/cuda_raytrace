@@ -6,8 +6,8 @@ void Engine::initialize() {
   glfwMakeContextCurrent(window);
   glewInit();
 
-  std::string vertexShaderString = readShaderSource("shaders/basic.vertex");
-  std::string fragmentShaderString = readShaderSource("shaders/basic.fragment");
+  std::string vertexShaderString = readShaderSource("shaders/textured_rectangle.vertex");
+  std::string fragmentShaderString = readShaderSource("shaders/textured_rectangle.fragment");
   shaderProgramHandle = createShaderProgram(vertexShaderString, fragmentShaderString);
 
   input = new Input();
