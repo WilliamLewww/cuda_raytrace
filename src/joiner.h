@@ -19,7 +19,6 @@ private:
 
   GLuint vao, vbo[2];
   GLuint textureHandle;
-
 public:
   void initialize(GLuint* shaderProgramHandle);
   void update();

@@ -376,11 +376,6 @@ extern "C" void updateCamera(float x, float y, float z, float rotationX, float r
   cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 }
 
-extern "C" void updateLight(float x, float y, float z) {
-  Light h_lightArray[] = {{{x, y, z, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
-  cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
-}
-
 extern "C" void initializeScene() {
   cudaMalloc(&lightingBuffer, 1000*1000*sizeof(Tuple));
   cudaMalloc(&reflectionsBuffer, 1000*1000*sizeof(Tuple));

@@ -2,9 +2,7 @@
 
 extern "C" void initializeScene();
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
-
 extern "C" void updateCamera(float x, float y, float z, float rotationX, float rotationY);
-extern "C" void updateLight(float x, float y, float z);
 
 GLfloat vertices[] = {
   -1.0, -1.0,
@@ -36,9 +34,6 @@ Tuple cameraPosition = {5.0, -3.5, -6.0, 1.0};
 Tuple cameraRotationVelocity = {0.0, 0.0, 0.0, 0.0};
 Tuple cameraRotation = {-M_PI / 12.0, -M_PI / 4.5, 0.0, 0.0};
 
-Tuple lightPositionVelocity = {0.0, 0.0, 0.0, 0.0};
-Tuple lightPosition = {10.0, -10.0, -5.0, 1.0};
-
 void Joiner::initialize(GLuint* shaderProgramHandle) {
   this->shaderProgramHandle = shaderProgramHandle;
 
@@ -65,8 +60,6 @@ void Joiner::initialize(GLuint* shaderProgramHandle) {
 void Joiner::update() {
   cameraPositionVelocity = {0.0, 0.0, 0.0, 0.0};
   cameraRotationVelocity = {0.0, 0.0, 0.0, 0.0};
-
-  lightPositionVelocity = {0.0, 0.0, 0.0, 0.0};
 
   if (Input::checkKeyDown(87)) {
     cameraPositionVelocity.x += cos(-cameraRotation.y + (M_PI / 2)) * 0.1;
@@ -103,19 +96,6 @@ void Joiner::update() {
     cameraRotationVelocity.y += -0.02;
   }
 
-  if (Input::checkKeyDown(265)) {
-    lightPositionVelocity.x += -0.05;
-  }
-  if (Input::checkKeyDown(264)) {
-    lightPositionVelocity.x += 0.05;
-  }
-  if (Input::checkKeyDown(263)) {
-    lightPositionVelocity.z += -0.05;
-  }
-  if (Input::checkKeyDown(262)) {
-    lightPositionVelocity.z += 0.05;
-  }
-
   cameraPosition.x += cameraPositionVelocity.x;
   cameraPosition.y += cameraPositionVelocity.y;
   cameraPosition.z += cameraPositionVelocity.z;
@@ -123,17 +103,12 @@ void Joiner::update() {
   cameraRotation.y += cameraRotationVelocity.y;
   cameraRotation.z += cameraRotationVelocity.z;
 
-  lightPosition.x += lightPositionVelocity.x;
-  lightPosition.y += lightPositionVelocity.y;
-  lightPosition.z += lightPositionVelocity.z;
-
   updateCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y);
-  updateLight(lightPosition.x, lightPosition.y, lightPosition.z);
 }
 
 void Joiner::render() {
   renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
-  
+
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, textureResource);
 
