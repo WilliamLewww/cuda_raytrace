@@ -11,5 +11,6 @@ private:
 public:
   static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
   static bool checkKeyDown(int key);
-  static bool checkJoystickButtonDown(int button);
+  static bool checkGamepadButtonDown(int button);
+  static float checkGamepadAxis(int axis);
 };

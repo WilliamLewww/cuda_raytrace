@@ -37,10 +37,6 @@ void Engine::exit() {
 
 void Engine::update() {
   joiner->update();
-
-  if (Input::checkJoystickButtonDown(GLFW_GAMEPAD_BUTTON_A)) {
-    printf("HELLO\n");
-  }
 }
 
 void Engine::render() {

@@ -26,7 +26,7 @@ bool Input::checkKeyDown(int key) {
   return false;
 }
 
-bool Input::checkJoystickButtonDown(int button) {
+bool Input::checkGamepadButtonDown(int button) {
   GLFWgamepadstate state;
 
   if (glfwGetGamepadState(GLFW_JOYSTICK_1, &state)) {
@@ -36,4 +36,14 @@ bool Input::checkJoystickButtonDown(int button) {
   }
 
   return false;
+}
+
+float Input::checkGamepadAxis(int axis) {
+  GLFWgamepadstate state;
+
+  if (glfwGetGamepadState(GLFW_JOYSTICK_1, &state)) {
+    return state.axes[axis];
+  }
+
+  return -1.0;
 }
