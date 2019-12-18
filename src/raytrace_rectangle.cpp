@@ -6,24 +6,6 @@ extern "C" {
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
 }
 
-GLfloat vertices[] = {
-  -1.0, -1.0,
-   1.0, -1.0,
-  -1.0,  1.0,
-  -1.0,  1.0,
-   1.0, -1.0,
-   1.0,  1.0,
-};
-
-GLfloat textureCoordinates[] = {
-  0.0, 1.0,
-  1.0, 1.0,
-  0.0, 0.0,
-  0.0, 0.0,
-  1.0, 1.0,
-  1.0, 0.0,
-};
-
 struct Tuple {
   float x;
   float y;
@@ -37,6 +19,20 @@ Tuple cameraRotationVelocity = {0.0, 0.0, 0.0, 0.0};
 Tuple cameraRotation = {-M_PI / 12.0, -M_PI / 4.5, 0.0, 0.0};
 
 void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
+  vertices[0] = -1.0;   vertices[1] = -1.0;
+  vertices[2] =  1.0;   vertices[3] = -1.0;
+  vertices[4] = -1.0;   vertices[5] =  1.0;
+  vertices[6] = -1.0;   vertices[7] =  1.0;
+  vertices[8] =  1.0;   vertices[9] = -1.0;
+  vertices[10] = 1.0;   vertices[11] = 1.0;
+
+  textureCoordinates[0] =  0.0;   textureCoordinates[1] =  1.0;
+  textureCoordinates[2] =  1.0;   textureCoordinates[3] =  1.0;
+  textureCoordinates[4] =  0.0;   textureCoordinates[5] =  0.0;
+  textureCoordinates[6] =  0.0;   textureCoordinates[7] =  0.0;
+  textureCoordinates[8] =  1.0;   textureCoordinates[9] =  1.0;
+  textureCoordinates[10] = 1.0;   textureCoordinates[11] = 0.0;
+
   this->shaderProgramHandle = shaderProgramHandle;
 
   glGenTextures(1, &textureResource);

@@ -19,6 +19,9 @@ private:
   
   GLuint vao, vbo[2];
   GLuint textureHandle;
+
+  GLfloat vertices[12];
+  GLfloat textureCoordinates[12];
 public:
   void initialize(GLuint* shaderProgramHandle);
   void update();
