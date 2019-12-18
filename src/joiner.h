@@ -8,17 +8,11 @@
 #include <cuda_gl_interop.h>
 
 #include "input.h"
+#include "raytrace_rectangle.h"
 
 class Joiner {
 private:
-  GLuint* shaderProgramHandle;
-
-  struct cudaGraphicsResource* cudaTextureResource;
-  GLuint textureResource;
-  void* cudaBuffer;
-
-  GLuint vao, vbo[2];
-  GLuint textureHandle;
+  RaytraceRectangle* rectangle;
 public:
   void initialize(GLuint* shaderProgramHandle);
   void update();
