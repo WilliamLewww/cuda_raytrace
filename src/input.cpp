@@ -34,4 +34,6 @@ bool Input::checkJoystickButtonDown(int button) {
       return true;
     }
   }
+
+  return false;
 }
