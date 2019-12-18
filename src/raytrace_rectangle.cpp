@@ -6,18 +6,6 @@ extern "C" {
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
 }
 
-struct Tuple {
-  float x;
-  float y;
-  float z;
-  float w;
-};
-
-Tuple cameraPositionVelocity = {0.0, 0.0, 0.0, 0.0};
-Tuple cameraPosition = {5.0, -3.5, -6.0, 1.0};
-Tuple cameraRotationVelocity = {0.0, 0.0, 0.0, 0.0};
-Tuple cameraRotation = {-M_PI / 12.0, -M_PI / 4.5, 0.0, 0.0};
-
 void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
   vertices[0] = -1.0;   vertices[1] = -1.0;
   vertices[2] =  1.0;   vertices[3] = -1.0;
@@ -56,52 +44,7 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 }
 
 void RaytraceRectangle::update() {
-  cameraPositionVelocity = {0.0, 0.0, 0.0, 0.0};
-  cameraRotationVelocity = {0.0, 0.0, 0.0, 0.0};
-
-  if (Input::checkKeyDown(87)) {
-    cameraPositionVelocity.x += cos(-cameraRotation.y + (M_PI / 2)) * 0.1;
-    cameraPositionVelocity.z += sin(-cameraRotation.y + (M_PI / 2)) * 0.1;
-  }
-  if (Input::checkKeyDown(83)) {
-    cameraPositionVelocity.x += -cos(-cameraRotation.y + (M_PI / 2)) * 0.1;
-    cameraPositionVelocity.z += -sin(-cameraRotation.y + (M_PI / 2)) * 0.1;
-  }
-  if (Input::checkKeyDown(65)) {
-    cameraPositionVelocity.x += -cos(-cameraRotation.y) * 0.1;
-    cameraPositionVelocity.z += -sin(-cameraRotation.y) * 0.1;
-  }
-  if (Input::checkKeyDown(68)) {
-    cameraPositionVelocity.x += cos(-cameraRotation.y) * 0.1;
-    cameraPositionVelocity.z += sin(-cameraRotation.y) * 0.1;
-  }
-  if (Input::checkKeyDown(341)) {
-    cameraPositionVelocity.y += 0.05;
-  }
-  if (Input::checkKeyDown(32)) {
-    cameraPositionVelocity.y += -0.05;
-  }
-  if (Input::checkKeyDown(82)) {
-    cameraRotationVelocity.x += 0.02;
-  }
-  if (Input::checkKeyDown(70)) {
-    cameraRotationVelocity.x += -0.02;
-  }
-  if (Input::checkKeyDown(69)) {
-    cameraRotationVelocity.y += 0.02;
-  }
-  if (Input::checkKeyDown(81)) {
-    cameraRotationVelocity.y += -0.02;
-  }
-
-  cameraPosition.x += cameraPositionVelocity.x;
-  cameraPosition.y += cameraPositionVelocity.y;
-  cameraPosition.z += cameraPositionVelocity.z;
-  cameraRotation.x += cameraRotationVelocity.x;
-  cameraRotation.y += cameraRotationVelocity.y;
-  cameraRotation.z += cameraRotationVelocity.z;
-
-  updateCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y);
+  
 }
 
 void RaytraceRectangle::render() {
