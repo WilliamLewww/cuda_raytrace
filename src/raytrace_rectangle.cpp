@@ -46,6 +46,12 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 }
 
 void RaytraceRectangle::update() {
+  handleGamepad();
+  handleKeyboard();
+  updateCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraRotationX, cameraRotationY);
+}
+
+void RaytraceRectangle::handleGamepad() {
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
     cameraPositionX += cos(-cameraRotationY) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
     cameraPositionZ += sin(-cameraRotationY) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
@@ -62,8 +68,10 @@ void RaytraceRectangle::update() {
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
     cameraRotationX += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -0.03;
   }
+}
 
-  updateCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraRotationX, cameraRotationY);
+void RaytraceRectangle::handleKeyboard() {
+
 }
 
 void RaytraceRectangle::render() {
