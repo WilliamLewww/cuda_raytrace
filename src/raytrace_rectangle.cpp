@@ -7,6 +7,9 @@ extern "C" {
 }
 
 void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
+  cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
+  cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
+
   vertices[0] = -1.0;   vertices[1] = -1.0;
   vertices[2] =  1.0;   vertices[3] = -1.0;
   vertices[4] = -1.0;   vertices[5] =  1.0;
@@ -25,14 +28,13 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 
   glGenTextures(1, &textureResource);
   glBindTexture(GL_TEXTURE_2D, textureResource);
-
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI_EXT, 1000, 1000, 0, GL_RGBA_INTEGER_EXT, GL_UNSIGNED_BYTE, NULL);
-
   cudaGraphicsGLRegisterImage(&cudaTextureResource, textureResource, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard);
+
   cudaMalloc(&cudaBuffer, 1000*1000*4*sizeof(GLubyte));
 
   initializeScene();
@@ -44,7 +46,24 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 }
 
 void RaytraceRectangle::update() {
-  
+  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
+    cameraPositionX += cos(-cameraRotationY) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
+    cameraPositionZ += sin(-cameraRotationY) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
+  }
+  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y)) > 0.08) {
+    cameraPositionX += cos(-cameraRotationY + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
+    cameraPositionZ += sin(-cameraRotationY + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
+  }
+
+  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
+    cameraRotationY += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * 0.03;
+  }
+
+  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
+    cameraRotationX += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -0.03;
+  }
+
+  updateCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraRotationX, cameraRotationY);
 }
 
 void RaytraceRectangle::render() {

@@ -11,6 +11,9 @@
 
 class RaytraceRectangle {
 private:
+  float cameraPositionX, cameraPositionY, cameraPositionZ;
+  float cameraRotationX, cameraRotationY;
+  
   GLuint* shaderProgramHandle;
 
   struct cudaGraphicsResource* cudaTextureResource;
