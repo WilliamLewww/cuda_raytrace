@@ -166,56 +166,32 @@ Tuple colorFromRay(Ray ray) {
       Tuple normal = normalize(intersectionPoint - sphereArray[intersectionIndex].origin);
       float lightNormalDifference = dot(normal, lightRay.direction);
 
-      Tuple lightReflection = reflect(negate(lightRay.direction), normal);
-      Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
-
-      float reflectEyeDifference = dot(lightReflection, eyeDirection);
-
       color = (0.1f * sphereArray[intersectionIndex].color) + 
-              (0.7f * lightNormalDifference * sphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
-              (0.2f * sphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+              (0.7f * lightNormalDifference * sphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0));
     }
 
     if (shapeType == 2) {
       Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
       float lightNormalDifference = dot(normal, lightRay.direction);
 
-      Tuple lightReflection = reflect(negate(lightRay.direction), normal);
-      Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
-
-      float reflectEyeDifference = dot(lightReflection, eyeDirection);
-
       color = (0.1f * planeArray[intersectionIndex].color) + 
-              (0.7f * lightNormalDifference * planeArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
-              (0.2f * planeArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+              (0.7f * lightNormalDifference * planeArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0));
     }
 
     if (shapeType == 3) {
       Tuple normal = normalize(intersectionPoint - reflectiveSphereArray[intersectionIndex].origin);
       float lightNormalDifference = dot(normal, lightRay.direction);
 
-      Tuple lightReflection = reflect(negate(lightRay.direction), normal);
-      Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
-
-      float reflectEyeDifference = dot(lightReflection, eyeDirection);
-
       color = (0.1f * reflectiveSphereArray[intersectionIndex].color) + 
-              (0.7f * lightNormalDifference * reflectiveSphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
-              (0.2f * reflectiveSphereArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+              (0.7f * lightNormalDifference * reflectiveSphereArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0));
     }
 
     if (shapeType == 4) {
       Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
       float lightNormalDifference = dot(normal, lightRay.direction);
 
-      Tuple lightReflection = reflect(negate(lightRay.direction), normal);
-      Tuple eyeDirection = (camera[0].inverseModelMatrix * lightRay.direction) - camera[0].position;
-
-      float reflectEyeDifference = dot(lightReflection, eyeDirection);
-
       color = (0.1f * reflectivePlaneArray[intersectionIndex].color) + 
-              (0.7f * lightNormalDifference * reflectivePlaneArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
-              (0.2f * reflectivePlaneArray[intersectionIndex].color * pow(reflectEyeDifference, 200.0f) * (reflectEyeDifference > 0) * (intersecionCount == 0));
+              (0.7f * lightNormalDifference * reflectivePlaneArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0));
     }
   }
 
