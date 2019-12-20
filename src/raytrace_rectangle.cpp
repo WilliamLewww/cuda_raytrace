@@ -1,15 +1,6 @@
 #include "raytrace_rectangle.h"
 
-extern "C" {
-  void initializeScene();
-  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
-  void updateCamera(float x, float y, float z, float rotationX, float rotationY);
-}
-
 void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
-  cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
-  cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
-
   vertices[0] = -1.0;   vertices[1] = -1.0;
   vertices[2] =  1.0;   vertices[3] = -1.0;
   vertices[4] = -1.0;   vertices[5] =  1.0;
@@ -33,11 +24,9 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI_EXT, 1000, 1000, 0, GL_RGBA_INTEGER_EXT, GL_UNSIGNED_BYTE, NULL);
-  cudaGraphicsGLRegisterImage(&cudaTextureResource, textureResource, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard);
 
-  cudaMalloc(&cudaBuffer, 1000*1000*4*sizeof(GLubyte));
-
-  initializeScene();
+  image = new RaytraceImage();
+  image->initialize(textureResource);
 
   glGenVertexArrays(1, &vao);
   glGenBuffers(2, vbo);
@@ -48,34 +37,11 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 void RaytraceRectangle::update() {
   handleGamepad();
   handleKeyboard();
-  updateCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraRotationX, cameraRotationY);
+  image->update();
 }
 
 void RaytraceRectangle::handleGamepad() {
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
-    cameraPositionX += cos(-cameraRotationY) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
-    cameraPositionZ += sin(-cameraRotationY) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
-  }
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y)) > 0.08) {
-    cameraPositionX += cos(-cameraRotationY + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
-    cameraPositionZ += sin(-cameraRotationY + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
-  }
 
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
-    cameraRotationY += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * 0.03;
-  }
-
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
-    cameraRotationX += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -0.03;
-  }
-
-  if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) > -0.92) {
-    cameraPositionY += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) + 1.0) * -0.03;
-  }
-
-  if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) > -0.92) {
-    cameraPositionY += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) + 1.0) * 0.03;
-  }
 }
 
 void RaytraceRectangle::handleKeyboard() {
@@ -83,8 +49,8 @@ void RaytraceRectangle::handleKeyboard() {
 }
 
 void RaytraceRectangle::render() {
-  renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
-
+  image->render();
+  
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, textureResource);
 

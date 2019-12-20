@@ -8,17 +8,14 @@
 #include <cuda_gl_interop.h>
 
 #include "input.h"
+#include "raytrace_image.h"
 
 class RaytraceRectangle {
 private:
-  float cameraPositionX, cameraPositionY, cameraPositionZ;
-  float cameraRotationX, cameraRotationY;
+  RaytraceImage* image;
 
   GLuint* shaderProgramHandle;
-
-  struct cudaGraphicsResource* cudaTextureResource;
   GLuint textureResource;
-  void* cudaBuffer;
   
   GLuint vao, vbo[2];
   GLuint textureHandle;
