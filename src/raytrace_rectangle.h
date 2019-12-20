@@ -7,7 +7,6 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
-#include "input.h"
 #include "raytrace_image.h"
 
 class RaytraceRectangle {
@@ -22,9 +21,6 @@ private:
 
   GLfloat vertices[12];
   GLfloat textureCoordinates[12];
-
-  void handleGamepad();
-  void handleKeyboard();
 public:
   void initialize(GLuint* shaderProgramHandle);
   void update();

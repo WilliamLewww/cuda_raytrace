@@ -35,22 +35,12 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 }
 
 void RaytraceRectangle::update() {
-  handleGamepad();
-  handleKeyboard();
   image->update();
-}
-
-void RaytraceRectangle::handleGamepad() {
-
-}
-
-void RaytraceRectangle::handleKeyboard() {
-
 }
 
 void RaytraceRectangle::render() {
   image->render();
-  
+
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, textureResource);
 
