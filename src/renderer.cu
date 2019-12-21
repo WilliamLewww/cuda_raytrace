@@ -302,23 +302,15 @@ void reflections(Tuple* colorOut) {
   colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromRay(rayFromReflection(ray));
 }
 
-void combineLightingReflections(Tuple* first, Tuple* second) {
-  for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
-    if (second[x].w > 0) {
-      first[x] = second[x];
-    }
-  }
-}
-
-void writeColorDataToFile(const char* filename, Tuple* colorData) {
+void writeColorDataToFile(const char* filename, unsigned int* colorData) {
   std::ofstream file;
   file.open(filename);
   file << "P3\n" << IMAGE_WIDTH << " " << IMAGE_HEIGHT << "\n255\n";
 
   for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
-    file << int(colorData[x].x) << " ";
-    file << int(colorData[x].y) << " ";
-    file << int(colorData[x].z) << "\n";
+    file << int(colorData[x] & 0xFF0000) << " ";
+    file << int(colorData[x] & 0x00FF00) << " ";
+    file << int(colorData[x] & 0x0000FF) << "\n";
   }
 
   file.close();
@@ -339,7 +331,7 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
     color = lightingBuffer[(idy*IMAGE_WIDTH)+idx];
   }
 
-  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | int(fmaxf(0, fminf(255, color.x)));
+  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
 
 Tuple* lightingBuffer;
@@ -417,90 +409,24 @@ extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cuda
 }
 
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) {
-  printf("\n");
+  initializeScene();
 
-  Analysis::setAbsoluteStart();
-  Analysis::createLabel(0, "allocate_memory");
-  Analysis::createLabel(1, "execute_kernel");
-  Analysis::createLabel(2, "copy_device");
-  Analysis::createLabel(3, "create_image");
+  unsigned int* h_imageData = (unsigned int*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte));
+  unsigned int* d_imageData;
+  cudaMalloc((unsigned int**)&d_imageData, IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte));
 
-  Analysis::begin();
-  Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
-  initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
-  initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
-  cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
-
-  const Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
-  cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
-
-  Sphere h_sphereArray[] = {
-                {{0.0, 0.0, 0.0, 1.0}, 1.0, {178.5, 255.0, 51.0, 1.0}},
-                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 127.5, 1.0}},
-                {{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 51.0, 127.5, 1.0}},
-                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 255.0, 1.0}},
-                {{0.0, 0.0, 0.0, 1.0}, 1.0, {76.5, 76.5, 255.0, 1.0}},
-                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.5, 76.5, 255.0, 1.0}}
-              };
-  initializeModelMatrix(&h_sphereArray[0], createTranslateMatrix(-0.5, -1, -2.0));
-  initializeModelMatrix(&h_sphereArray[1], multiply(createTranslateMatrix(-0.5, -2, -2.0), createScaleMatrix(0.75, 0.75, 0.75)));
-  initializeModelMatrix(&h_sphereArray[2], multiply(createTranslateMatrix(2, -1, 0.5), createScaleMatrix(1.25, 1.25, 1.25)));
-  initializeModelMatrix(&h_sphereArray[3], multiply(createTranslateMatrix(2.0, -0.25, -1.5), createScaleMatrix(0.5, 0.5, 0.5)));
-  initializeModelMatrix(&h_sphereArray[4], multiply(createTranslateMatrix(1.25, -2, -3.0), createScaleMatrix(0.25, 0.25, 0.25)));
-  initializeModelMatrix(&h_sphereArray[5], multiply(createTranslateMatrix(8.0, -2.0, -7.0), createScaleMatrix(2.25, 2.25, 2.25)));
-  cudaMemcpyToSymbol(sphereArray, h_sphereArray, SPHERE_COUNT*sizeof(Sphere));
-
-  Plane h_planeArray[] = {
-              {{0.0, 0.0, 0.0, 1.0}, {127.5, 229.5, 229.5, 1.0}},
-              {{0.0, 0.0, 0.0, 1.0}, {229.5, 127.5, 229.5, 1.0}},
-              {{0.0, 0.0, 0.0, 1.0}, {229.5, 229.5, 127.5, 1.0}}
-            };
-  initializeModelMatrix(&h_planeArray[0], createTranslateMatrix(0.0, 0.0, 0.0));
-  initializeModelMatrix(&h_planeArray[1], multiply(createTranslateMatrix(0.0, 0.0, 3.0), createRotationMatrixX(M_PI / 2)));
-  initializeModelMatrix(&h_planeArray[2], multiply(createTranslateMatrix(-3.0, 0.0, 0.0), createRotationMatrixZ(M_PI / 2)));
-  cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
-
-  Sphere h_reflectiveSphereArray[] = {
-                {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 255.0, 1.0}}
-  };
-  initializeModelMatrix(&h_reflectiveSphereArray[0], createTranslateMatrix(-0.5, -3.0, 0.5));
-  cudaMemcpyToSymbol(reflectiveSphereArray, h_reflectiveSphereArray, REFLECTIVE_SPHERE_COUNT*sizeof(Sphere));
-
-  Tuple* h_lightingData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
-  Tuple* h_reflectionsData = (Tuple*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
   Tuple *d_lightingData, *d_reflectionsData;
   cudaMalloc((Tuple**)&d_lightingData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
   cudaMalloc((Tuple**)&d_reflectionsData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
-  Analysis::end(0);
 
   dim3 block(blockDimX, blockDimY);
   dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
 
-  Analysis::begin();
-  printf("rendering ray traced image...\n");
   lighting<<<grid, block>>>(d_lightingData);
   reflections<<<grid, block>>>(d_reflectionsData);
+  combineLightingReflectionBuffers<<<grid, block>>>(d_imageData, d_lightingData, d_reflectionsData);
   cudaDeviceSynchronize();
-  printf("finished rendering\n");
-  Analysis::end(1);
 
-  Analysis::begin();
-  cudaMemcpy(h_lightingData, d_lightingData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
-  cudaMemcpy(h_reflectionsData, d_reflectionsData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple), cudaMemcpyDeviceToHost);
-  combineLightingReflections(h_lightingData, h_reflectionsData);
-  cudaFree(d_lightingData);
-  cudaFree(d_reflectionsData);
-  Analysis::end(2);
-
-  Analysis::begin();
-  writeColorDataToFile(filename, h_lightingData);
-  printf("saved image as: [%s]\n", filename);
-  Analysis::end(3);
-
-  Analysis::printAll(IMAGE_WIDTH, IMAGE_HEIGHT);
-
-  cudaDeviceReset();
-  free(h_lightingData);
-  free(h_reflectionsData);
-  printf("\n");
+  cudaMemcpy(h_imageData, d_imageData, IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte), cudaMemcpyDeviceToHost);
+  writeColorDataToFile(filename, h_imageData);
 }

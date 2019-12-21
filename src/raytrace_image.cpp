@@ -2,8 +2,10 @@
 
 extern "C" {
   void initializeScene();
-  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
+
+  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
+  void renderImage(int blockDimX, int blockDimY, const char* filename);
 }
 
 void RaytraceImage::initialize(GLuint textureResource) {
@@ -40,6 +42,11 @@ void RaytraceImage::update() {
 
   if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) > -0.92) {
     cameraPositionY += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) + 1.0) * 0.03;
+  }
+
+  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && !alreadyMadeImage) {
+    renderImage(16, 16, "test.ppm");
+    alreadyMadeImage = true;
   }
   
   updateCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraRotationX, cameraRotationY);
