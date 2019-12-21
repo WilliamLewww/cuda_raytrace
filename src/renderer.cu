@@ -308,9 +308,9 @@ void writeColorDataToFile(const char* filename, unsigned int* colorData) {
   file << "P3\n" << IMAGE_WIDTH << " " << IMAGE_HEIGHT << "\n255\n";
 
   for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
-    file << int(colorData[x] & 0xFF0000) << " ";
-    file << int(colorData[x] & 0x00FF00) << " ";
-    file << int(colorData[x] & 0x0000FF) << "\n";
+    file << int(colorData[x] & 0x0000FF) << " ";
+    file << int((colorData[x] & 0x00FF00) >> 8) << " ";
+    file << int((colorData[x] & 0xFF0000) >> 16) << "\n";
   }
 
   file.close();
@@ -409,7 +409,7 @@ extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cuda
 }
 
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) {
-  initializeScene();
+  printf("%s\n", "rendering image...");
 
   unsigned int* h_imageData = (unsigned int*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte));
   unsigned int* d_imageData;
@@ -429,4 +429,6 @@ extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) 
 
   cudaMemcpy(h_imageData, d_imageData, IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte), cudaMemcpyDeviceToHost);
   writeColorDataToFile(filename, h_imageData);
+
+  printf("%s\n", "finished rendering");
 }

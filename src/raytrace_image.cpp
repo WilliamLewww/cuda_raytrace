@@ -44,9 +44,13 @@ void RaytraceImage::update() {
     cameraPositionY += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) + 1.0) * 0.03;
   }
 
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && !alreadyMadeImage) {
-    renderImage(16, 16, "test.ppm");
-    alreadyMadeImage = true;
+  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && canTakeImage) {
+    renderImage(16, 16, "image.ppm");
+    canTakeImage = false;
+  }
+
+  if (!canTakeImage && !Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS)) {
+    canTakeImage = true;
   }
   
   updateCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraRotationX, cameraRotationY);

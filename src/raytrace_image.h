@@ -17,7 +17,7 @@ private:
   struct cudaGraphicsResource* cudaTextureResource;
   void* cudaBuffer;
 
-  bool alreadyMadeImage;
+  bool canTakeImage;
 public:
   void initialize(GLuint textureResource);
   void update();
