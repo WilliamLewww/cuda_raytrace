@@ -7,8 +7,11 @@
 #include "structures.h"
 #include "analysis.h"
 
-#define IMAGE_WIDTH 1000
-#define IMAGE_HEIGHT 1000
+#define FRAME_WIDTH 1000
+#define FRAME_HEIGHT 1000
+
+#define IMAGE_WIDTH 5000
+#define IMAGE_HEIGHT 5000
 
 #define LIGHT_COUNT 1
 
@@ -265,41 +268,41 @@ Ray rayFromReflection(Ray ray, int recursionCount = 0) {
 }
 
 __global__
-void lighting(Tuple* colorOut) {
+void lighting(Tuple* colorOut, int renderWidth, int renderHeight) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+  if (idx >= renderWidth || idy >= renderHeight) { return; }
 
   Tuple pixel = {
-    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    (idx - (renderWidth / 2.0f)) / renderWidth, 
+    (idy - (renderHeight / 2.0f)) / renderHeight, 
     0.0f, 1.0f
   };
   Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
   Ray ray = {camera[0].position, direction};
   ray = transform(ray, camera[0].modelMatrix);
 
-  colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromRay(ray);
+  colorOut[(idy*renderWidth)+idx] = colorFromRay(ray);
 }
 
 __global__
-void reflections(Tuple* colorOut) {
+void reflections(Tuple* colorOut, int renderWidth, int renderHeight) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+  if (idx >= renderWidth || idy >= renderHeight) { return; }
 
   Tuple pixel = {
-    (idx - (IMAGE_WIDTH / 2.0f)) / IMAGE_WIDTH, 
-    (idy - (IMAGE_HEIGHT / 2.0f)) / IMAGE_HEIGHT, 
+    (idx - (renderWidth / 2.0f)) / renderWidth, 
+    (idy - (renderHeight / 2.0f)) / renderHeight, 
     0.0f, 1.0f
   };
   Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
   Ray ray = {camera[0].position, direction};
   ray = transform(ray, camera[0].modelMatrix);
 
-  colorOut[(idy*IMAGE_WIDTH)+idx] = colorFromRay(rayFromReflection(ray));
+  colorOut[(idy*renderWidth)+idx] = colorFromRay(rayFromReflection(ray));
 }
 
 void writeColorDataToFile(const char* filename, unsigned int* colorData) {
@@ -317,21 +320,21 @@ void writeColorDataToFile(const char* filename, unsigned int* colorData) {
 }
 
 __global__
-void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingBuffer, Tuple* reflectionsBuffer) {
+void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingBuffer, Tuple* reflectionsBuffer, int renderWidth, int renderHeight) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-  if (idx >= IMAGE_WIDTH || idy >= IMAGE_HEIGHT) { return; }
+  if (idx >= renderWidth || idy >= renderHeight) { return; }
 
   Tuple color;
-  if (reflectionsBuffer[(idy*IMAGE_WIDTH)+idx].w > 0) {
-    color = (0.2 * reflectionsBuffer[(idy*IMAGE_WIDTH)+idx]) + lightingBuffer[(idy*IMAGE_WIDTH)+idx];
+  if (reflectionsBuffer[(idy*renderWidth)+idx].w > 0) {
+    color = (0.2 * reflectionsBuffer[(idy*renderWidth)+idx]) + lightingBuffer[(idy*renderWidth)+idx];
   }
   else {
-    color = lightingBuffer[(idy*IMAGE_WIDTH)+idx];
+    color = lightingBuffer[(idy*renderWidth)+idx];
   }
 
-  cudaBuffer[(idy*IMAGE_WIDTH)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
+  cudaBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
 
 Tuple* lightingBuffer;
@@ -345,8 +348,8 @@ extern "C" void updateCamera(float x, float y, float z, float rotationX, float r
 }
 
 extern "C" void initializeScene() {
-  cudaMalloc(&lightingBuffer, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
-  cudaMalloc(&reflectionsBuffer, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+  cudaMalloc(&lightingBuffer, FRAME_WIDTH*FRAME_HEIGHT*sizeof(Tuple));
+  cudaMalloc(&reflectionsBuffer, FRAME_WIDTH*FRAME_HEIGHT*sizeof(Tuple));
 
   Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
   initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
@@ -395,16 +398,16 @@ extern "C" void initializeScene() {
 
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
   dim3 block(blockDimX, blockDimY);
-  dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
-  lighting<<<grid, block>>>(lightingBuffer);
-  reflections<<<grid, block>>>(reflectionsBuffer);
-  combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)cudaBuffer, lightingBuffer, reflectionsBuffer);
+  dim3 grid((FRAME_WIDTH + block.x - 1) / block.x, (FRAME_HEIGHT + block.y - 1) / block.y);
+  lighting<<<grid, block>>>(lightingBuffer, FRAME_WIDTH, FRAME_HEIGHT);
+  reflections<<<grid, block>>>(reflectionsBuffer, FRAME_WIDTH, FRAME_HEIGHT);
+  combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)cudaBuffer, lightingBuffer, reflectionsBuffer, FRAME_WIDTH, FRAME_HEIGHT);
 
   cudaArray *texture_ptr;
   cudaGraphicsMapResources(1, cudaTextureResource, 0);
   cudaGraphicsSubResourceGetMappedArray(&texture_ptr, *cudaTextureResource, 0, 0);
 
-  cudaMemcpy2DToArray(texture_ptr, 0, 0,  cudaBuffer, IMAGE_WIDTH*4*sizeof(GLubyte), IMAGE_WIDTH*4*sizeof(GLubyte), IMAGE_HEIGHT, cudaMemcpyDeviceToDevice);
+  cudaMemcpy2DToArray(texture_ptr, 0, 0,  cudaBuffer, FRAME_WIDTH*4*sizeof(GLubyte), FRAME_WIDTH*4*sizeof(GLubyte), FRAME_HEIGHT, cudaMemcpyDeviceToDevice);
   cudaGraphicsUnmapResources(1, cudaTextureResource, 0);
 }
 
@@ -422,9 +425,9 @@ extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) 
   dim3 block(blockDimX, blockDimY);
   dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
 
-  lighting<<<grid, block>>>(d_lightingData);
-  reflections<<<grid, block>>>(d_reflectionsData);
-  combineLightingReflectionBuffers<<<grid, block>>>(d_imageData, d_lightingData, d_reflectionsData);
+  lighting<<<grid, block>>>(d_lightingData, IMAGE_WIDTH, IMAGE_HEIGHT);
+  reflections<<<grid, block>>>(d_reflectionsData, IMAGE_WIDTH, IMAGE_HEIGHT);
+  combineLightingReflectionBuffers<<<grid, block>>>(d_imageData, d_lightingData, d_reflectionsData, IMAGE_WIDTH, IMAGE_HEIGHT);
   cudaDeviceSynchronize();
 
   cudaMemcpy(h_imageData, d_imageData, IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte), cudaMemcpyDeviceToHost);
