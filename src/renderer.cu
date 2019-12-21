@@ -345,8 +345,8 @@ extern "C" void updateCamera(float x, float y, float z, float rotationX, float r
 }
 
 extern "C" void initializeScene() {
-  cudaMalloc(&lightingBuffer, 1000*1000*sizeof(Tuple));
-  cudaMalloc(&reflectionsBuffer, 1000*1000*sizeof(Tuple));
+  cudaMalloc(&lightingBuffer, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+  cudaMalloc(&reflectionsBuffer, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
 
   Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
   initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
@@ -404,7 +404,7 @@ extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cuda
   cudaGraphicsMapResources(1, cudaTextureResource, 0);
   cudaGraphicsSubResourceGetMappedArray(&texture_ptr, *cudaTextureResource, 0, 0);
 
-  cudaMemcpy2DToArray(texture_ptr, 0, 0,  cudaBuffer, 1000*4*sizeof(GLubyte), 1000*4*sizeof(GLubyte), 1000, cudaMemcpyDeviceToDevice);
+  cudaMemcpy2DToArray(texture_ptr, 0, 0,  cudaBuffer, IMAGE_WIDTH*4*sizeof(GLubyte), IMAGE_WIDTH*4*sizeof(GLubyte), IMAGE_HEIGHT, cudaMemcpyDeviceToDevice);
   cudaGraphicsUnmapResources(1, cudaTextureResource, 0);
 }
 
