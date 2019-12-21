@@ -1,6 +1,9 @@
 /bin/*
 /dump/*
 
+# Image files
+*.ppm
+
 # Prerequisites
 *.d
 

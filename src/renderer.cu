@@ -412,8 +412,15 @@ extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cuda
 }
 
 extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) {
-  printf("%s\n", "rendering image...");
+  printf("\n");
 
+  Analysis::setAbsoluteStart();
+  Analysis::createLabel(0, "allocate_memory");
+  Analysis::createLabel(1, "execute_kernel");
+  Analysis::createLabel(2, "copy_device");
+  Analysis::createLabel(3, "create_image");
+
+  Analysis::begin();
   unsigned int* h_imageData = (unsigned int*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte));
   unsigned int* d_imageData;
   cudaMalloc((unsigned int**)&d_imageData, IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte));
@@ -421,17 +428,35 @@ extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) 
   Tuple *d_lightingData, *d_reflectionsData;
   cudaMalloc((Tuple**)&d_lightingData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
   cudaMalloc((Tuple**)&d_reflectionsData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+  Analysis::end(0);
 
   dim3 block(blockDimX, blockDimY);
   dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
 
+  Analysis::begin();
+  printf("rendering ray traced image...\n");
   lighting<<<grid, block>>>(d_lightingData, IMAGE_WIDTH, IMAGE_HEIGHT);
   reflections<<<grid, block>>>(d_reflectionsData, IMAGE_WIDTH, IMAGE_HEIGHT);
   combineLightingReflectionBuffers<<<grid, block>>>(d_imageData, d_lightingData, d_reflectionsData, IMAGE_WIDTH, IMAGE_HEIGHT);
   cudaDeviceSynchronize();
+  printf("finished rendering\n");
+  Analysis::end(1);
 
+  Analysis::begin();
   cudaMemcpy(h_imageData, d_imageData, IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte), cudaMemcpyDeviceToHost);
-  writeColorDataToFile(filename, h_imageData);
+  Analysis::end(2);
 
-  printf("%s\n", "finished rendering");
+  Analysis::begin();
+  writeColorDataToFile(filename, h_imageData);
+  printf("saved image as: [%s]\n", filename);
+  Analysis::end(3);
+
+  Analysis::printAll(IMAGE_WIDTH, IMAGE_HEIGHT);
+
+  free(h_imageData);
+  cudaFree(d_imageData);
+  cudaFree(d_lightingData);
+  cudaFree(d_reflectionsData);
+
+  printf("\n");
 }
