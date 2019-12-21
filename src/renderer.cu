@@ -457,6 +457,4 @@ extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) 
   cudaFree(d_imageData);
   cudaFree(d_lightingData);
   cudaFree(d_reflectionsData);
-
-  printf("\n");
 }
