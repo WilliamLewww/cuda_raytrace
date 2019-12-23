@@ -32,7 +32,7 @@ all: clean $(EXEC) run
 SRCS := main.cpp engine.cpp joiner.cpp input.cpp raytrace_rectangle.cpp raytrace_image.cpp structures.cpp
 OBJS := $(SRCS:%.cpp=%.o)
 
-CUDA_SRCS := renderer.cu
+CUDA_SRCS := renderer_triangles.cu
 CUDA_OBJS := $(CUDA_SRCS:%.cu=%.o)
 
 $(EXEC): $(OBJS) $(CUDA_OBJS)
