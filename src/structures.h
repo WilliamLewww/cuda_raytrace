@@ -36,6 +36,17 @@ struct Plane {
   float inverseModelMatrix[16];
 };
 
+struct Triangle {
+  Tuple pointA;
+  Tuple pointB;
+  Tuple pointC;
+
+  Tuple color;
+
+  float modelMatrix[16];
+  float inverseModelMatrix[16];
+};
+
 struct Camera {
   Tuple position;
   Tuple direction;
@@ -163,6 +174,15 @@ void initializeModelMatrix(Plane* plane, float* matrix) {
   for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
 }
 
+void initializeModelMatrix(Triangle* triangle, float* matrix) {
+  float* modelMatrix = triangle->modelMatrix;
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
+
+  modelMatrix = triangle->inverseModelMatrix;
+  float* inverseModelMatrix = inverseMatrix(triangle->modelMatrix);
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
+}
+
 Tuple multiplyMatrixTuple(float* matrix, Tuple tuple) {
   return { 
     (matrix[0] * tuple.x) + (matrix[1] * tuple.y) + (matrix[2] * tuple.z) + (matrix[3] * tuple.w),
@@ -192,4 +212,5 @@ __device__ Tuple normalize(Tuple tuple) { return {tuple.x / magnitude(tuple), tu
 __device__ Tuple negate(Tuple tuple) { return {-tuple.x, -tuple.y, -tuple.z, -tuple.w}; }
 __device__ Tuple project(Ray ray, float t) { return ray.origin + (ray.direction * t); }
 __device__ float dot(Tuple tupleA, Tuple tupleB) { return (tupleA.x * tupleB.x) + (tupleA.y * tupleB.y) + (tupleA.z * tupleB.z) + (tupleA.w * tupleB.w); }
-__device__ Tuple reflect(Tuple tuple, Tuple normal) { return tuple - (normal * 2.0 * dot(tuple, normal)); }
+__device__ Tuple cross(Tuple tupleA, Tuple tupleB) { return {(tupleA.y * tupleB.z) - (tupleA.z * tupleB.y), (tupleA.z * tupleB.x) - (tupleA.x * tupleB.z), (tupleA.x * tupleB.y) - (tupleA.y * tupleB.x), 1.0f}; }
+__device__ Tuple reflect(Tuple tuple, Tuple normal) { return tuple - (normal * 2.0f * dot(tuple, normal)); }

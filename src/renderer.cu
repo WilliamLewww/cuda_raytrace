@@ -17,11 +17,13 @@
 
 #define SPHERE_COUNT 6
 #define PLANE_COUNT 2
+#define TRIANGLE_COUNT 1
 
 #define REFLECTIVE_SPHERE_COUNT 1
 #define REFLECTIVE_PLANE_COUNT 1
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
+#define TRIANGLE_INTERSECTION_EPILSON 0.0000001
 
 __constant__ Camera camera[1];
 
@@ -29,6 +31,7 @@ __constant__ Light lightArray[LIGHT_COUNT];
 
 __constant__ Sphere sphereArray[SPHERE_COUNT];
 __constant__ Plane planeArray[PLANE_COUNT];
+__constant__ Triangle triangleArray[TRIANGLE_COUNT];
 
 __constant__ Sphere reflectiveSphereArray[REFLECTIVE_SPHERE_COUNT];
 __constant__ Plane reflectivePlaneArray[REFLECTIVE_PLANE_COUNT];
@@ -61,6 +64,41 @@ int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
   *intersectionMagnitude = t;
 
   return 1 * (t >= 0);
+}
+
+__device__
+int intersectTriangle(float* intersectionMagnitude, Triangle triangle, Ray ray) {
+  Tuple edgeB = triangle.pointB - triangle.pointA;
+  Tuple edgeC = triangle.pointC - triangle.pointA;
+
+  Tuple h = cross(ray.direction, edgeC);
+  float a = dot(edgeB, h);
+
+  if (a > -TRIANGLE_INTERSECTION_EPILSON && a < TRIANGLE_INTERSECTION_EPILSON) {
+    return 0;
+  }
+
+  float f = 1.0f / a;
+  Tuple s = ray.origin - triangle.pointA;
+  float u = f * dot(s, h);
+
+  if (u < 0.0f || u > 1.0f) {
+    return 0;
+  }
+
+  Tuple q = cross(s, edgeB);
+  float v = f * dot(ray.direction, q);
+  if (v < 0.0f || u + v > 1.0f) {
+    return 0;
+  }
+
+  float t = f * dot(edgeC, q);
+  if (t > TRIANGLE_INTERSECTION_EPILSON && t < 1.0f / TRIANGLE_INTERSECTION_EPILSON) {
+    *intersectionMagnitude = t;
+    return 1;
+  }
+
+  return 0;
 }
 
 __device__
@@ -110,6 +148,16 @@ Tuple colorFromRay(Ray ray) {
     intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
+  #pragma unroll
+  for (int x = 0; x < TRIANGLE_COUNT; x++) {
+    float point;
+    int count = intersectTriangle(&point, triangleArray[x], ray);
+
+    shapeType = (5 * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (shapeType * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+  }
+
   if (intersectionIndex != -1) {
     Ray transformedRay;
     Tuple intersectionPoint;
@@ -139,6 +187,12 @@ Tuple colorFromRay(Ray ray) {
       lightRay = {reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint))};
     }
 
+    if (shapeType == 5) {
+      transformedRay = transform(ray, triangleArray[intersectionIndex].inverseModelMatrix);
+      intersectionPoint = project(transformedRay, intersectionMagnitude);
+      lightRay = {triangleArray[intersectionIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (triangleArray[intersectionIndex].modelMatrix * intersectionPoint))};
+    }
+
     int intersecionCount = 0;
 
     #pragma unroll
@@ -163,6 +217,12 @@ Tuple colorFromRay(Ray ray) {
     for (int x = 0; x < REFLECTIVE_PLANE_COUNT; x++) {
       float point = 0;
       intersecionCount += intersectPlane(&point, reflectivePlaneArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 4)) * (point < magnitude(lightArray[0].position - intersectionPoint));
+    }
+
+    #pragma unroll
+    for (int x = 0; x < TRIANGLE_COUNT; x++) {
+      float point = 0;
+      intersecionCount += intersectTriangle(&point, triangleArray[x], lightRay) * ((x != intersectionIndex) || (shapeType != 5)) * (point < magnitude(lightArray[0].position - intersectionPoint));
     }
 
     if (shapeType == 1) {
@@ -195,6 +255,10 @@ Tuple colorFromRay(Ray ray) {
 
       color = (0.1f * reflectivePlaneArray[intersectionIndex].color) + 
               (0.7f * lightNormalDifference * reflectivePlaneArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0));
+    }
+
+    if (shapeType == 5) {
+      color = (1.0f * triangleArray[intersectionIndex].color);
     }
   }
 
@@ -382,6 +446,12 @@ extern "C" void initializeScene() {
   initializeModelMatrix(&h_planeArray[0], multiply(createTranslateMatrix(0.0, 0.0, 3.0), createRotationMatrixX(M_PI / 2)));
   initializeModelMatrix(&h_planeArray[1], multiply(createTranslateMatrix(-3.0, 0.0, 0.0), createRotationMatrixZ(M_PI / 2)));
   cudaMemcpyToSymbol(planeArray, h_planeArray, PLANE_COUNT*sizeof(Plane));
+
+  Triangle h_triangleArray[] = {
+              {{0.0, 0.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 1.0}, {255.0, 255.0, 255.0, 1.0}},
+            };
+  initializeModelMatrix(&h_triangleArray[0], createIdentityMatrix());
+  cudaMemcpyToSymbol(triangleArray, h_triangleArray, TRIANGLE_COUNT*sizeof(Triangle));
 
   Sphere h_reflectiveSphereArray[] = {
                 {{0.0, 0.0, 0.0, 1.0}, 1.0, {255.0, 255.0, 255.0, 1.0}}
