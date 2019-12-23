@@ -37,9 +37,9 @@ struct Plane {
 };
 
 struct Triangle {
-  Tuple pointA;
-  Tuple pointB;
-  Tuple pointC;
+  Tuple vertexA;
+  Tuple vertexB;
+  Tuple vertexC;
 
   Tuple color;
 

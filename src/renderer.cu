@@ -68,8 +68,8 @@ int intersectPlane(float* intersectionMagnitude, Plane plane, Ray ray) {
 
 __device__
 int intersectTriangle(float* intersectionMagnitude, Triangle triangle, Ray ray) {
-  Tuple edgeB = triangle.pointB - triangle.pointA;
-  Tuple edgeC = triangle.pointC - triangle.pointA;
+  Tuple edgeB = triangle.vertexB - triangle.vertexA;
+  Tuple edgeC = triangle.vertexC - triangle.vertexA;
 
   Tuple h = cross(ray.direction, edgeC);
   float a = dot(edgeB, h);
@@ -79,7 +79,7 @@ int intersectTriangle(float* intersectionMagnitude, Triangle triangle, Ray ray) 
   }
 
   float f = 1.0f / a;
-  Tuple s = ray.origin - triangle.pointA;
+  Tuple s = ray.origin - triangle.vertexA;
   float u = f * dot(s, h);
 
   if (u < 0.0f || u > 1.0f) {
