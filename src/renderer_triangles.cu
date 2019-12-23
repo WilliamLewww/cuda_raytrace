@@ -48,32 +48,17 @@ int intersectTriangle(float* intersectionMagnitude, Triangle triangle, Ray ray) 
 
   Tuple h = cross(ray.direction, edgeC);
   float a = dot(edgeB, h);
-
-  if (a > -TRIANGLE_INTERSECTION_EPILSON && a < TRIANGLE_INTERSECTION_EPILSON) {
-    return 0;
-  }
-
   float f = 1.0f / a;
   Tuple s = ray.origin - triangle.vertexA;
   float u = f * dot(s, h);
-
-  if (u < 0.0f || u > 1.0f) {
-    return 0;
-  }
-
   Tuple q = cross(s, edgeB);
   float v = f * dot(ray.direction, q);
-  if (v < 0.0f || u + v > 1.0f) {
-    return 0;
-  }
-
   float t = f * dot(edgeC, q);
-  if (t > TRIANGLE_INTERSECTION_EPILSON && t < 1.0f / TRIANGLE_INTERSECTION_EPILSON) {
-    *intersectionMagnitude = t;
-    return 1;
-  }
 
-  return 0;
+  int intersecting = (t > TRIANGLE_INTERSECTION_EPILSON && t < 1.0f / TRIANGLE_INTERSECTION_EPILSON) * (a <= -TRIANGLE_INTERSECTION_EPILSON || a >= TRIANGLE_INTERSECTION_EPILSON) * (u >= 0.0f && u <= 1.0f) * (v >= 0.0f && u + v <= 1.0f);
+  *intersectionMagnitude = t;
+
+  return intersecting;
 }
 
 __device__
