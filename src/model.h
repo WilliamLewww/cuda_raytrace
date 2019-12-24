@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+#include <fstream>
+#include <string>
+#include <stdio.h>
 
 #include "structures.h"
 

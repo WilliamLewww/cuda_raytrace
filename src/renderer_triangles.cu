@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "structures.h"
+#include "model.h"
 #include "analysis.h"
 
 #define FRAME_WIDTH 1000
@@ -15,7 +16,7 @@
 
 #define LIGHT_COUNT 1
 
-#define TRIANGLE_COUNT 2
+#define TRIANGLE_COUNT 12
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
@@ -190,12 +191,8 @@ extern "C" void initializeScene() {
   Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-  Triangle h_triangleArray[] = {
-              {{1.0, 1.0, -1.0, 1.0}, {-1.0, 1.0, -1.0, 1.0}, {-1.0, 1.0, 1.0, 1.0}, {0.0, 1.0, 0.0, 0.0}, {255.0, 0.0, 0.0, 1.0}},
-              {{-1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, -1.0, 1.0}, {0.0, 1.0, 0.0, 0.0}, {0.0, 255.0, 0.0, 1.0}},
-            };
-  initializeModelMatrix(&h_triangleArray[0], createIdentityMatrix());
-  cudaMemcpyToSymbol(triangleArray, h_triangleArray, TRIANGLE_COUNT*sizeof(Triangle));
+  Model h_model = createModelFromOBJ("res/cube.obj");
+  cudaMemcpyToSymbol(triangleArray, h_model.triangleArray, TRIANGLE_COUNT*sizeof(Triangle));
 }
 
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
