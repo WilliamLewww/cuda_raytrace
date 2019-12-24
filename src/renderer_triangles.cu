@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <stdio.h>
 
@@ -196,12 +197,14 @@ extern "C" void initializeScene() {
   Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-  MeshDescriptor* h_meshDescriptorArray = new MeshDescriptor[1];
+  MeshDescriptor* h_meshDescriptorArray = new MeshDescriptor[MESH_DESCRIPTOR_COUNT];
+  MeshSegment* h_meshSegmentArray = new MeshSegment[MESH_SEGMENT_COUNT];
   Model h_model = createModelFromOBJ("res/torus.obj");
   initializeModelMatrix(&h_model.meshDescriptor, createIdentityMatrix());
   h_meshDescriptorArray[0] = h_model.meshDescriptor;
+  std::copy(h_model.meshSegmentArray, h_model.meshSegmentArray + 100, h_meshSegmentArray);
   cudaMemcpyToSymbol(meshDescriptorArray, h_meshDescriptorArray, MESH_DESCRIPTOR_COUNT*sizeof(MeshDescriptor));
-  cudaMemcpyToSymbol(meshSegmentArray, h_model.meshSegmentArray, MESH_SEGMENT_COUNT*sizeof(MeshSegment));
+  cudaMemcpyToSymbol(meshSegmentArray, h_meshSegmentArray, MESH_SEGMENT_COUNT*sizeof(MeshSegment));
 }
 
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
