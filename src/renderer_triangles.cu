@@ -16,7 +16,7 @@
 
 #define LIGHT_COUNT 1
 
-#define TRIANGLE_COUNT 12
+#define TRIANGLE_COUNT 100
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
@@ -191,7 +191,7 @@ extern "C" void initializeScene() {
   Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-  Model h_model = createModelFromOBJ("res/cube.obj");
+  Model h_model = createModelFromOBJ("res/torus.obj");
   cudaMemcpyToSymbol(triangleArray, h_model.triangleArray, TRIANGLE_COUNT*sizeof(Triangle));
 }
 
