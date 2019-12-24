@@ -41,6 +41,7 @@ struct Triangle {
   Tuple vertexA;
   Tuple vertexB;
   Tuple vertexC;
+  Tuple normal;
 
   Tuple color;
 

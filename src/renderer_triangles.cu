@@ -15,7 +15,7 @@
 
 #define LIGHT_COUNT 1
 
-#define TRIANGLE_COUNT 1
+#define TRIANGLE_COUNT 2
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
@@ -191,7 +191,8 @@ extern "C" void initializeScene() {
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
   Triangle h_triangleArray[] = {
-              {{0.0, 0.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 1.0}, {255.0, 255.0, 255.0, 1.0}},
+              {{1.0, 1.0, -1.0, 1.0}, {-1.0, 1.0, -1.0, 1.0}, {-1.0, 1.0, 1.0, 1.0}, {0.0, 1.0, 0.0, 0.0}, {255.0, 0.0, 0.0, 1.0}},
+              {{-1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, -1.0, 1.0}, {0.0, 1.0, 0.0, 0.0}, {0.0, 255.0, 0.0, 1.0}},
             };
   initializeModelMatrix(&h_triangleArray[0], createIdentityMatrix());
   cudaMemcpyToSymbol(triangleArray, h_triangleArray, TRIANGLE_COUNT*sizeof(Triangle));

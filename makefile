@@ -29,7 +29,7 @@ EXEC_ARGS=bin/image.ppm 16 16
 
 all: clean $(EXEC) run
 
-SRCS := main.cpp engine.cpp joiner.cpp input.cpp raytrace_rectangle.cpp raytrace_image.cpp structures.cpp
+SRCS := main.cpp engine.cpp joiner.cpp input.cpp raytrace_rectangle.cpp raytrace_image.cpp structures.cpp model.cpp
 OBJS := $(SRCS:%.cpp=%.o)
 
 CUDA_SRCS := renderer_triangles.cu
