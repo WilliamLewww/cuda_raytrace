@@ -75,17 +75,26 @@ Model createModelFromOBJ(const char* filename) {
     }
   }
 
-  model.triangleCount = model.indexList.size() / 3;
-  model.triangleArray = new Triangle[model.triangleCount];
-  for (int x = 0; x < model.triangleCount; x++) {
-    model.triangleArray[x].vertexA = model.vertexList[model.indexList[(3 * x)].x - 1];
-    model.triangleArray[x].vertexB = model.vertexList[model.indexList[(3 * x) + 1].x - 1];
-    model.triangleArray[x].vertexC = model.vertexList[model.indexList[(3 * x) + 2].x - 1];
+  model.meshDescriptor.segmentCount = model.indexList.size() / 3;
+  model.meshSegmentArray = new MeshSegment[model.meshDescriptor.segmentCount];
+  for (int x = 0; x < model.meshDescriptor.segmentCount; x++) {
+    model.meshSegmentArray[x].vertexA = model.vertexList[model.indexList[(3 * x)].x - 1];
+    model.meshSegmentArray[x].vertexB = model.vertexList[model.indexList[(3 * x) + 1].x - 1];
+    model.meshSegmentArray[x].vertexC = model.vertexList[model.indexList[(3 * x) + 2].x - 1];
 
-    model.triangleArray[x].normal = model.normalList[model.indexList[(3 * x)].z - 1];
+    model.meshSegmentArray[x].normal = model.normalList[model.indexList[(3 * x)].z - 1];
 
-    model.triangleArray[x].color = {float(int(45.0 * x + 87) % 255), float(int(77.0 * x + 102) % 255), float(int(123.0 * x + 153) % 255), 1.0};
+    model.meshSegmentArray[x].color = {float(int(45.0 * x + 87) % 255), float(int(77.0 * x + 102) % 255), float(int(123.0 * x + 153) % 255), 1.0};
   }
 
   return model;
+}
+
+void initializeModelMatrix(MeshDescriptor* meshDescriptor, float* matrix) {
+  float* modelMatrix = meshDescriptor->modelMatrix;
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
+
+  modelMatrix = meshDescriptor->inverseModelMatrix;
+  float* inverseModelMatrix = inverseMatrix(meshDescriptor->modelMatrix);
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
 }
