@@ -89,7 +89,11 @@ Tuple colorFromRay(Ray ray) {
       intersecionCount += intersectTriangle(&point, triangleArray[x], lightRay) * (x != intersectionIndex) * (point < magnitude(lightArray[0].position - intersectionPoint));
     }
 
-    color = (1.0f * triangleArray[intersectionIndex].color);
+    float lightNormalDifference = dot(triangleArray[intersectionIndex].normal, lightRay.direction);
+
+    color = (0.1f * triangleArray[intersectionIndex].color) + 
+            (0.7f * lightNormalDifference * triangleArray[intersectionIndex].color * (lightNormalDifference > 0));
+              //* (intersecionCount == 0));
   }
 
   return color;
