@@ -92,8 +92,7 @@ Tuple colorFromRay(Ray ray) {
     float lightNormalDifference = dot(triangleArray[intersectionIndex].normal, lightRay.direction);
 
     color = (0.1f * triangleArray[intersectionIndex].color) + 
-            (0.7f * lightNormalDifference * triangleArray[intersectionIndex].color * (lightNormalDifference > 0));
-              //* (intersecionCount == 0));
+            (0.7f * lightNormalDifference * triangleArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0));
   }
 
   return color;
@@ -196,6 +195,7 @@ extern "C" void initializeScene() {
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
   Model h_model = createModelFromOBJ("res/torus.obj");
+  for (int x = 0; x < TRIANGLE_COUNT; x++) { initializeModelMatrix(&h_model.triangleArray[x], createIdentityMatrix()); }
   cudaMemcpyToSymbol(triangleArray, h_model.triangleArray, TRIANGLE_COUNT*sizeof(Triangle));
 }
 
