@@ -65,7 +65,7 @@ Model createModelFromOBJ(const char* filename) {
 
       c.x = std::stof(temp.substr(0, temp.find_first_of('/')));
       temp = temp.substr(temp.find_first_of('/') + 1);
-    // printf("%d\n", std::stof(temp.substr(0, temp.find_first_of('/'))));
+      // printf("%d\n", std::stof(temp.substr(0, temp.find_first_of('/'))));
       temp = temp.substr(temp.find_first_of('/') + 1);
       c.z = std::stof(temp.substr(0, temp.find_first_of(' ')));
 
@@ -84,7 +84,7 @@ Model createModelFromOBJ(const char* filename) {
 
     model.triangleArray[x].normal = model.normalList[model.indexList[(3 * x)].z - 1];
 
-    model.triangleArray[x].color = {float(int(45.0 * x) % 255), float(int(77.0 * x) % 255), float(int(123.0 * x) % 255), 1.0};
+    model.triangleArray[x].color = {float(int(45.0 * x + 87) % 255), float(int(77.0 * x + 102) % 255), float(int(123.0 * x + 153) % 255), 1.0};
   }
 
   return model;
