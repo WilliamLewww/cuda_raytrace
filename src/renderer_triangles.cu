@@ -17,8 +17,8 @@
 
 #define LIGHT_COUNT 1
 
-#define MESH_DESCRIPTOR_COUNT 1
-#define MESH_SEGMENT_COUNT 12
+#define MESH_DESCRIPTOR_COUNT 2
+#define MESH_SEGMENT_COUNT 24
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
@@ -71,20 +71,16 @@ __device__
 Tuple colorFromRay(Ray ray) {
   Tuple color = {0.0f, 0.0f, 0.0f, 0.0f};
   int intersectionIndex = -1;
-  float intersectionMagnitude = 0.0f;
-
   int intersectionDescriptorIndex = -1;
-  int currentSegmentCount = 0;
+  float intersectionMagnitude = 0.0f;
 
   #pragma unroll
   for (int x = 0; x < MESH_SEGMENT_COUNT; x++) {
-    currentSegmentCount += 1;
-
     int descriptorIndex = -1;
     int currentDescriptorRange = 0;
     for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
+      descriptorIndex = (y * (x > currentDescriptorRange) * (x <= currentDescriptorRange + meshDescriptorArray[y].segmentCount)) + (descriptorIndex * (x <= currentDescriptorRange) * (x > currentDescriptorRange + meshDescriptorArray[y].segmentCount));
       currentDescriptorRange += meshDescriptorArray[y].segmentCount;
-      descriptorIndex = (y * (currentSegmentCount <= currentDescriptorRange)) + (descriptorIndex * (currentSegmentCount > currentDescriptorRange));
     }
 
     float point;
@@ -214,12 +210,23 @@ extern "C" void initializeScene() {
 
   MeshDescriptor* h_meshDescriptorArray = new MeshDescriptor[MESH_DESCRIPTOR_COUNT];
   MeshSegment* h_meshSegmentArray = new MeshSegment[MESH_SEGMENT_COUNT];
-  Model h_model = createModelFromOBJ("res/cube.obj");
-  initializeModelMatrix(&h_model.meshDescriptor, createScaleMatrix(1.0, 2.0, 1.0));
-  h_meshDescriptorArray[0] = h_model.meshDescriptor;
-  std::copy(h_model.meshSegmentArray, h_model.meshSegmentArray + 12, h_meshSegmentArray);
+
+  Model modelA = createModelFromOBJ("res/cube.obj");
+  Model modelB = createModelFromOBJ("res/cube.obj");
+  initializeModelMatrix(&modelA.meshDescriptor, createScaleMatrix(1.0, 2.0, 1.0));
+  initializeModelMatrix(&modelB.meshDescriptor, createTranslateMatrix(3.0, 0.0, 0.0));
+
+  h_meshDescriptorArray[0] = modelA.meshDescriptor;
+  h_meshDescriptorArray[1] = modelB.meshDescriptor;
+  memcpy(&h_meshSegmentArray[0], modelA.meshSegmentArray, 12*sizeof(MeshSegment));
+  memcpy(&h_meshSegmentArray[12], modelB.meshSegmentArray, 12*sizeof(MeshSegment));
+
   cudaMemcpyToSymbol(meshDescriptorArray, h_meshDescriptorArray, MESH_DESCRIPTOR_COUNT*sizeof(MeshDescriptor));
   cudaMemcpyToSymbol(meshSegmentArray, h_meshSegmentArray, MESH_SEGMENT_COUNT*sizeof(MeshSegment));
+}
+
+extern "C" void updateScene() {
+
 }
 
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
