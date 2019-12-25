@@ -79,7 +79,7 @@ Tuple colorFromRay(Ray ray) {
     int descriptorIndex = -1;
     int currentDescriptorRange = 0;
     for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
-      descriptorIndex = (y * (x > currentDescriptorRange) * (x <= currentDescriptorRange + meshDescriptorArray[y].segmentCount)) + (descriptorIndex * (x <= currentDescriptorRange) * (x > currentDescriptorRange + meshDescriptorArray[y].segmentCount));
+      descriptorIndex = (y * (x >= currentDescriptorRange) * (x < currentDescriptorRange + meshDescriptorArray[y].segmentCount)) + (descriptorIndex * (x < currentDescriptorRange) * (x >= currentDescriptorRange + meshDescriptorArray[y].segmentCount));
       currentDescriptorRange += meshDescriptorArray[y].segmentCount;
     }
 
@@ -100,7 +100,7 @@ Tuple colorFromRay(Ray ray) {
     #pragma unroll
     for (int x = 0; x < MESH_SEGMENT_COUNT; x++) {
       float point = 0;
-      intersecionCount += intersectTriangle(&point, meshDescriptorArray[intersectionDescriptorIndex], meshSegmentArray[x], lightRay) * (x != intersectionIndex) * (point < magnitude(lightArray[0].position - intersectionPoint));
+      intersecionCount += intersectTriangle(&point, meshDescriptorArray[intersectionDescriptorIndex], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
     }
 
     float lightNormalDifference = dot(meshSegmentArray[intersectionIndex].normal, lightRay.direction);
@@ -213,8 +213,8 @@ extern "C" void initializeScene() {
 
   Model modelA = createModelFromOBJ("res/cube.obj");
   Model modelB = createModelFromOBJ("res/cube.obj");
-  initializeModelMatrix(&modelA.meshDescriptor, createScaleMatrix(1.0, 2.0, 1.0));
-  initializeModelMatrix(&modelB.meshDescriptor, createTranslateMatrix(3.0, 0.0, 0.0));
+  initializeModelMatrix(&modelA.meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
+  initializeModelMatrix(&modelB.meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
 
   h_meshDescriptorArray[0] = modelA.meshDescriptor;
   h_meshDescriptorArray[1] = modelB.meshDescriptor;
