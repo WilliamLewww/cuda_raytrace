@@ -18,7 +18,7 @@
 #define LIGHT_COUNT 1
 
 #define MESH_DESCRIPTOR_COUNT 1
-#define MESH_SEGMENT_COUNT 100
+#define MESH_SEGMENT_COUNT 12
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
@@ -73,25 +73,38 @@ Tuple colorFromRay(Ray ray) {
   int intersectionIndex = -1;
   float intersectionMagnitude = 0.0f;
 
+  int intersectionDescriptorIndex = -1;
+  int currentSegmentCount = 0;
+
   #pragma unroll
   for (int x = 0; x < MESH_SEGMENT_COUNT; x++) {
+    currentSegmentCount += 1;
+
+    int descriptorIndex = -1;
+    int currentDescriptorRange = 0;
+    for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
+      currentDescriptorRange += meshDescriptorArray[y].segmentCount;
+      descriptorIndex = (y * (currentSegmentCount <= currentDescriptorRange)) + (descriptorIndex * (currentSegmentCount > currentDescriptorRange));
+    }
+
     float point;
-    int count = intersectTriangle(&point, meshDescriptorArray[0], meshSegmentArray[x], ray);
+    int count = intersectTriangle(&point, meshDescriptorArray[descriptorIndex], meshSegmentArray[x], ray);
 
     intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    intersectionDescriptorIndex = (descriptorIndex * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionDescriptorIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
     intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
   if (intersectionIndex != -1) {
-    Ray transformedRay = transform(ray, meshDescriptorArray[0].inverseModelMatrix);
+    Ray transformedRay = transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
     Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
-    Ray lightRay = {meshDescriptorArray[0].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (meshDescriptorArray[0].modelMatrix * intersectionPoint))};
+    Ray lightRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint))};
 
     int intersecionCount = 0;
     #pragma unroll
     for (int x = 0; x < MESH_SEGMENT_COUNT; x++) {
       float point = 0;
-      intersecionCount += intersectTriangle(&point, meshDescriptorArray[0], meshSegmentArray[x], lightRay) * (x != intersectionIndex) * (point < magnitude(lightArray[0].position - intersectionPoint));
+      intersecionCount += intersectTriangle(&point, meshDescriptorArray[intersectionDescriptorIndex], meshSegmentArray[x], lightRay) * (x != intersectionIndex) * (point < magnitude(lightArray[0].position - intersectionPoint));
     }
 
     float lightNormalDifference = dot(meshSegmentArray[intersectionIndex].normal, lightRay.direction);
@@ -201,10 +214,10 @@ extern "C" void initializeScene() {
 
   MeshDescriptor* h_meshDescriptorArray = new MeshDescriptor[MESH_DESCRIPTOR_COUNT];
   MeshSegment* h_meshSegmentArray = new MeshSegment[MESH_SEGMENT_COUNT];
-  Model h_model = createModelFromOBJ("res/torus.obj");
+  Model h_model = createModelFromOBJ("res/cube.obj");
   initializeModelMatrix(&h_model.meshDescriptor, createScaleMatrix(1.0, 2.0, 1.0));
   h_meshDescriptorArray[0] = h_model.meshDescriptor;
-  std::copy(h_model.meshSegmentArray, h_model.meshSegmentArray + 100, h_meshSegmentArray);
+  std::copy(h_model.meshSegmentArray, h_model.meshSegmentArray + 12, h_meshSegmentArray);
   cudaMemcpyToSymbol(meshDescriptorArray, h_meshDescriptorArray, MESH_DESCRIPTOR_COUNT*sizeof(MeshDescriptor));
   cudaMemcpyToSymbol(meshSegmentArray, h_meshSegmentArray, MESH_SEGMENT_COUNT*sizeof(MeshSegment));
 }
