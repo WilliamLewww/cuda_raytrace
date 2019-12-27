@@ -21,6 +21,7 @@
 #define MESH_SEGMENT_COUNT 24
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
+#define SHADOW_EPILSON 0.00001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
 
 __constant__ Camera camera[1];
@@ -93,7 +94,7 @@ Tuple colorFromRay(Ray ray) {
 
   if (intersectionIndex != -1) {
     Ray transformedRay = transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
-    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
+    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude - SHADOW_EPILSON);
     Ray lightRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint))};
 
     int intersecionCount = 0;
@@ -105,7 +106,7 @@ Tuple colorFromRay(Ray ray) {
         descriptorIndex = (y * (x >= currentDescriptorRange) * (x < currentDescriptorRange + meshDescriptorArray[y].segmentCount)) + (descriptorIndex * (x < currentDescriptorRange) * (x >= currentDescriptorRange + meshDescriptorArray[y].segmentCount));
         currentDescriptorRange += meshDescriptorArray[y].segmentCount;
       }
-    
+
       float point = 0;
       intersecionCount += intersectTriangle(&point, meshDescriptorArray[descriptorIndex], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
     }
