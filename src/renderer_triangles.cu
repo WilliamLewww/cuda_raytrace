@@ -75,21 +75,17 @@ Tuple colorFromRay(Ray ray) {
   int intersectionDescriptorIndex = -1;
   float intersectionMagnitude = 0.0f;
 
+  int segmentOffset = 0;
   #pragma unroll
-  for (int x = 0; x < MESH_SEGMENT_COUNT; x++) {
-    int descriptorIndex = -1;
-    int currentDescriptorRange = 0;
-    for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
-      descriptorIndex = (y * (x >= currentDescriptorRange) * (x < currentDescriptorRange + meshDescriptorArray[y].segmentCount)) + (descriptorIndex * (x < currentDescriptorRange) * (x >= currentDescriptorRange + meshDescriptorArray[y].segmentCount));
-      currentDescriptorRange += meshDescriptorArray[y].segmentCount;
+  for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
+    for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
+      float point;
+      int count = intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], ray);
+
+      intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+      intersectionDescriptorIndex = (y * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionDescriptorIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+      intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
     }
-
-    float point;
-    int count = intersectTriangle(&point, meshDescriptorArray[descriptorIndex], meshSegmentArray[x], ray);
-
-    intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionDescriptorIndex = (descriptorIndex * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionDescriptorIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
-    intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
   }
 
   if (intersectionIndex != -1) {
@@ -98,17 +94,14 @@ Tuple colorFromRay(Ray ray) {
     Ray lightRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint))};
 
     int intersecionCount = 0;
-    #pragma unroll
-    for (int x = 0; x < MESH_SEGMENT_COUNT; x++) {
-      int descriptorIndex = -1;
-      int currentDescriptorRange = 0;
-      for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
-        descriptorIndex = (y * (x >= currentDescriptorRange) * (x < currentDescriptorRange + meshDescriptorArray[y].segmentCount)) + (descriptorIndex * (x < currentDescriptorRange) * (x >= currentDescriptorRange + meshDescriptorArray[y].segmentCount));
-        currentDescriptorRange += meshDescriptorArray[y].segmentCount;
-      }
 
-      float point = 0;
-      intersecionCount += intersectTriangle(&point, meshDescriptorArray[descriptorIndex], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
+    segmentOffset = 0;
+    #pragma unroll
+    for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
+      for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
+        float point = 0;
+        intersecionCount += intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
+      }
     }
 
     float lightNormalDifference = dot(meshSegmentArray[intersectionIndex].normal, lightRay.direction);
