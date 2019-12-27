@@ -99,8 +99,15 @@ Tuple colorFromRay(Ray ray) {
     int intersecionCount = 0;
     #pragma unroll
     for (int x = 0; x < MESH_SEGMENT_COUNT; x++) {
+      int descriptorIndex = -1;
+      int currentDescriptorRange = 0;
+      for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
+        descriptorIndex = (y * (x >= currentDescriptorRange) * (x < currentDescriptorRange + meshDescriptorArray[y].segmentCount)) + (descriptorIndex * (x < currentDescriptorRange) * (x >= currentDescriptorRange + meshDescriptorArray[y].segmentCount));
+        currentDescriptorRange += meshDescriptorArray[y].segmentCount;
+      }
+    
       float point = 0;
-      intersecionCount += intersectTriangle(&point, meshDescriptorArray[intersectionDescriptorIndex], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
+      intersecionCount += intersectTriangle(&point, meshDescriptorArray[descriptorIndex], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
     }
 
     float lightNormalDifference = dot(meshSegmentArray[intersectionIndex].normal, lightRay.direction);
