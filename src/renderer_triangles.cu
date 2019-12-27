@@ -18,7 +18,7 @@
 #define LIGHT_COUNT 1
 
 #define MESH_DESCRIPTOR_COUNT 2
-#define MESH_SEGMENT_COUNT 24
+#define MESH_SEGMENT_COUNT 112
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define SHADOW_EPILSON 0.00001
@@ -86,6 +86,8 @@ Tuple colorFromRay(Ray ray) {
       intersectionDescriptorIndex = (y * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionDescriptorIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
       intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
     }
+
+    segmentOffset += meshDescriptorArray[y].segmentCount;
   }
 
   if (intersectionIndex != -1) {
@@ -102,6 +104,8 @@ Tuple colorFromRay(Ray ray) {
         float point = 0;
         intersecionCount += intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
       }
+
+      segmentOffset += meshDescriptorArray[y].segmentCount;
     }
 
     float lightNormalDifference = dot(meshSegmentArray[intersectionIndex].normal, lightRay.direction);
@@ -213,14 +217,14 @@ extern "C" void initializeScene() {
   MeshSegment* h_meshSegmentArray = new MeshSegment[MESH_SEGMENT_COUNT];
 
   Model modelA = createModelFromOBJ("res/cube.obj");
-  Model modelB = createModelFromOBJ("res/cube.obj");
+  Model modelB = createModelFromOBJ("res/torus.obj");
   initializeModelMatrix(&modelA.meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
   initializeModelMatrix(&modelB.meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
 
   h_meshDescriptorArray[0] = modelA.meshDescriptor;
   h_meshDescriptorArray[1] = modelB.meshDescriptor;
   memcpy(&h_meshSegmentArray[0], modelA.meshSegmentArray, 12*sizeof(MeshSegment));
-  memcpy(&h_meshSegmentArray[12], modelB.meshSegmentArray, 12*sizeof(MeshSegment));
+  memcpy(&h_meshSegmentArray[12], modelB.meshSegmentArray, 100*sizeof(MeshSegment));
 
   cudaMemcpyToSymbol(meshDescriptorArray, h_meshDescriptorArray, MESH_DESCRIPTOR_COUNT*sizeof(MeshDescriptor));
   cudaMemcpyToSymbol(meshSegmentArray, h_meshSegmentArray, MESH_SEGMENT_COUNT*sizeof(MeshSegment));
