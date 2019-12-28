@@ -481,6 +481,10 @@ extern "C" void initializeScene() {
   cudaMemcpyToSymbol(reflectivePlaneArray, h_reflectivePlaneArray, REFLECTIVE_PLANE_COUNT*sizeof(Plane));
 }
 
+extern "C" void updateScene() {
+
+}
+
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
   dim3 block(blockDimX, blockDimY);
   dim3 grid((FRAME_WIDTH + block.x - 1) / block.x, (FRAME_HEIGHT + block.y - 1) / block.y);
