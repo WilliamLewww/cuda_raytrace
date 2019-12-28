@@ -13,10 +13,6 @@ extern "C" {
   void renderImage(int blockDimX, int blockDimY, const char* filename);
 }
 
-RaytraceImage::~RaytraceImage() {
-  cudaFree(cudaBuffer);
-}
-
 void RaytraceImage::initialize() {
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
   cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;

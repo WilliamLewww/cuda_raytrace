@@ -45,7 +45,7 @@ void RaytraceRectangle::update() {
   }
 
   if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && shouldDecreaseImageResolution) {
-    imageResolution -= 50;
+    if (imageResolution > 50) { imageResolution -= 50; }
     initializeImage(imageResolution, imageResolution);
     shouldDecreaseImageResolution = false;
   }

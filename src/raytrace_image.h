@@ -18,9 +18,7 @@ private:
   void* cudaBuffer;
 
   bool shouldTakePhoto;
-public:
-  ~RaytraceImage();
-  
+public:  
   void initialize();
   void update();
   void render();
