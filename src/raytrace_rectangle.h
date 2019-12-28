@@ -21,6 +21,8 @@ private:
 
   GLfloat vertices[12];
   GLfloat textureCoordinates[12];
+
+  void initializeImage(int width, int height);
 public:
   void initialize(GLuint* shaderProgramHandle);
   void update();

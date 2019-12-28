@@ -5,17 +5,24 @@ extern "C" {
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
   void updateScene();
 
+  void updateFrameResolution(int width, int height);
+
   void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
   void renderImage(int blockDimX, int blockDimY, const char* filename);
 }
 
-void RaytraceImage::initialize(GLuint textureResource) {
+RaytraceImage::~RaytraceImage() {
+  cudaFree(cudaBuffer);
+}
+
+void RaytraceImage::initialize(int width, int height, GLuint textureResource) {
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
   cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
 
   cudaGraphicsGLRegisterImage(&cudaTextureResource, textureResource, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard);
-  cudaMalloc(&cudaBuffer, 1000*1000*4*sizeof(GLubyte));
+  cudaMalloc(&cudaBuffer, width*height*4*sizeof(GLubyte));
 
+  updateFrameResolution(width, height);
   initializeScene();
 }
 
@@ -52,24 +59,6 @@ void RaytraceImage::update() {
   if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CIRCLE) && shouldTakePhoto) {
     renderImage(16, 16, "image.ppm");
     shouldTakePhoto = false;
-  }
-
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && !shouldIncreaseDetail) {
-    shouldIncreaseDetail = true;
-  }
-
-  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && shouldIncreaseDetail) {
-    if (detailLevel > 1) { detailLevel -= 1; }
-    shouldIncreaseDetail = false;
-  }
-
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && !shouldDecreaseDetail) {
-    shouldDecreaseDetail = true;
-  }
-
-  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && shouldDecreaseDetail) {
-    detailLevel += 1;
-    shouldDecreaseDetail = false;
   }
   
   updateCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraRotationX, cameraRotationY);

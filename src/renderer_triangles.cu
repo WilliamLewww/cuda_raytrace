@@ -9,9 +9,6 @@
 #include "model.h"
 #include "analysis.h"
 
-#define FRAME_WIDTH 1000
-#define FRAME_HEIGHT 1000
-
 #define IMAGE_WIDTH 5000
 #define IMAGE_HEIGHT 5000
 
@@ -23,6 +20,9 @@
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define SHADOW_EPILSON 0.00001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
+
+int frameWidth = 1000;
+int frameHeight = 1000;
 
 __constant__ Camera camera[1];
 
@@ -230,8 +230,8 @@ extern "C" void updateCamera(float x, float y, float z, float rotationX, float r
 }
 
 extern "C" void initializeScene() {
-  cudaMalloc(&lightingBuffer, FRAME_WIDTH*FRAME_HEIGHT*sizeof(Tuple));
-  cudaMalloc(&reflectionsBuffer, FRAME_WIDTH*FRAME_HEIGHT*sizeof(Tuple));
+  cudaMalloc(&lightingBuffer, frameWidth*frameHeight*sizeof(Tuple));
+  cudaMalloc(&reflectionsBuffer, frameWidth*frameHeight*sizeof(Tuple));
 
   Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
   initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
@@ -262,18 +262,23 @@ extern "C" void updateScene() {
 
 }
 
+extern "C" void updateFrameResolution(int width, int height) {
+  frameWidth = width;
+  frameHeight = height;
+}
+
 extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
   dim3 block(blockDimX, blockDimY);
-  dim3 grid((FRAME_WIDTH + block.x - 1) / block.x, (FRAME_HEIGHT + block.y - 1) / block.y);
-  lighting<<<grid, block>>>(lightingBuffer, FRAME_WIDTH, FRAME_HEIGHT);
-  reflections<<<grid, block>>>(reflectionsBuffer, FRAME_WIDTH, FRAME_HEIGHT);
-  combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)cudaBuffer, lightingBuffer, reflectionsBuffer, FRAME_WIDTH, FRAME_HEIGHT);
+  dim3 grid((frameWidth + block.x - 1) / block.x, (frameHeight + block.y - 1) / block.y);
+  lighting<<<grid, block>>>(lightingBuffer, frameWidth, frameHeight);
+  reflections<<<grid, block>>>(reflectionsBuffer, frameWidth, frameHeight);
+  combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)cudaBuffer, lightingBuffer, reflectionsBuffer, frameWidth, frameHeight);
 
   cudaArray *texture_ptr;
   cudaGraphicsMapResources(1, cudaTextureResource, 0);
   cudaGraphicsSubResourceGetMappedArray(&texture_ptr, *cudaTextureResource, 0, 0);
 
-  cudaMemcpy2DToArray(texture_ptr, 0, 0,  cudaBuffer, FRAME_WIDTH*4*sizeof(GLubyte), FRAME_WIDTH*4*sizeof(GLubyte), FRAME_HEIGHT, cudaMemcpyDeviceToDevice);
+  cudaMemcpy2DToArray(texture_ptr, 0, 0,  cudaBuffer, frameWidth*4*sizeof(GLubyte), frameWidth*4*sizeof(GLubyte), frameHeight, cudaMemcpyDeviceToDevice);
   cudaGraphicsUnmapResources(1, cudaTextureResource, 0);
 }
 
