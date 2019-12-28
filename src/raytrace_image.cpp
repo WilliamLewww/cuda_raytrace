@@ -5,7 +5,7 @@ extern "C" {
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
   void updateScene();
 
-  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource, int detailLevel);
+  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
   void renderImage(int blockDimX, int blockDimY, const char* filename);
 }
 
@@ -77,5 +77,5 @@ void RaytraceImage::update() {
 }
 
 void RaytraceImage::render() {
-  renderFrame(16, 16, cudaBuffer, &cudaTextureResource, detailLevel);
+  renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
 }

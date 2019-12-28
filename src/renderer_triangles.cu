@@ -69,7 +69,7 @@ int intersectTriangle(float* intersectionMagnitude, MeshDescriptor meshDescripto
 }
 
 __device__
-Tuple colorFromRay(Ray ray, int detailLevel = 1) {
+Tuple colorFromRay(Ray ray) {
   Tuple color = {0.0f, 0.0f, 0.0f, 0.0f};
   int intersectionIndex = -1;
   int intersectionDescriptorIndex = -1;
@@ -78,7 +78,7 @@ Tuple colorFromRay(Ray ray, int detailLevel = 1) {
   int segmentOffset = 0;
   #pragma unroll
   for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
-    for (int x = segmentOffset; x < segmentOffset + (meshDescriptorArray[y].segmentCount / detailLevel); x += detailLevel) {
+    for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
       float point;
       int count = intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], ray);
 
@@ -100,7 +100,7 @@ Tuple colorFromRay(Ray ray, int detailLevel = 1) {
     segmentOffset = 0;
     #pragma unroll
     for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
-      for (int x = segmentOffset; x < segmentOffset + (meshDescriptorArray[y].segmentCount / detailLevel); x += detailLevel) {
+      for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
         float point = 0;
         intersecionCount += intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
       }
@@ -118,7 +118,7 @@ Tuple colorFromRay(Ray ray, int detailLevel = 1) {
 }
 
 __device__
-Ray rayFromReflection(Ray ray, int recursionCount = 0, int detailLevel = 1) {
+Ray rayFromReflection(Ray ray, int recursionCount = 0) {
   int intersectionIndex = -1;
   int intersectionDescriptorIndex = -1;
   float intersectionMagnitude = 0.0f;
@@ -126,7 +126,7 @@ Ray rayFromReflection(Ray ray, int recursionCount = 0, int detailLevel = 1) {
   int segmentOffset = 0;
   #pragma unroll
   for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
-    for (int x = segmentOffset; x < segmentOffset + (meshDescriptorArray[y].segmentCount / detailLevel); x += detailLevel) {
+    for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
       float point;
       int count = intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], ray);
 
@@ -151,7 +151,7 @@ Ray rayFromReflection(Ray ray, int recursionCount = 0, int detailLevel = 1) {
 }
 
 __global__
-void lighting(Tuple* colorOut, int renderWidth, int renderHeight, int detailLevel = 1) {
+void lighting(Tuple* colorOut, int renderWidth, int renderHeight) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
@@ -166,11 +166,11 @@ void lighting(Tuple* colorOut, int renderWidth, int renderHeight, int detailLeve
   Ray ray = {camera[0].position, direction};
   ray = transform(ray, camera[0].modelMatrix);
 
-  colorOut[(idy*renderWidth)+idx] = colorFromRay(ray, detailLevel);
+  colorOut[(idy*renderWidth)+idx] = colorFromRay(ray);
 }
 
 __global__
-void reflections(Tuple* colorOut, int renderWidth, int renderHeight, int detailLevel = 1) {
+void reflections(Tuple* colorOut, int renderWidth, int renderHeight) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
@@ -185,7 +185,7 @@ void reflections(Tuple* colorOut, int renderWidth, int renderHeight, int detailL
   Ray ray = {camera[0].position, direction};
   ray = transform(ray, camera[0].modelMatrix);
 
-  colorOut[(idy*renderWidth)+idx] = colorFromRay(rayFromReflection(ray, detailLevel), detailLevel);
+  colorOut[(idy*renderWidth)+idx] = colorFromRay(rayFromReflection(ray));
 }
 
 void writeColorDataToFile(const char* filename, unsigned int* colorData) {
@@ -262,11 +262,11 @@ extern "C" void updateScene() {
 
 }
 
-extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource, int detailLevel = 1) {
+extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
   dim3 block(blockDimX, blockDimY);
   dim3 grid((FRAME_WIDTH + block.x - 1) / block.x, (FRAME_HEIGHT + block.y - 1) / block.y);
-  lighting<<<grid, block>>>(lightingBuffer, FRAME_WIDTH, FRAME_HEIGHT, detailLevel);
-  reflections<<<grid, block>>>(reflectionsBuffer, FRAME_WIDTH, FRAME_HEIGHT, detailLevel);
+  lighting<<<grid, block>>>(lightingBuffer, FRAME_WIDTH, FRAME_HEIGHT);
+  reflections<<<grid, block>>>(reflectionsBuffer, FRAME_WIDTH, FRAME_HEIGHT);
   combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)cudaBuffer, lightingBuffer, reflectionsBuffer, FRAME_WIDTH, FRAME_HEIGHT);
 
   cudaArray *texture_ptr;
