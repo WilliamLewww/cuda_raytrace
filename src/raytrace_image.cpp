@@ -5,7 +5,7 @@ extern "C" {
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
   void updateScene();
 
-  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource);
+  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource, int detailLevel);
   void renderImage(int blockDimX, int blockDimY, const char* filename);
 }
 
@@ -45,13 +45,31 @@ void RaytraceImage::update() {
     cameraPositionY += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) + 1.0) * 0.03;
   }
 
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && canTakeImage) {
-    renderImage(16, 16, "image.ppm");
-    canTakeImage = false;
+  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CIRCLE) && !shouldTakePhoto) {
+    shouldTakePhoto = true;
   }
 
-  if (!canTakeImage && !Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS)) {
-    canTakeImage = true;
+  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CIRCLE) && shouldTakePhoto) {
+    renderImage(16, 16, "image.ppm");
+    shouldTakePhoto = false;
+  }
+
+  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && !shouldIncreaseDetail) {
+    shouldIncreaseDetail = true;
+  }
+
+  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && shouldIncreaseDetail) {
+    if (detailLevel > 1) { detailLevel -= 1; }
+    shouldIncreaseDetail = false;
+  }
+
+  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && !shouldDecreaseDetail) {
+    shouldDecreaseDetail = true;
+  }
+
+  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && shouldDecreaseDetail) {
+    detailLevel += 1;
+    shouldDecreaseDetail = false;
   }
   
   updateCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraRotationX, cameraRotationY);
@@ -59,5 +77,5 @@ void RaytraceImage::update() {
 }
 
 void RaytraceImage::render() {
-  renderFrame(16, 16, cudaBuffer, &cudaTextureResource);
+  renderFrame(16, 16, cudaBuffer, &cudaTextureResource, detailLevel);
 }

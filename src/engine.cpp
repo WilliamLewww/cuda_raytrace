@@ -37,6 +37,7 @@ void Engine::exit() {
 
 void Engine::update() {
   joiner->update();
+  Input::refreshInput();
 }
 
 void Engine::render() {

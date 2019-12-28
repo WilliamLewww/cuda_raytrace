@@ -11,13 +11,16 @@
 
 class RaytraceImage {
 private:
+  int detailLevel = 1;
+  
   float cameraPositionX, cameraPositionY, cameraPositionZ;
   float cameraRotationX, cameraRotationY;
 
   struct cudaGraphicsResource* cudaTextureResource;
   void* cudaBuffer;
 
-  bool canTakeImage;
+  bool shouldTakePhoto;
+  bool shouldIncreaseDetail, shouldDecreaseDetail;
 public:
   void initialize(GLuint textureResource);
   void update();
