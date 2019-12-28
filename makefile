@@ -1,14 +1,15 @@
+CUDA_PATH=/usr/local/cuda-10.1
+GLFW_PATH=/usr/local/glfw-3.3
+GLEW_PATH=/usr/local/glew-2.1.0
+
 CURRENT_PATH=$(shell pwd)
 
 BIN_PATH=$(CURRENT_PATH)/bin
 SRC_PATH=$(CURRENT_PATH)/src
-CUDA_PATH=/usr/local/cuda-10.1
 
-GLFW_PATH=/usr/local/glfw-3.3
 GLFW_LIBRARY_PATH=$(GLFW_PATH)/glfw-build/src
 GLFW_INCLUDE_PATH=$(GLFW_PATH)/include
 
-GLEW_PATH=/usr/local/glew-2.1.0
 GLEW_LIBRARY_PATH=$(GLEW_PATH)/lib
 GLEW_INCLUDE_PATH=$(GLEW_PATH)/include
 
