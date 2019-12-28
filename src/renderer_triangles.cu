@@ -230,6 +230,9 @@ extern "C" void updateCamera(float x, float y, float z, float rotationX, float r
 }
 
 extern "C" void initializeScene() {
+  cudaFree(lightingBuffer);
+  cudaFree(reflectionsBuffer);
+  
   cudaMalloc(&lightingBuffer, frameWidth*frameHeight*sizeof(Tuple));
   cudaMalloc(&reflectionsBuffer, frameWidth*frameHeight*sizeof(Tuple));
 

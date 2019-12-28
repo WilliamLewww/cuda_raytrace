@@ -24,7 +24,7 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  initializeImage(1000, 1000);
+  initializeImage(250, 250);
 
   glGenVertexArrays(1, &vao);
   glGenBuffers(2, vbo);
