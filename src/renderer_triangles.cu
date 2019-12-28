@@ -229,13 +229,15 @@ extern "C" void updateCamera(float x, float y, float z, float rotationX, float r
   cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
 }
 
-extern "C" void initializeScene() {
+extern "C" void initializeMemory() {
   cudaFree(lightingBuffer);
   cudaFree(reflectionsBuffer);
   
   cudaMalloc(&lightingBuffer, frameWidth*frameHeight*sizeof(Tuple));
   cudaMalloc(&reflectionsBuffer, frameWidth*frameHeight*sizeof(Tuple));
+}
 
+extern "C" void initializeScene() {
   Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
   initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
   initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);

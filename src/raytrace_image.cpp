@@ -1,6 +1,8 @@
 #include "raytrace_image.h"
 
 extern "C" {
+  void initializeMemory();
+
   void initializeScene();
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
   void updateScene();
@@ -15,15 +17,18 @@ RaytraceImage::~RaytraceImage() {
   cudaFree(cudaBuffer);
 }
 
-void RaytraceImage::initialize(int width, int height, GLuint textureResource) {
+void RaytraceImage::initialize() {
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
   cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
 
+  initializeScene();
+}
+
+void RaytraceImage::updateResolution(int width, int height, GLuint textureResource) {
   cudaGraphicsGLRegisterImage(&cudaTextureResource, textureResource, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard);
   cudaMalloc(&cudaBuffer, width*height*4*sizeof(GLubyte));
-
   updateFrameResolution(width, height);
-  initializeScene();
+  initializeMemory();
 }
 
 void RaytraceImage::update() {

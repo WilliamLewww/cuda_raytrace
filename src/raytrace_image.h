@@ -21,7 +21,9 @@ private:
 public:
   ~RaytraceImage();
   
-  void initialize(int width, int height, GLuint textureResource);
+  void initialize();
   void update();
   void render();
+
+  void updateResolution(int width, int height, GLuint textureResource);
 };

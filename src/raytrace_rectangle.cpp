@@ -19,6 +19,8 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 
   this->shaderProgramHandle = shaderProgramHandle;
 
+  image = new RaytraceImage();
+  image->initialize();
   initializeImage(imageResolution, imageResolution);
 
   glGenVertexArrays(1, &vao);
@@ -87,9 +89,7 @@ void RaytraceRectangle::initializeImage(int width, int height) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI_EXT, width, height, 0, GL_RGBA_INTEGER_EXT, GL_UNSIGNED_BYTE, NULL);
 
-  delete image;
-  image = new RaytraceImage();
-  image->initialize(width, height, textureResource);
+  image->updateResolution(width, height, textureResource);
 
   glBindTexture(GL_TEXTURE_2D, 0);
 }
