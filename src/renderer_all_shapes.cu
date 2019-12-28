@@ -332,7 +332,7 @@ Ray rayFromReflection(Ray ray, int recursionCount = 0) {
     Tuple intersectionPoint = project(transformedRay, intersectionMagnitude);
     Tuple normal = normalize(intersectionPoint - reflectiveSphereArray[intersectionIndex].origin);
 
-    reflectedRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
+    reflectedRay = {reflectiveSphereArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(ray.direction, normal)};
   }
 
   if (shapeType == 4) {
@@ -340,7 +340,7 @@ Ray rayFromReflection(Ray ray, int recursionCount = 0) {
     Tuple intersectionPoint = project(transformedRay, intersectionMagnitude - REFLECTIVE_RAY_EPILSON);
     Tuple normal = {0.0f, -1.0f, 0.0f, 0.0f};
 
-    reflectedRay = {reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(transformedRay.direction, normal)};
+    reflectedRay = {reflectivePlaneArray[intersectionIndex].modelMatrix * intersectionPoint, reflect(ray.direction, normal)};
   }
 
   return reflectedRay;

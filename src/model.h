@@ -8,6 +8,7 @@
 
 struct MeshDescriptor {
   int segmentCount;
+  int reflective;
 
   float modelMatrix[16];
   float inverseModelMatrix[16];
@@ -31,5 +32,5 @@ struct Model {
   MeshSegment* meshSegmentArray;
 };
 
-Model createModelFromOBJ(const char* filename);
+Model createModelFromOBJ(const char* filename, int reflective);
 void initializeModelMatrix(MeshDescriptor* meshDescriptor, float* matrix);

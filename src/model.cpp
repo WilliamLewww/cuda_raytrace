@@ -1,6 +1,6 @@
 #include "model.h"
 
-Model createModelFromOBJ(const char* filename) {
+Model createModelFromOBJ(const char* filename, int reflective) {
   Model model;
 
   std::ifstream file(filename);
@@ -86,6 +86,8 @@ Model createModelFromOBJ(const char* filename) {
 
     model.meshSegmentArray[x].color = {float(int(45.0 * x + 87) % 255), float(int(77.0 * x + 102) % 255), float(int(123.0 * x + 153) % 255), 1.0};
   }
+
+  model.meshDescriptor.reflective = reflective;
 
   return model;
 }

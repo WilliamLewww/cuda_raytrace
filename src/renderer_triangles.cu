@@ -118,8 +118,36 @@ Tuple colorFromRay(Ray ray, int detailLevel = 1) {
 }
 
 __device__
-Ray rayFromReflection(Ray ray, int recursionCount = 0) {
-  return ray;
+Ray rayFromReflection(Ray ray, int recursionCount = 0, int detailLevel = 1) {
+  int intersectionIndex = -1;
+  int intersectionDescriptorIndex = -1;
+  float intersectionMagnitude = 0.0f;
+
+  int segmentOffset = 0;
+  #pragma unroll
+  for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
+    for (int x = segmentOffset; x < segmentOffset + (meshDescriptorArray[y].segmentCount / detailLevel); x += detailLevel) {
+      float point;
+      int count = intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], ray);
+
+      intersectionIndex = (x * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+      intersectionDescriptorIndex = (y * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionDescriptorIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+      intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    }
+
+    segmentOffset += meshDescriptorArray[y].segmentCount;
+  }
+
+  Ray reflectedRay;
+  if (intersectionDescriptorIndex != -1 && meshDescriptorArray[intersectionDescriptorIndex].reflective) {
+    Ray transformedRay = transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
+    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude - REFLECTIVE_RAY_EPILSON);
+    Tuple normal = meshSegmentArray[intersectionIndex].normal;
+
+    reflectedRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, reflect(ray.direction, normal)};
+  }
+
+  return reflectedRay;
 }
 
 __global__
@@ -157,7 +185,7 @@ void reflections(Tuple* colorOut, int renderWidth, int renderHeight, int detailL
   Ray ray = {camera[0].position, direction};
   ray = transform(ray, camera[0].modelMatrix);
 
-  colorOut[(idy*renderWidth)+idx] = colorFromRay(rayFromReflection(ray), detailLevel);
+  colorOut[(idy*renderWidth)+idx] = colorFromRay(rayFromReflection(ray, detailLevel), detailLevel);
 }
 
 void writeColorDataToFile(const char* filename, unsigned int* colorData) {
@@ -216,8 +244,8 @@ extern "C" void initializeScene() {
   MeshDescriptor* h_meshDescriptorArray = new MeshDescriptor[MESH_DESCRIPTOR_COUNT];
   MeshSegment* h_meshSegmentArray = new MeshSegment[MESH_SEGMENT_COUNT];
 
-  Model modelA = createModelFromOBJ("res/cube.obj");
-  Model modelB = createModelFromOBJ("res/torus.obj");
+  Model modelA = createModelFromOBJ("res/cube.obj", 1);
+  Model modelB = createModelFromOBJ("res/torus.obj", 0);
   initializeModelMatrix(&modelA.meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
   initializeModelMatrix(&modelB.meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
 
