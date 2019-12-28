@@ -1,6 +1,8 @@
 #include "raytrace_rectangle.h"
 
 void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
+  imageResolution = 250;
+
   vertices[0] = -1.0;   vertices[1] = -1.0;
   vertices[2] =  1.0;   vertices[3] = -1.0;
   vertices[4] = -1.0;   vertices[5] =  1.0;
@@ -17,14 +19,7 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 
   this->shaderProgramHandle = shaderProgramHandle;
 
-  glGenTextures(1, &textureResource);
-  glBindTexture(GL_TEXTURE_2D, textureResource);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-  initializeImage(250, 250);
+  initializeImage(imageResolution, imageResolution);
 
   glGenVertexArrays(1, &vao);
   glGenBuffers(2, vbo);
@@ -33,6 +28,26 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 }
 
 void RaytraceRectangle::update() {
+  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && !shouldIncreaseImageResolution) {
+    shouldIncreaseImageResolution = true;
+  }
+
+  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && shouldIncreaseImageResolution) {
+    imageResolution += 50;
+    initializeImage(imageResolution, imageResolution);
+    shouldIncreaseImageResolution = false;
+  }
+
+  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && !shouldDecreaseImageResolution) {
+    shouldDecreaseImageResolution = true;
+  }
+
+  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && shouldDecreaseImageResolution) {
+    imageResolution -= 50;
+    initializeImage(imageResolution, imageResolution);
+    shouldDecreaseImageResolution = false;
+  }
+
   image->update();
 }
 
@@ -64,7 +79,12 @@ void RaytraceRectangle::render() {
 }
 
 void RaytraceRectangle::initializeImage(int width, int height) {
+  glGenTextures(1, &textureResource);
   glBindTexture(GL_TEXTURE_2D, textureResource);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI_EXT, width, height, 0, GL_RGBA_INTEGER_EXT, GL_UNSIGNED_BYTE, NULL);
 
   delete image;
