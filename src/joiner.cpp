@@ -14,5 +14,5 @@ void Joiner::update() {
 
 void Joiner::render() {
   raytraceRectangle->render();
-  // characterRectangle->render();
+  characterRectangle->render();
 }

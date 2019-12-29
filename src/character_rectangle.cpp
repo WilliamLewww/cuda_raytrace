@@ -14,11 +14,11 @@ int CharacterRectangle::findIndexFromSymbol(char symbol) {
 }
 
 void CharacterRectangle::initialize(GLuint* shaderProgramHandle, char symbol) {
-  vertices[0] = -1.0;   vertices[1] = -1.0;
-  vertices[2] =  1.0;   vertices[3] = -1.0;
-  vertices[4] = -1.0;   vertices[5] =  1.0;
-  vertices[6] = -1.0;   vertices[7] =  1.0;
-  vertices[8] =  1.0;   vertices[9] = -1.0;
+  vertices[0] =  0.0;   vertices[1] =  0.0;
+  vertices[2] =  1.0;   vertices[3] =  0.0;
+  vertices[4] =  0.0;   vertices[5] =  1.0;
+  vertices[6] =  0.0;   vertices[7] =  1.0;
+  vertices[8] =  1.0;   vertices[9] =  0.0;
   vertices[10] = 1.0;   vertices[11] = 1.0;
 
   int index = findIndexFromSymbol(symbol);
@@ -58,6 +58,9 @@ void CharacterRectangle::initialize(GLuint* shaderProgramHandle, char symbol) {
 }
 
 void CharacterRectangle::render() {
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, textureResource);
 
@@ -80,4 +83,5 @@ void CharacterRectangle::render() {
   glDrawArrays(GL_TRIANGLES, 0, 6);
 
   glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_BLEND);
 }
