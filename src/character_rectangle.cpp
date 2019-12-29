@@ -1,11 +1,8 @@
 #include "character_rectangle.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 int CharacterRectangle::findIndexFromSymbol(char symbol) {
-  for (int x = 0; x < fontUbuntu.characterCount; x++) {
-    if (fontUbuntu.characters[x].symbol == symbol) {
+  for (int x = 0; x < FontHolder::fontUbuntu.characterCount; x++) {
+    if (FontHolder::fontUbuntu.characters[x].symbol == symbol) {
       return x;
     }
   }
@@ -23,10 +20,10 @@ void CharacterRectangle::initialize(GLuint* shaderProgramHandle, char symbol) {
 
   int index = findIndexFromSymbol(symbol);
 
-  float minX = (float(fontUbuntu.characters[index].x) / fontUbuntu.width);
-  float minY = (float(fontUbuntu.characters[index].y) / fontUbuntu.height);
-  float maxX = minX + (float(fontUbuntu.characters[index].width) / fontUbuntu.width);
-  float maxY = minY + (float(fontUbuntu.characters[index].height) / fontUbuntu.height);
+  float minX = (float(FontHolder::fontUbuntu.characters[index].x) / FontHolder::fontUbuntu.width);
+  float minY = (float(FontHolder::fontUbuntu.characters[index].y) / FontHolder::fontUbuntu.height);
+  float maxX = minX + (float(FontHolder::fontUbuntu.characters[index].width) / FontHolder::fontUbuntu.width);
+  float maxY = minY + (float(FontHolder::fontUbuntu.characters[index].height) / FontHolder::fontUbuntu.height);
 
   textureCoordinates[0] =  minX;   textureCoordinates[1] =  maxY;
   textureCoordinates[2] =  maxX;   textureCoordinates[3] =  maxY;
@@ -34,20 +31,6 @@ void CharacterRectangle::initialize(GLuint* shaderProgramHandle, char symbol) {
   textureCoordinates[6] =  minX;   textureCoordinates[7] =  minY;
   textureCoordinates[8] =  maxX;   textureCoordinates[9] =  maxY;
   textureCoordinates[10] = maxX;   textureCoordinates[11] = minY;
-
-  int w, h, comp;
-  unsigned char* image = stbi_load("res/font_ubuntu.png", &w, &h, &comp, STBI_rgb_alpha);
-
-  glGenTextures(1, &textureResource);
-  glBindTexture(GL_TEXTURE_2D, textureResource);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  stbi_image_free(image);
 
   this->shaderProgramHandle = shaderProgramHandle;
 
@@ -62,7 +45,7 @@ void CharacterRectangle::render() {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, textureResource);
+  glBindTexture(GL_TEXTURE_2D, FontHolder::fontUbuntuTextureResource);
 
   glUseProgram(*shaderProgramHandle);
 

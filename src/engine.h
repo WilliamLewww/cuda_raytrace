@@ -11,6 +11,7 @@
 #include <cuda_gl_interop.h>
 
 #include "input.h"
+#include "font.h"
 #include "joiner.h"
 
 class Engine {

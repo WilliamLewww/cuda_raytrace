@@ -1,9 +1,5 @@
 #include "engine.h"
 
-void joystick_callback(int jid, int event) {
-  printf("HELLO\n");
-}
-
 void Engine::initialize() {
   glfwInit();
   window = glfwCreateWindow(1000, 1000, "cuda_raytrace", NULL, NULL);
@@ -19,6 +15,8 @@ void Engine::initialize() {
 
   joiner = new Joiner();
   joiner->initialize(&shaderProgramHandle);
+
+  FontHolder::initialize();
 }
 
 void Engine::run() {

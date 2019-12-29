@@ -1,4 +1,6 @@
 #pragma once
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 struct Character {
   char symbol;
@@ -17,5 +19,12 @@ struct Font {
   Character* characters;
 };
 
-extern Character charactersUbuntu[];
-extern Font fontUbuntu;
+class FontHolder {
+private:
+  static Character charactersUbuntu[];
+public:
+  static Font fontUbuntu;
+  static GLuint fontUbuntuTextureResource;
+
+  static void initialize();
+};

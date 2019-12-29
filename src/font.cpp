@@ -1,6 +1,9 @@
 #include "font.h"
 
-Character charactersUbuntu[] = {
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+Character FontHolder::charactersUbuntu[] = {
   {' ', 245, 106, 3, 3, 1, 1},
   {'!', 138, 82, 7, 24, -1, 23},
   {'"', 156, 106, 12, 11, -1, 25},
@@ -97,5 +100,21 @@ Character charactersUbuntu[] = {
   {'}', 46, 0, 12, 33, 1, 26},
   {'~', 189, 106, 18, 7, 0, 13},
 };
+Font FontHolder::fontUbuntu = {"Ubuntu", 32, 0, 0, 341, 125, 95, charactersUbuntu};
+GLuint FontHolder::fontUbuntuTextureResource;
 
-Font fontUbuntu = {"Ubuntu", 32, 0, 0, 341, 125, 95, charactersUbuntu};
+void FontHolder::initialize() {
+  int w, h, comp;
+  unsigned char* image = stbi_load("res/font_ubuntu.png", &w, &h, &comp, STBI_rgb_alpha);
+
+  glGenTextures(1, &fontUbuntuTextureResource);
+  glBindTexture(GL_TEXTURE_2D, fontUbuntuTextureResource);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  stbi_image_free(image);
+}
