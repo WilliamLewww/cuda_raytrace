@@ -100,8 +100,30 @@ Character FontHolder::charactersUbuntu[] = {
   {'}', 46, 0, 12, 33, 1, 26},
   {'~', 189, 106, 18, 7, 0, 13},
 };
-Font FontHolder::fontUbuntu = {"Ubuntu", 32, 0, 0, 341, 125, 95, charactersUbuntu};
 GLuint FontHolder::fontUbuntuTextureResource;
+
+Font FontHolder::fontArray[] = {{"Ubuntu", 32, 0, 0, 341, 125, 95, charactersUbuntu}};
+int FontHolder::fontCount = 1;
+
+Font* FontHolder::findFontFromName(const char* name) {
+  for (int x = 0; x < fontCount; x++) {
+    if (strcmp(fontArray[x].name, name) == 0) {
+      return &fontArray[x];
+    }
+  }
+
+  return nullptr;
+}
+
+int FontHolder::findIndexFromSymbol(Font font, char symbol) {
+  for (int x = 0; x < font.characterCount; x++) {
+    if (font.characters[x].symbol == symbol) {
+      return x;
+    }
+  }
+
+  return -1;
+}
 
 void FontHolder::initialize() {
   int w, h, comp;

@@ -14,8 +14,6 @@ private:
 
   GLfloat vertices[12];
   GLfloat textureCoordinates[12];
-
-  static int findIndexFromSymbol(char symbol);
 public:
   void initialize(GLuint* shaderProgramHandle, char symbol);
   void render();

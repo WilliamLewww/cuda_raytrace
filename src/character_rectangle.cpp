@@ -1,15 +1,5 @@
 #include "character_rectangle.h"
 
-int CharacterRectangle::findIndexFromSymbol(char symbol) {
-  for (int x = 0; x < FontHolder::fontUbuntu.characterCount; x++) {
-    if (FontHolder::fontUbuntu.characters[x].symbol == symbol) {
-      return x;
-    }
-  }
-
-  return -1;
-}
-
 void CharacterRectangle::initialize(GLuint* shaderProgramHandle, char symbol) {
   vertices[0] =  0.0;   vertices[1] =  0.0;
   vertices[2] =  1.0;   vertices[3] =  0.0;
@@ -18,12 +8,13 @@ void CharacterRectangle::initialize(GLuint* shaderProgramHandle, char symbol) {
   vertices[8] =  1.0;   vertices[9] =  0.0;
   vertices[10] = 1.0;   vertices[11] = 1.0;
 
-  int index = findIndexFromSymbol(symbol);
+  Font* font = FontHolder::findFontFromName("Ubuntu");
+  int index = FontHolder::findIndexFromSymbol(*font, symbol);
 
-  float minX = (float(FontHolder::fontUbuntu.characters[index].x) / FontHolder::fontUbuntu.width);
-  float minY = (float(FontHolder::fontUbuntu.characters[index].y) / FontHolder::fontUbuntu.height);
-  float maxX = minX + (float(FontHolder::fontUbuntu.characters[index].width) / FontHolder::fontUbuntu.width);
-  float maxY = minY + (float(FontHolder::fontUbuntu.characters[index].height) / FontHolder::fontUbuntu.height);
+  float minX = (float(font->characters[index].x) / font->width);
+  float minY = (float(font->characters[index].y) / font->height);
+  float maxX = minX + (float(font->characters[index].width) / font->width);
+  float maxY = minY + (float(font->characters[index].height) / font->height);
 
   textureCoordinates[0] =  minX;   textureCoordinates[1] =  maxY;
   textureCoordinates[2] =  maxX;   textureCoordinates[3] =  maxY;
