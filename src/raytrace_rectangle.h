@@ -27,6 +27,8 @@ private:
 
   void initializeImage(int width, int height);
 public:
+  int getImageResolution();
+  
   void initialize(GLuint* shaderProgramHandle);
   void update();
   void render();

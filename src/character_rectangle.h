@@ -20,6 +20,6 @@ private:
 public:
   float getOffsetX();
 
-  void initialize(GLuint* shaderProgramHandle, const char symbol, float positionX);
+  void initialize(GLuint* shaderProgramHandle, const char symbol, float positionX, float positionY);
   void render();
 };

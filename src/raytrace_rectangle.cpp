@@ -1,5 +1,9 @@
 #include "raytrace_rectangle.h"
 
+int RaytraceRectangle::getImageResolution() {
+  return imageResolution;
+}
+
 void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
   imageResolution = 250;
 

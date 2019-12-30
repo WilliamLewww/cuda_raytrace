@@ -4,7 +4,7 @@ float CharacterRectangle::getOffsetX() {
   return (float(character->width) / font->width);
 }
 
-void CharacterRectangle::initialize(GLuint* shaderProgramHandle, const char symbol, float positionX) {
+void CharacterRectangle::initialize(GLuint* shaderProgramHandle, const char symbol, float positionX, float positionY) {
   font = FontHolder::findFontFromName("Ubuntu");
   int index = FontHolder::findIndexFromSymbol(*font, symbol);
 
@@ -15,17 +15,18 @@ void CharacterRectangle::initialize(GLuint* shaderProgramHandle, const char symb
   float maxX = minX + (float(font->characters[index].width) / font->width);
   float maxY = minY + (float(font->characters[index].height) / font->height);
 
-  float clipX = (float(font->characters[index].width) / font->width) / 2.0;
-  float clipY = (float(font->characters[index].height) / font->height) / 2.0;
+  float clipX = (float(font->characters[index].width) / font->width) / 4.0;
+  float clipY = (float(font->characters[index].height) / font->height) / 4.0;
 
-  float positionY = 0.0;
+  float offsetX = positionX;
+  float offsetY = positionY + (float(font->characters[index].originY) / font->height) / 4.0;
 
-  vertices[0] =  -clipX + positionX;  vertices[1] =  -clipY + positionY;
-  vertices[2] =  clipX + positionX;   vertices[3] =  -clipY + positionY;
-  vertices[4] =  -clipX + positionX;  vertices[5] =  clipY + positionY;
-  vertices[6] =  -clipX + positionX;  vertices[7] =  clipY + positionY;
-  vertices[8] =  clipX + positionX;   vertices[9] =  -clipY + positionY;
-  vertices[10] = clipX + positionX;   vertices[11] = clipY + positionY;
+  vertices[0] =  -clipX + offsetX;  vertices[1] =  -clipY + offsetY;
+  vertices[2] =  clipX + offsetX;   vertices[3] =  -clipY + offsetY;
+  vertices[4] =  -clipX + offsetX;  vertices[5] =  clipY + offsetY;
+  vertices[6] =  -clipX + offsetX;  vertices[7] =  clipY + offsetY;
+  vertices[8] =  clipX + offsetX;   vertices[9] =  -clipY + offsetY;
+  vertices[10] = clipX + offsetX;   vertices[11] = clipY + offsetY;
 
   textureCoordinates[0] =  minX;   textureCoordinates[1] =  maxY;
   textureCoordinates[2] =  maxX;   textureCoordinates[3] =  maxY;

@@ -8,6 +8,6 @@ class TextRectangle {
 private:
   std::vector<CharacterRectangle> characterRectangleList;
 public:
-  void initialize(GLuint* shaderProgramHandle, std::string text);
+  void initialize(GLuint* shaderProgramHandle, std::string text, float positionX, float positionY);
   void render();
 };
