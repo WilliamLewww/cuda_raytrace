@@ -1,20 +1,31 @@
 #include "character_rectangle.h"
 
-void CharacterRectangle::initialize(GLuint* shaderProgramHandle, char symbol) {
-  vertices[0] =  0.0;   vertices[1] =  0.0;
-  vertices[2] =  1.0;   vertices[3] =  0.0;
-  vertices[4] =  0.0;   vertices[5] =  1.0;
-  vertices[6] =  0.0;   vertices[7] =  1.0;
-  vertices[8] =  1.0;   vertices[9] =  0.0;
-  vertices[10] = 1.0;   vertices[11] = 1.0;
+float CharacterRectangle::getOffsetX() {
+  return (float(character->width) / font->width);
+}
 
-  Font* font = FontHolder::findFontFromName("Ubuntu");
+void CharacterRectangle::initialize(GLuint* shaderProgramHandle, const char symbol, float positionX) {
+  font = FontHolder::findFontFromName("Ubuntu");
   int index = FontHolder::findIndexFromSymbol(*font, symbol);
+
+  character = &font->characters[index];
 
   float minX = (float(font->characters[index].x) / font->width);
   float minY = (float(font->characters[index].y) / font->height);
   float maxX = minX + (float(font->characters[index].width) / font->width);
   float maxY = minY + (float(font->characters[index].height) / font->height);
+
+  float clipX = (float(font->characters[index].width) / font->width) / 2.0;
+  float clipY = (float(font->characters[index].height) / font->height) / 2.0;
+
+  float positionY = 0.0;
+
+  vertices[0] =  -clipX + positionX;  vertices[1] =  -clipY + positionY;
+  vertices[2] =  clipX + positionX;   vertices[3] =  -clipY + positionY;
+  vertices[4] =  -clipX + positionX;  vertices[5] =  clipY + positionY;
+  vertices[6] =  -clipX + positionX;  vertices[7] =  clipY + positionY;
+  vertices[8] =  clipX + positionX;   vertices[9] =  -clipY + positionY;
+  vertices[10] = clipX + positionX;   vertices[11] = clipY + positionY;
 
   textureCoordinates[0] =  minX;   textureCoordinates[1] =  maxY;
   textureCoordinates[2] =  maxX;   textureCoordinates[3] =  maxY;

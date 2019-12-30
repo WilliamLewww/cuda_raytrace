@@ -6,6 +6,9 @@
 
 class CharacterRectangle {
 private:
+  Font* font;
+  Character* character;
+
   GLuint* shaderProgramHandle;
   GLuint textureResource;
 
@@ -15,6 +18,8 @@ private:
   GLfloat vertices[12];
   GLfloat textureCoordinates[12];
 public:
-  void initialize(GLuint* shaderProgramHandle, char symbol);
+  float getOffsetX();
+
+  void initialize(GLuint* shaderProgramHandle, const char symbol, float positionX);
   void render();
 };

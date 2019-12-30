@@ -9,12 +9,12 @@
 
 #include "input.h"
 #include "raytrace_rectangle.h"
-#include "character_rectangle.h"
+#include "text_rectangle.h"
 
 class Joiner {
 private:
   RaytraceRectangle* raytraceRectangle;
-  CharacterRectangle* characterRectangle;
+  TextRectangle* textRectangle;
 public:
   void initialize(GLuint* shaderProgramHandle);
   void update();

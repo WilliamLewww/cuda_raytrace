@@ -4,8 +4,8 @@ void Joiner::initialize(GLuint* shaderProgramHandle) {
   raytraceRectangle = new RaytraceRectangle();
   raytraceRectangle->initialize(shaderProgramHandle);
 
-  characterRectangle = new CharacterRectangle();
-  characterRectangle->initialize(shaderProgramHandle, 'c');
+  textRectangle = new TextRectangle();
+  textRectangle->initialize(shaderProgramHandle, "abcdefghijklmnopqrstuvwxyz");
 }
 
 void Joiner::update() {
@@ -14,5 +14,5 @@ void Joiner::update() {
 
 void Joiner::render() {
   raytraceRectangle->render();
-  characterRectangle->render();
+  textRectangle->render();
 }
