@@ -9,6 +9,10 @@ void TextRectangle::initialize(GLuint* shaderProgramHandle, std::string text, fl
   }
 }
 
+void TextRectangle::update() {
+
+}
+
 void TextRectangle::render() {
   for (int x = 0; x < characterRectangleList.size(); x++) {
     characterRectangleList[x].render();
