@@ -14,6 +14,8 @@
 
 class Joiner {
 private:
+  bool shouldDecreaseImageResolution, shouldIncreaseImageResolution;
+  
   RaytraceRectangle* raytraceRectangle;
   TextRectangle* textRectangle;
 public:

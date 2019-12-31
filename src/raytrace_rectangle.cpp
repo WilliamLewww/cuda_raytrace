@@ -34,27 +34,17 @@ void RaytraceRectangle::initialize(GLuint* shaderProgramHandle) {
 }
 
 void RaytraceRectangle::update() {
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && !shouldIncreaseImageResolution) {
-    shouldIncreaseImageResolution = true;
-  }
-
-  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && shouldIncreaseImageResolution) {
-    imageResolution += 50;
-    initializeImage(imageResolution, imageResolution);
-    shouldIncreaseImageResolution = false;
-  }
-
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && !shouldDecreaseImageResolution) {
-    shouldDecreaseImageResolution = true;
-  }
-
-  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && shouldDecreaseImageResolution) {
-    if (imageResolution > 50) { imageResolution -= 50; }
-    initializeImage(imageResolution, imageResolution);
-    shouldDecreaseImageResolution = false;
-  }
-
   image->update();
+}
+
+void RaytraceRectangle::incrementResolution() {
+  imageResolution += 50;
+  initializeImage(imageResolution, imageResolution);
+}
+
+void RaytraceRectangle::decrementResolution() {
+  if (imageResolution > 50) { imageResolution -= 50; }
+  initializeImage(imageResolution, imageResolution);
 }
 
 void RaytraceRectangle::render() {

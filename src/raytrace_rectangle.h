@@ -12,7 +12,6 @@
 class RaytraceRectangle {
 private:
   int imageResolution;
-  bool shouldDecreaseImageResolution, shouldIncreaseImageResolution;
 
   RaytraceImage* image;
 
@@ -28,6 +27,8 @@ private:
   void initializeImage(int width, int height);
 public:
   int getImageResolution();
+  void incrementResolution();
+  void decrementResolution();
   
   void initialize(GLuint* shaderProgramHandle);
   void update();
