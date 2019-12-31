@@ -1,17 +1,14 @@
 #include "squiggle_animation_text.h"
-#include <stdio.h>
-
-int movingDownLower = 0;
-int movingDownUpper = 0;
 
 void SquiggleAnimationText::initialize(std::vector<CharacterRectangle>* characterRectangleList) {
   this->characterRectangleList = characterRectangleList;
 
   movingDownLower = 0;
   movingDownUpper = characterRectangleList->size();
+  
+  counter = 0;
 }
 
-int counter = 0;
 void SquiggleAnimationText::animate() {
   if (counter < 15) {
     counter += 1;
