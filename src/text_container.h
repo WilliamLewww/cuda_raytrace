@@ -5,7 +5,7 @@
 #include "character_rectangle.h"
 #include "squiggle_animation_text.h"
 
-class TextRectangle {
+class TextContainer {
 private:
   std::vector<CharacterRectangle> characterRectangleList;
   GLuint* shaderProgramHandle;

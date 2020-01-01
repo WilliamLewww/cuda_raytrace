@@ -1,6 +1,6 @@
-#include "text_rectangle.h"
+#include "text_container.h"
 
-void TextRectangle::initialize(GLuint* shaderProgramHandle, std::string text, float positionX, float positionY) {
+void TextContainer::initialize(GLuint* shaderProgramHandle, std::string text, float positionX, float positionY) {
   this->shaderProgramHandle = shaderProgramHandle;
   this->positionX = positionX;
   this->positionY = positionY;
@@ -8,7 +8,7 @@ void TextRectangle::initialize(GLuint* shaderProgramHandle, std::string text, fl
   changeText(text);
 }
 
-void TextRectangle::changeText(std::string text) {
+void TextContainer::changeText(std::string text) {
   characterRectangleList.clear();
   
   float offsetX = 0.0;
@@ -21,11 +21,11 @@ void TextRectangle::changeText(std::string text) {
   squiggleAnimationText.initialize(&characterRectangleList);
 }
 
-void TextRectangle::update() {
+void TextContainer::update() {
   squiggleAnimationText.animate();
 }
 
-void TextRectangle::render() {
+void TextContainer::render() {
   for (int x = 0; x < characterRectangleList.size(); x++) {
     characterRectangleList[x].render();
   }

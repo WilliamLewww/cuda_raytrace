@@ -6,8 +6,8 @@ void Joiner::initialize(GLuint* shaderProgramHandle) {
 
   std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
 
-  textRectangle = new TextRectangle();
-  textRectangle->initialize(shaderProgramHandle, resolutionString, -0.95, 0.85);
+  textContainer = new TextContainer();
+  textContainer->initialize(shaderProgramHandle, resolutionString, -0.95, 0.85);
 }
 
 void Joiner::update() {
@@ -18,7 +18,7 @@ void Joiner::update() {
   if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && shouldIncreaseImageResolution) {
     raytraceRectangle->incrementResolution();
     std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
-    textRectangle->changeText(resolutionString);
+    textContainer->changeText(resolutionString);
     shouldIncreaseImageResolution = false;
   }
 
@@ -29,15 +29,15 @@ void Joiner::update() {
   if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && shouldDecreaseImageResolution) {
     raytraceRectangle->decrementResolution();
     std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
-    textRectangle->changeText(resolutionString);
+    textContainer->changeText(resolutionString);
     shouldDecreaseImageResolution = false;
   }
 
   raytraceRectangle->update();
-  textRectangle->update();
+  textContainer->update();
 }
 
 void Joiner::render() {
   raytraceRectangle->render();
-  textRectangle->render();
+  textContainer->render();
 }

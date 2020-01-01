@@ -10,14 +10,14 @@
 
 #include "input.h"
 #include "raytrace_rectangle.h"
-#include "text_rectangle.h"
+#include "text_container.h"
 
 class Joiner {
 private:
   bool shouldDecreaseImageResolution, shouldIncreaseImageResolution;
   
   RaytraceRectangle* raytraceRectangle;
-  TextRectangle* textRectangle;
+  TextContainer* textContainer;
 public:
   void initialize(GLuint* shaderProgramHandle);
   void update();
