@@ -65,3 +65,4 @@ open:
 
 clean:
 	rm -rf $(BIN_PATH)/*
+	mkdir -p bin
