@@ -15,7 +15,7 @@ void CharacterRectangle::addPosition(float positionX, float positionY) {
 
 void CharacterRectangle::initialize(GLuint* shaderProgramHandle, Font* font, const char symbol, float positionX, float positionY) {
   this->font = font;
-  int index = FontHandler::findIndexFromSymbol(*this->font, symbol);
+  int index = FontHandler::getIndexFromSymbol(*this->font, symbol);
 
   character = &this->font->characterList[index];
 

@@ -3,6 +3,16 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+int FontHandler::getIndexFromSymbol(Font font, char symbol) {
+  for (int x = 0; x < font.characterList.size(); x++) {
+    if (font.characterList[x].symbol == symbol) {
+      return x;
+    }
+  }
+
+  return -1;
+}
+
 Font* FontHandler::getFontFromName(const char* name) {
   for (int x = 0; x < fontList.size(); x++) {
     if (strcmp(fontList[x].name.c_str(), name) == 0) {
@@ -11,16 +21,6 @@ Font* FontHandler::getFontFromName(const char* name) {
   }
 
   return nullptr;
-}
-
-int FontHandler::findIndexFromSymbol(Font font, char symbol) {
-  for (int x = 0; x < font.characterList.size(); x++) {
-    if (font.characterList[x].symbol == symbol) {
-      return x;
-    }
-  }
-
-  return -1;
 }
 
 void FontHandler::createFontFromFile(std::string filename) {
