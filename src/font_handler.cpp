@@ -129,6 +129,8 @@ int FontHandler::findIndexFromSymbol(Font font, char symbol) {
 
 void FontHandler::createFontFromFile(std::string filename) {
   std::string dateFile = filename + ".glyph";
+  std::string imageFile = filename + ".png";
+
   std::ifstream file(dateFile);
   std::string line;
 
@@ -177,7 +179,7 @@ void FontHandler::createFontFromFile(std::string filename) {
   }
 
   int w, h, comp;
-  unsigned char* image = stbi_load("res/font_ubuntu.png", &w, &h, &comp, STBI_rgb_alpha);
+  unsigned char* image = stbi_load(imageFile.c_str(), &w, &h, &comp, STBI_rgb_alpha);
 
   glGenTextures(1, &font.textureResource);
   glBindTexture(GL_TEXTURE_2D, font.textureResource);
