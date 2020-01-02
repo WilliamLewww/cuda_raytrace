@@ -10,19 +10,10 @@
 
 class FontHandler {
 private:
-  static std::vector<Font> fontList;
-
-  static Character charactersUbuntu[];
-  static Font fontArray[];
-
-  static int fontCount;
+  std::vector<Font> fontList;
 public:
-  static GLuint fontUbuntuTextureResource;
+  void createFontFromFile(std::string filename);
 
-  static void createFontFromFile(std::string filename);
-
-  static Font* findFontFromName(const char* name);
+  Font* getFontFromName(const char* name);
   static int findIndexFromSymbol(Font font, char symbol);
-
-  static void initialize();
 };

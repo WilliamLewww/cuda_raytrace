@@ -13,22 +13,22 @@ void CharacterRectangle::addPosition(float positionX, float positionY) {
   vertices[10] += positionX;   vertices[11] += positionY;
 }
 
-void CharacterRectangle::initialize(GLuint* shaderProgramHandle, const char symbol, float positionX, float positionY) {
-  font = FontHandler::findFontFromName("Ubuntu");
-  int index = FontHandler::findIndexFromSymbol(*font, symbol);
+void CharacterRectangle::initialize(GLuint* shaderProgramHandle, Font* font, const char symbol, float positionX, float positionY) {
+  this->font = font;
+  int index = FontHandler::findIndexFromSymbol(*this->font, symbol);
 
-  character = &font->characters[index];
+  character = &this->font->characterList[index];
 
-  float minX = (float(font->characters[index].x) / font->width);
-  float minY = (float(font->characters[index].y) / font->height);
-  float maxX = minX + (float(font->characters[index].width) / font->width);
-  float maxY = minY + (float(font->characters[index].height) / font->height);
+  float minX = (float(this->font->characterList[index].x) / this->font->width);
+  float minY = (float(this->font->characterList[index].y) / this->font->height);
+  float maxX = minX + (float(this->font->characterList[index].width) / this->font->width);
+  float maxY = minY + (float(this->font->characterList[index].height) / this->font->height);
 
-  float clipX = (float(font->characters[index].width) / font->width) / 4.0;
-  float clipY = (float(font->characters[index].height) / font->height) / 4.0;
+  float clipX = (float(this->font->characterList[index].width) / this->font->width) / 4.0;
+  float clipY = (float(this->font->characterList[index].height) / this->font->height) / 4.0;
 
   float offsetX = positionX;
-  float offsetY = positionY + (float(font->characters[index].originY) / font->height) / 4.0;
+  float offsetY = positionY + (float(this->font->characterList[index].originY) / this->font->height) / 4.0;
 
   vertices[0] =  -clipX + offsetX;  vertices[1] =  -clipY + offsetY;
   vertices[2] =  clipX + offsetX;   vertices[3] =  -clipY + offsetY;
@@ -57,7 +57,7 @@ void CharacterRectangle::render() {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, FontHandler::fontUbuntuTextureResource);
+  glBindTexture(GL_TEXTURE_2D, font->textureResource);
 
   glUseProgram(*shaderProgramHandle);
 

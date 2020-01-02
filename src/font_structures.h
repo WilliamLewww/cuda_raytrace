@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -13,14 +14,12 @@ struct Character {
 };
 
 struct Font {
-  const char* name;
+  std::string name;
 
   int size;
   int bold, italic;
   int width, height;
   int characterCount;
-
-  Character* characters;
 
   std::vector<Character> characterList;
   GLuint textureResource;

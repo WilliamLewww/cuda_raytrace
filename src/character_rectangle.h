@@ -21,6 +21,6 @@ public:
   float getOffsetX();
   void addPosition(float positionX, float positionY);
 
-  void initialize(GLuint* shaderProgramHandle, const char symbol, float positionX, float positionY);
+  void initialize(GLuint* shaderProgramHandle, Font* font, const char symbol, float positionX, float positionY);
   void render();
 };

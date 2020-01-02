@@ -19,6 +19,7 @@ private:
   GLFWwindow* window;
   GLuint shaderProgramHandle;
 
+  FontHandler* fontHandler;
   Joiner* joiner;
 
   void update();

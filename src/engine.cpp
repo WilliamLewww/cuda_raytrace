@@ -11,12 +11,12 @@ void Engine::initialize() {
   shaderProgramHandle = createShaderProgram(vertexShaderString, fragmentShaderString);
 
   glfwSetKeyCallback(window, Input::keyCallback);
+  
+  fontHandler = new FontHandler();
+  fontHandler->createFontFromFile("res/font_ubuntu");
 
   joiner = new Joiner();
-  joiner->initialize(&shaderProgramHandle);
-
-  FontHandler::initialize();
-  FontHandler::createFontFromFile("res/font_ubuntu");
+  joiner->initialize(&shaderProgramHandle, fontHandler);
 }
 
 void Engine::run() {

@@ -19,7 +19,7 @@ private:
   RaytraceRectangle* raytraceRectangle;
   TextContainer* textContainer;
 public:
-  void initialize(GLuint* shaderProgramHandle);
+  void initialize(GLuint* shaderProgramHandle, FontHandler* fontHandler);
   void update();
   void render();
 };
