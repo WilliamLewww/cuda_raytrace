@@ -1,10 +1,12 @@
 #pragma once
-#include <cstring>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+struct Character {
+  char symbol;
 
-#include "character.h"
+  int x, y;
+  int width, height;
+  int originX, originY;
+};
 
 struct Font {
   const char* name;

@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "font.h"
+#include "font_structures.h"
 
 class FontHolder {
 private:
