@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "structures.h"
+#include "raytrace_structures.h"
 #include "analysis.h"
 
 #define FRAME_WIDTH 1000

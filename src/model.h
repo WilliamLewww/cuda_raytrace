@@ -4,7 +4,7 @@
 #include <string>
 #include <stdio.h>
 
-#include "structures.h"
+#include "raytrace_structures.h"
 
 struct MeshDescriptor {
   int segmentCount;

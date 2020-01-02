@@ -12,8 +12,8 @@ class FontHandler {
 private:
   std::vector<Font> fontList;
 public:
-  void createFontFromFile(std::string filename);
+  static int findIndexFromSymbol(Font font, char symbol);
 
   Font* getFontFromName(const char* name);
-  static int findIndexFromSymbol(Font font, char symbol);
+  void createFontFromFile(std::string filename);
 };

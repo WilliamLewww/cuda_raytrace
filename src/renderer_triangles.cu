@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "structures.h"
+#include "raytrace_structures.h"
 #include "model.h"
 #include "analysis.h"
 

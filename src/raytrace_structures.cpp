@@ -1,4 +1,4 @@
-#include "structures.h"
+#include "raytrace_structures.h"
 
 float* inverseMatrix(float* matrix) {
     float* inverse = (float*)malloc(16*sizeof(float));
