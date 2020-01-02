@@ -10,7 +10,6 @@ void Engine::initialize() {
   std::string fragmentShaderString = readShaderSource("shaders/textured_rectangle.fragment");
   shaderProgramHandle = createShaderProgram(vertexShaderString, fragmentShaderString);
 
-  input = new Input();
   glfwSetKeyCallback(window, Input::keyCallback);
 
   joiner = new Joiner();

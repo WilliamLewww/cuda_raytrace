@@ -11,7 +11,7 @@
 #include <cuda_gl_interop.h>
 
 #include "input.h"
-#include "font.h"
+#include "font_handler.h"
 #include "joiner.h"
 
 class Engine {
@@ -19,7 +19,6 @@ private:
   GLFWwindow* window;
   GLuint shaderProgramHandle;
 
-  Input* input;
   Joiner* joiner;
 
   void update();
