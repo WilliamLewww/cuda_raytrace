@@ -1,4 +1,8 @@
 #pragma once
+#include <vector>
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 struct Character {
   char symbol;
@@ -17,4 +21,7 @@ struct Font {
   int characterCount;
 
   Character* characters;
+
+  std::vector<Character> characterList;
+  GLuint textureResource;
 };

@@ -15,7 +15,8 @@ void Engine::initialize() {
   joiner = new Joiner();
   joiner->initialize(&shaderProgramHandle);
 
-  FontHolder::initialize();
+  FontHandler::initialize();
+  FontHandler::createFontFromFile("res/font_ubuntu");
 }
 
 void Engine::run() {

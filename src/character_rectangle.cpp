@@ -14,8 +14,8 @@ void CharacterRectangle::addPosition(float positionX, float positionY) {
 }
 
 void CharacterRectangle::initialize(GLuint* shaderProgramHandle, const char symbol, float positionX, float positionY) {
-  font = FontHolder::findFontFromName("Ubuntu");
-  int index = FontHolder::findIndexFromSymbol(*font, symbol);
+  font = FontHandler::findFontFromName("Ubuntu");
+  int index = FontHandler::findIndexFromSymbol(*font, symbol);
 
   character = &font->characters[index];
 
@@ -57,7 +57,7 @@ void CharacterRectangle::render() {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, FontHolder::fontUbuntuTextureResource);
+  glBindTexture(GL_TEXTURE_2D, FontHandler::fontUbuntuTextureResource);
 
   glUseProgram(*shaderProgramHandle);
 

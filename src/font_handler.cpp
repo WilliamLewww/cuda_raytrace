@@ -3,7 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Character FontHolder::charactersUbuntu[] = {
+Character FontHandler::charactersUbuntu[] = {
   {' ', 245, 106, 3, 3, 1, 1},
   {'!', 138, 82, 7, 24, -1, 23},
   {'"', 156, 106, 12, 11, -1, 25},
@@ -100,12 +100,12 @@ Character FontHolder::charactersUbuntu[] = {
   {'}', 46, 0, 12, 33, 1, 26},
   {'~', 189, 106, 18, 7, 0, 13},
 };
-GLuint FontHolder::fontUbuntuTextureResource;
+GLuint FontHandler::fontUbuntuTextureResource;
 
-Font FontHolder::fontArray[] = {{"Ubuntu", 32, 0, 0, 341, 125, 95, charactersUbuntu}};
-int FontHolder::fontCount = 1;
+Font FontHandler::fontArray[] = {{"Ubuntu", 32, 0, 0, 341, 125, 95, charactersUbuntu}};
+int FontHandler::fontCount = 1;
 
-Font* FontHolder::findFontFromName(const char* name) {
+Font* FontHandler::findFontFromName(const char* name) {
   for (int x = 0; x < fontCount; x++) {
     if (strcmp(fontArray[x].name, name) == 0) {
       return &fontArray[x];
@@ -115,7 +115,7 @@ Font* FontHolder::findFontFromName(const char* name) {
   return nullptr;
 }
 
-int FontHolder::findIndexFromSymbol(Font font, char symbol) {
+int FontHandler::findIndexFromSymbol(Font font, char symbol) {
   for (int x = 0; x < font.characterCount; x++) {
     if (font.characters[x].symbol == symbol) {
       return x;
@@ -125,7 +125,17 @@ int FontHolder::findIndexFromSymbol(Font font, char symbol) {
   return -1;
 }
 
-void FontHolder::initialize() {
+void FontHandler::createFontFromFile(std::string filename) {
+  std::string dateFile = filename + ".glyph";
+  std::ifstream file(dateFile);
+  std::string line;
+
+  while (std::getline(file, line)) {
+    
+  }
+}
+
+void FontHandler::initialize() {
   int w, h, comp;
   unsigned char* image = stbi_load("res/font_ubuntu.png", &w, &h, &comp, STBI_rgb_alpha);
 
