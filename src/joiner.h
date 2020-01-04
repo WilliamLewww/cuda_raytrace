@@ -1,5 +1,4 @@
 #pragma once
-#include <math.h>
 #include <string>
 
 #include <GL/glew.h>
@@ -9,8 +8,8 @@
 #include <cuda_gl_interop.h>
 
 #include "input.h"
-#include "raytrace_rectangle.h"
 #include "shader_handler.h"
+#include "raytrace_rectangle.h"
 #include "text_container.h"
 
 class Joiner {

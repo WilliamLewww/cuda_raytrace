@@ -1,6 +1,5 @@
 #include "text_container.h"
 
-#include <stdio.h>
 void TextContainer::initialize(GLuint* shaderProgramHandle, Font* font, std::string text, float positionX, float positionY) {
   this->shaderProgramHandle = shaderProgramHandle;
   this->font = font;

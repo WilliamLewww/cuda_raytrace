@@ -2,7 +2,6 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include <stdio.h>
 
 #include "raytrace_structures.h"
 
