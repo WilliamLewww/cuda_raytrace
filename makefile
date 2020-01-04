@@ -25,7 +25,7 @@ CUDA_FLAGS=--gpu-architecture=sm_30
 LIBRARIES=-lglfw3 -lGLEW -lGL -lGLU -lXrandr -lXext -lX11
 LINKER_ARGUMENTS=-L$(GLFW_LIBRARY_PATH) -L$(GLEW_LIBRARY_PATH) -I$(GLFW_INCLUDE_PATH) -I$(GLEW_INCLUDE_PATH) $(LIBRARIES)
 
-EXEC=raytrace_renderer
+EXEC=raytrace_renderer.out
 EXEC_ARGS=bin/image.ppm 16 16
 
 all: clean $(EXEC) run
