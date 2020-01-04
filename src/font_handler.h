@@ -13,7 +13,7 @@ private:
   std::vector<Font> fontList;
 public:
   static int getIndexFromSymbol(Font font, char symbol);
-
   Font* getFontFromName(const char* name);
-  void createFontFromFile(std::string filename);
+  
+  void addFontFromFile(std::string filename);
 };

@@ -23,7 +23,7 @@ Font* FontHandler::getFontFromName(const char* name) {
   return nullptr;
 }
 
-void FontHandler::createFontFromFile(std::string filename) {
+void FontHandler::addFontFromFile(std::string filename) {
   std::string dateFile = filename + ".glyph";
   std::string imageFile = filename + ".png";
 

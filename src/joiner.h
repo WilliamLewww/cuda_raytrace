@@ -10,6 +10,7 @@
 
 #include "input.h"
 #include "raytrace_rectangle.h"
+#include "shader_handler.h"
 #include "text_container.h"
 
 class Joiner {
@@ -19,7 +20,7 @@ private:
   RaytraceRectangle* raytraceRectangle;
   TextContainer* textContainer;
 public:
-  void initialize(GLuint* shaderProgramHandle, FontHandler* fontHandler);
+  void initialize(ShaderHandler* shaderHandler, FontHandler* fontHandler);
   void update();
   void render();
 };

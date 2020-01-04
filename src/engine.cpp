@@ -6,17 +6,16 @@ void Engine::initialize() {
   glfwMakeContextCurrent(window);
   glewInit();
 
-  std::string vertexShaderString = readShaderSource("shaders/textured_rectangle.vertex");
-  std::string fragmentShaderString = readShaderSource("shaders/textured_rectangle.fragment");
-  shaderProgramHandle = createShaderProgram(vertexShaderString, fragmentShaderString);
-
   glfwSetKeyCallback(window, Input::keyCallback);
   
   fontHandler = new FontHandler();
-  fontHandler->createFontFromFile("res/font_ubuntu");
+  fontHandler->addFontFromFile("res/font_ubuntu");
+
+  shaderHandler = new ShaderHandler();
+  shaderHandler->addShaderProgram("shaders/textured_rectangle");
 
   joiner = new Joiner();
-  joiner->initialize(&shaderProgramHandle, fontHandler);
+  joiner->initialize(shaderHandler, fontHandler);
 }
 
 void Engine::run() {
@@ -45,39 +44,4 @@ void Engine::render() {
   joiner->render();
 
   glfwSwapBuffers(window);
-}
-
-std::string Engine::readShaderSource(const char* filepath) {
-  std::string content;
-  std::ifstream fileStream(filepath, std::ios::in);
-  std::string line = "";
-
-  while (!fileStream.eof()) {
-      getline(fileStream, line);
-      content.append(line + "\n");
-  }
-  fileStream.close();
-
-  return content;
-}
-
-GLuint Engine::createShaderProgram(std::string vertexShaderString, std::string fragmentShaderString) {
-  const char* vertexShaderSource = vertexShaderString.c_str();
-  const char* fragmentShaderSource = fragmentShaderString.c_str();
-
-  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-
-  glCompileShader(vertexShader);
-  glCompileShader(fragmentShader);
-
-  GLuint shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-
-  return shaderProgram;
 }
