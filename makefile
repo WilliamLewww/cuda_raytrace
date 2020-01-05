@@ -60,9 +60,6 @@ cuda-gdb:
 memory-check:
 	$(MEMCHECK) $(BIN_PATH)/$(EXEC) $(EXEC_ARGS) 2>$(BIN_PATH)/memory-check.log; cat $(BIN_PATH)/memory-check.log;
 
-open:
-	xdg-open bin/image.ppm
-
 clean:
 	rm -rf $(BIN_PATH)/*
 	mkdir -p bin

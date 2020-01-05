@@ -19,6 +19,11 @@
 
 #define LIGHT_COUNT 1
 
+Tuple* lightingBuffer;
+Tuple* reflectionsBuffer;
+MeshDescriptor* meshDescriptorBuffer;
+MeshSegment* meshSegmentBuffer;
+
 int frameWidth = 1000;
 int frameHeight = 1000;
 
@@ -216,11 +221,6 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
 
   cudaBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
-
-Tuple* lightingBuffer;
-Tuple* reflectionsBuffer;
-MeshDescriptor* meshDescriptorBuffer;
-MeshSegment* meshSegmentBuffer;
 
 extern "C" void initializeMemory() {
   cudaFree(lightingBuffer);
