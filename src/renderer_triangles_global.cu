@@ -135,7 +135,7 @@ Ray rayFromReflection(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment*
     segmentOffset += meshDescriptorArray[y].segmentCount;
   }
 
-  Ray reflectedRay;
+  Ray reflectedRay = ray;
   if (intersectionDescriptorIndex != -1 && meshDescriptorArray[intersectionDescriptorIndex].reflective) {
     Ray transformedRay = transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
     Tuple intersectionPoint = project(transformedRay, intersectionMagnitude - REFLECTIVE_RAY_EPILSON);
@@ -206,15 +206,13 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
 
   if (idx >= renderWidth || idy >= renderHeight) { return; }
 
-  // Tuple color;
-  // if (reflectionsBuffer[(idy*renderWidth)+idx].w > 0) {
-  //   color = (0.2 * reflectionsBuffer[(idy*renderWidth)+idx]) + lightingBuffer[(idy*renderWidth)+idx];
-  // }
-  // else {
-  //   color = lightingBuffer[(idy*renderWidth)+idx];
-  // }
-
-  Tuple color = lightingBuffer[(idy*renderWidth)+idx];
+  Tuple color;
+  if (reflectionsBuffer[(idy*renderWidth)+idx].w > 0) {
+    color = (0.2 * reflectionsBuffer[(idy*renderWidth)+idx]) + lightingBuffer[(idy*renderWidth)+idx];
+  }
+  else {
+    color = lightingBuffer[(idy*renderWidth)+idx];
+  }
 
   cudaBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
