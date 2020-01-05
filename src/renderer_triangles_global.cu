@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <fstream>
+#include <vector>
 #include <stdio.h>
 
 #include <GL/glew.h>
@@ -230,6 +231,31 @@ extern "C" void initializeMemory() {
   cudaMalloc(&reflectionsBuffer, frameWidth*frameHeight*sizeof(Tuple));
 }
 
+void initializeModels() {
+  std::vector<Model> modelList;
+  modelList.push_back(createModelFromOBJ("res/cube.obj", 1));
+  modelList.push_back(createModelFromOBJ("res/torus.obj", 0));
+  initializeModelMatrix(&modelList[0].meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
+  initializeModelMatrix(&modelList[1].meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
+
+  std::vector<MeshDescriptor> h_meshDescriptorList;
+  std::vector<MeshSegment> h_meshSegmentList;
+
+  for (int x = 0; x < modelList.size(); x++) {
+    h_meshDescriptorList.push_back(modelList[x].meshDescriptor);
+
+    for (int y = 0; y < h_meshDescriptorList[x].segmentCount; y++) {
+      h_meshSegmentList.push_back(modelList[x].meshSegmentArray[y]);
+    }
+  }
+
+  cudaMalloc(&meshDescriptorBuffer, h_meshDescriptorList.size()*sizeof(MeshDescriptor));
+  cudaMalloc(&meshSegmentBuffer, h_meshSegmentList.size()*sizeof(MeshSegment));
+
+  cudaMemcpy(meshDescriptorBuffer, &h_meshDescriptorList[0], h_meshDescriptorList.size()*sizeof(MeshDescriptor), cudaMemcpyHostToDevice);
+  cudaMemcpy(meshSegmentBuffer, &h_meshSegmentList[0], h_meshSegmentList.size()*sizeof(MeshSegment), cudaMemcpyHostToDevice);
+}
+
 extern "C" void initializeScene() {
   Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
   initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
@@ -239,24 +265,7 @@ extern "C" void initializeScene() {
   Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-  MeshDescriptor* h_meshDescriptorArray = new MeshDescriptor[MESH_DESCRIPTOR_COUNT];
-  MeshSegment* h_meshSegmentArray = new MeshSegment[MESH_SEGMENT_COUNT];
-
-  Model modelA = createModelFromOBJ("res/cube.obj", 1);
-  Model modelB = createModelFromOBJ("res/torus.obj", 0);
-  initializeModelMatrix(&modelA.meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
-  initializeModelMatrix(&modelB.meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
-
-  h_meshDescriptorArray[0] = modelA.meshDescriptor;
-  h_meshDescriptorArray[1] = modelB.meshDescriptor;
-  memcpy(&h_meshSegmentArray[0], modelA.meshSegmentArray, 12*sizeof(MeshSegment));
-  memcpy(&h_meshSegmentArray[12], modelB.meshSegmentArray, 100*sizeof(MeshSegment));
-
-  cudaMalloc(&meshDescriptorBuffer, MESH_DESCRIPTOR_COUNT*sizeof(MeshDescriptor));
-  cudaMalloc(&meshSegmentBuffer, MESH_SEGMENT_COUNT*sizeof(MeshSegment));
-
-  cudaMemcpy(meshDescriptorBuffer, h_meshDescriptorArray, MESH_DESCRIPTOR_COUNT*sizeof(MeshDescriptor), cudaMemcpyHostToDevice);
-  cudaMemcpy(meshSegmentBuffer, h_meshSegmentArray, MESH_SEGMENT_COUNT*sizeof(MeshSegment), cudaMemcpyHostToDevice);
+  initializeModels();
 }
 
 extern "C" void updateCamera(float x, float y, float z, float rotationX, float rotationY) {
