@@ -2,8 +2,8 @@
 
 extern "C" {
   void initializeMemory();
-
   void initializeScene();
+  
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
   void updateScene();
 
