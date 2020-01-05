@@ -13,21 +13,20 @@
 #define IMAGE_WIDTH 5000
 #define IMAGE_HEIGHT 5000
 
-#define LIGHT_COUNT 1
-
-#define MESH_DESCRIPTOR_COUNT 2
-#define MESH_SEGMENT_COUNT 112
-
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define SHADOW_EPILSON 0.00001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
 
+#define LIGHT_COUNT 1
+
 int frameWidth = 1000;
 int frameHeight = 1000;
 
-__constant__ Camera camera[1];
-
+__constant__ Camera camera;
 __constant__ Light lightArray[LIGHT_COUNT];
+
+__constant__ int meshDescriptorCount;
+__constant__ int meshSegmentCount;
 
 __device__ Tuple operator*(float* matrix, Tuple tuple) { return {(matrix[0] * tuple.x) + (matrix[1] * tuple.y) + (matrix[2] * tuple.z) + (matrix[3] * tuple.w), (matrix[4] * tuple.x) + (matrix[5] * tuple.y) + (matrix[6] * tuple.z) + (matrix[7] * tuple.w), (matrix[8] * tuple.x) + (matrix[9] * tuple.y) + (matrix[10] * tuple.z) + (matrix[11] * tuple.w), (matrix[12] * tuple.x) + (matrix[13] * tuple.y) + (matrix[14] * tuple.z) + (matrix[15] * tuple.w)}; }
 __device__ Ray transform(Ray ray, float* matrix) { return {(matrix * ray.origin), (matrix * ray.direction)}; }
@@ -75,7 +74,7 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
 
   int segmentOffset = 0;
   #pragma unroll
-  for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
+  for (int y = 0; y < meshDescriptorCount; y++) {
     for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
       float point;
       int count = intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], ray);
@@ -97,7 +96,7 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
 
     segmentOffset = 0;
     #pragma unroll
-    for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
+    for (int y = 0; y < meshDescriptorCount; y++) {
       for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
         float point = 0;
         intersecionCount += intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
@@ -123,7 +122,7 @@ Ray rayFromReflection(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment*
 
   int segmentOffset = 0;
   #pragma unroll
-  for (int y = 0; y < MESH_DESCRIPTOR_COUNT; y++) {
+  for (int y = 0; y < meshDescriptorCount; y++) {
     for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
       float point;
       int count = intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], ray);
@@ -160,9 +159,9 @@ void lighting(Tuple* colorOut, MeshDescriptor* meshDescriptorArray, MeshSegment*
     (idy - (renderHeight / 2.0f)) / renderHeight, 
     0.0f, 1.0f
   };
-  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
-  Ray ray = {camera[0].position, direction};
-  ray = transform(ray, camera[0].modelMatrix);
+  Tuple direction = normalize((pixel + camera.direction) - camera.position);
+  Ray ray = {camera.position, direction};
+  ray = transform(ray, camera.modelMatrix);
 
   colorOut[(idy*renderWidth)+idx] = colorFromRay(ray, meshDescriptorArray, meshSegmentArray);
 }
@@ -179,9 +178,9 @@ void reflections(Tuple* colorOut, MeshDescriptor* meshDescriptorArray, MeshSegme
     (idy - (renderHeight / 2.0f)) / renderHeight, 
     0.0f, 1.0f
   };
-  Tuple direction = normalize((pixel + camera[0].direction) - camera[0].position);
-  Ray ray = {camera[0].position, direction};
-  ray = transform(ray, camera[0].modelMatrix);
+  Tuple direction = normalize((pixel + camera.direction) - camera.position);
+  Ray ray = {camera.position, direction};
+  ray = transform(ray, camera.modelMatrix);
 
   colorOut[(idy*renderWidth)+idx] = colorFromRay(rayFromReflection(ray, meshDescriptorArray, meshSegmentArray), meshDescriptorArray, meshSegmentArray);
 }
@@ -249,18 +248,24 @@ void initializeModels() {
     }
   }
 
-  cudaMalloc(&meshDescriptorBuffer, h_meshDescriptorList.size()*sizeof(MeshDescriptor));
-  cudaMalloc(&meshSegmentBuffer, h_meshSegmentList.size()*sizeof(MeshSegment));
+  int h_meshDescriptorCount = h_meshDescriptorList.size();
+  int h_meshSegmentCount = h_meshSegmentList.size();
 
-  cudaMemcpy(meshDescriptorBuffer, &h_meshDescriptorList[0], h_meshDescriptorList.size()*sizeof(MeshDescriptor), cudaMemcpyHostToDevice);
-  cudaMemcpy(meshSegmentBuffer, &h_meshSegmentList[0], h_meshSegmentList.size()*sizeof(MeshSegment), cudaMemcpyHostToDevice);
+  cudaMalloc(&meshDescriptorBuffer, h_meshDescriptorCount*sizeof(MeshDescriptor));
+  cudaMalloc(&meshSegmentBuffer, h_meshSegmentCount*sizeof(MeshSegment));
+
+  cudaMemcpy(meshDescriptorBuffer, &h_meshDescriptorList[0], h_meshDescriptorCount*sizeof(MeshDescriptor), cudaMemcpyHostToDevice);
+  cudaMemcpy(meshSegmentBuffer, &h_meshSegmentList[0], h_meshSegmentCount*sizeof(MeshSegment), cudaMemcpyHostToDevice);
+
+  cudaMemcpyToSymbol(meshDescriptorCount, &h_meshDescriptorCount, sizeof(int));
+  cudaMemcpyToSymbol(meshSegmentCount, &h_meshSegmentCount, sizeof(int));
 }
 
 extern "C" void initializeScene() {
-  Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
-  initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
-  initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
-  cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
+  Camera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
+  initializeModelMatrix(h_camera.modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
+  initializeInverseModelMatrix(h_camera.inverseModelMatrix, h_camera.modelMatrix);
+  cudaMemcpyToSymbol(camera, &h_camera, sizeof(Camera));
 
   Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
@@ -269,10 +274,10 @@ extern "C" void initializeScene() {
 }
 
 extern "C" void updateCamera(float x, float y, float z, float rotationX, float rotationY) {
-  Camera h_camera[] = {{{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}};
-  initializeModelMatrix(h_camera[0].modelMatrix, multiply(multiply(createTranslateMatrix(x, y, z), createRotationMatrixY(rotationY)), createRotationMatrixX(rotationX)));
-  initializeInverseModelMatrix(h_camera[0].inverseModelMatrix, h_camera[0].modelMatrix);
-  cudaMemcpyToSymbol(camera, h_camera, sizeof(Camera));
+  Camera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
+  initializeModelMatrix(h_camera.modelMatrix, multiply(multiply(createTranslateMatrix(x, y, z), createRotationMatrixY(rotationY)), createRotationMatrixX(rotationX)));
+  initializeInverseModelMatrix(h_camera.inverseModelMatrix, h_camera.modelMatrix);
+  cudaMemcpyToSymbol(camera, &h_camera, sizeof(Camera));
 }
 
 extern "C" void updateScene() {
