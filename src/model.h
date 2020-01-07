@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <cmath>
 
 #include "raytrace_structures.h"
 
@@ -31,5 +32,6 @@ struct Model {
   MeshSegment* meshSegmentArray;
 };
 
+Model createReducedOBJ(const char* source, const char* target);
 Model createModelFromOBJ(const char* filename, int reflective);
 void initializeModelMatrix(MeshDescriptor* meshDescriptor, float* matrix);
