@@ -15,6 +15,8 @@ Model createReducedOBJ(const char* source, const char* target) {
 
     if (lineType == -1) {
       targetFile << line << "\n";
+      skipVertex = false;
+      skipFace = true;
     }
 
     if (lineType == 1) {

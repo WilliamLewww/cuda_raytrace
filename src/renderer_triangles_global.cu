@@ -233,7 +233,7 @@ extern "C" void initializeMemory() {
 void initializeModels() {
   std::vector<Model> modelList;
   modelList.push_back(createModelFromOBJ("res/cube.obj", 1));
-  modelList.push_back(createModelFromOBJ("res/reduced/torus_2.obj", 0));
+  modelList.push_back(createModelFromOBJ("res/reduced/donut_4.obj", 0));
   initializeModelMatrix(&modelList[0].meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
   initializeModelMatrix(&modelList[1].meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
 
