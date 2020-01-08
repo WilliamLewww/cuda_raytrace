@@ -55,8 +55,6 @@ RaytraceImage::~RaytraceImage() {
 
   cudaFree(d_meshSegmentBuffer);
   cudaFree(d_meshDescriptorBuffer);
-
-  free(cudaTextureResource);
 }
 
 void RaytraceImage::updateResolution(int width, int height, GLuint textureResource) {
