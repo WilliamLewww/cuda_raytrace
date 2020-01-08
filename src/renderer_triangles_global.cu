@@ -24,9 +24,6 @@ Tuple* reflectionsBuffer;
 MeshDescriptor* meshDescriptorBuffer;
 MeshSegment* meshSegmentBuffer;
 
-int frameWidth = 1000;
-int frameHeight = 1000;
-
 __constant__ Camera camera;
 __constant__ Light lightArray[LIGHT_COUNT];
 
@@ -222,7 +219,7 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
   cudaBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
 
-extern "C" void initializeMemory() {
+extern "C" void initializeMemory(int frameWidth, int frameHeight) {
   cudaFree(lightingBuffer);
   cudaFree(reflectionsBuffer);
   
@@ -233,7 +230,7 @@ extern "C" void initializeMemory() {
 void initializeModels() {
   std::vector<Model> modelList;
   modelList.push_back(createModelFromOBJ("res/cube.obj", 1));
-  modelList.push_back(createModelFromOBJ("res/reduced/donut_4.obj", 0));
+  modelList.push_back(createModelFromOBJ("res/donut.obj", 0));
   initializeModelMatrix(&modelList[0].meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
   initializeModelMatrix(&modelList[1].meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
 
@@ -284,12 +281,7 @@ extern "C" void updateScene() {
 
 }
 
-extern "C" void updateFrameResolution(int width, int height) {
-  frameWidth = width;
-  frameHeight = height;
-}
-
-extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource) {
+extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight) {
   dim3 block(blockDimX, blockDimY);
   dim3 grid((frameWidth + block.x - 1) / block.x, (frameHeight + block.y - 1) / block.y);
   lighting<<<grid, block>>>(lightingBuffer, meshDescriptorBuffer, meshSegmentBuffer, frameWidth, frameHeight);
