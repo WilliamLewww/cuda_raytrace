@@ -19,8 +19,6 @@
 
 #define LIGHT_COUNT 1
 
-Tuple* lightingBuffer;
-Tuple* reflectionsBuffer;
 MeshDescriptor* meshDescriptorBuffer;
 MeshSegment* meshSegmentBuffer;
 
@@ -219,14 +217,6 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
   cudaBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
 
-extern "C" void initializeMemory(int frameWidth, int frameHeight) {
-  cudaFree(lightingBuffer);
-  cudaFree(reflectionsBuffer);
-  
-  cudaMalloc(&lightingBuffer, frameWidth*frameHeight*sizeof(Tuple));
-  cudaMalloc(&reflectionsBuffer, frameWidth*frameHeight*sizeof(Tuple));
-}
-
 void initializeModels() {
   std::vector<Model> modelList;
   modelList.push_back(createModelFromOBJ("res/cube.obj", 1));
@@ -281,7 +271,7 @@ extern "C" void updateScene() {
 
 }
 
-extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight) {
+extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer) {
   dim3 block(blockDimX, blockDimY);
   dim3 grid((frameWidth + block.x - 1) / block.x, (frameHeight + block.y - 1) / block.y);
   lighting<<<grid, block>>>(lightingBuffer, meshDescriptorBuffer, meshSegmentBuffer, frameWidth, frameHeight);

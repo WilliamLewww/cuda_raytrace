@@ -1,20 +1,19 @@
 #include "raytrace_image.h"
 
 extern "C" {
-  void initializeMemory(int frameWidth, int frameHeight);
   void initializeScene();
   
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
   void updateScene();
 
-  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight);
+  void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer);
   void renderImage(int blockDimX, int blockDimY, const char* filename);
 }
 
 void RaytraceImage::initialize() {
   frameWidth = 250;
   frameHeight = 250;
-  
+
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
   cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
 
@@ -26,8 +25,14 @@ void RaytraceImage::updateResolution(int width, int height, GLuint textureResour
   frameHeight = height;
 
   cudaGraphicsGLRegisterImage(&cudaTextureResource, textureResource, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard);
+
+  cudaFree(cudaBuffer);
   cudaMalloc(&cudaBuffer, frameWidth*frameHeight*4*sizeof(GLubyte));
-  initializeMemory(frameWidth, frameHeight);
+
+  cudaFree(lightingBuffer);
+  cudaFree(reflectionsBuffer);
+  cudaMalloc(&lightingBuffer, frameWidth*frameHeight*sizeof(Tuple));
+  cudaMalloc(&reflectionsBuffer, frameWidth*frameHeight*sizeof(Tuple));
 }
 
 void RaytraceImage::update() {
@@ -70,5 +75,5 @@ void RaytraceImage::update() {
 }
 
 void RaytraceImage::render() {
-  renderFrame(16, 16, cudaBuffer, &cudaTextureResource, frameWidth, frameHeight);
+  renderFrame(16, 16, cudaBuffer, &cudaTextureResource, frameWidth, frameHeight, lightingBuffer, reflectionsBuffer);
 }

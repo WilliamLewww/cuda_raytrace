@@ -7,16 +7,20 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
+#include "raytrace_structures.h"
 #include "input.h"
 
 class RaytraceImage {
 private:
   int frameWidth, frameHeight;
-  
+
   float cameraPositionX, cameraPositionY, cameraPositionZ;
   float cameraRotationX, cameraRotationY;
 
   struct cudaGraphicsResource* cudaTextureResource;
+
+  Tuple* lightingBuffer;
+  Tuple* reflectionsBuffer;
   void* cudaBuffer;
 
   bool shouldTakePhoto;
