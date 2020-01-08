@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <math.h>
 
 #include <GL/glew.h>
@@ -17,6 +18,12 @@ private:
 
   float cameraPositionX, cameraPositionY, cameraPositionZ;
   float cameraRotationX, cameraRotationY;
+
+  std::vector<Model> modelList;
+  int h_meshDescriptorCount, h_meshSegmentCount;
+
+  MeshDescriptor* meshDescriptorBuffer;
+  MeshSegment* meshSegmentBuffer;
 
   struct cudaGraphicsResource* cudaTextureResource;
 

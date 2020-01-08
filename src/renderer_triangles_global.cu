@@ -19,9 +19,6 @@
 
 #define LIGHT_COUNT 1
 
-MeshDescriptor* meshDescriptorBuffer;
-MeshSegment* meshSegmentBuffer;
-
 __constant__ Camera camera;
 __constant__ Light lightArray[LIGHT_COUNT];
 
@@ -217,38 +214,7 @@ void combineLightingReflectionBuffers(unsigned int* colorBuffer, Tuple* lighting
   colorBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
 
-void initializeModels() {
-  std::vector<Model> modelList;
-  modelList.push_back(createModelFromOBJ("res/cube.obj", 1));
-  modelList.push_back(createModelFromOBJ("res/donut.obj", 0));
-  initializeModelMatrix(&modelList[0].meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
-  initializeModelMatrix(&modelList[1].meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
-
-  std::vector<MeshDescriptor> h_meshDescriptorList;
-  std::vector<MeshSegment> h_meshSegmentList;
-
-  for (int x = 0; x < modelList.size(); x++) {
-    h_meshDescriptorList.push_back(modelList[x].meshDescriptor);
-
-    for (int y = 0; y < h_meshDescriptorList[x].segmentCount; y++) {
-      h_meshSegmentList.push_back(modelList[x].meshSegmentArray[y]);
-    }
-  }
-
-  int h_meshDescriptorCount = h_meshDescriptorList.size();
-  int h_meshSegmentCount = h_meshSegmentList.size();
-
-  cudaMalloc(&meshDescriptorBuffer, h_meshDescriptorCount*sizeof(MeshDescriptor));
-  cudaMalloc(&meshSegmentBuffer, h_meshSegmentCount*sizeof(MeshSegment));
-
-  cudaMemcpy(meshDescriptorBuffer, &h_meshDescriptorList[0], h_meshDescriptorCount*sizeof(MeshDescriptor), cudaMemcpyHostToDevice);
-  cudaMemcpy(meshSegmentBuffer, &h_meshSegmentList[0], h_meshSegmentCount*sizeof(MeshSegment), cudaMemcpyHostToDevice);
-
-  cudaMemcpyToSymbol(meshDescriptorCount, &h_meshDescriptorCount, sizeof(int));
-  cudaMemcpyToSymbol(meshSegmentCount, &h_meshSegmentCount, sizeof(int));
-}
-
-extern "C" void initializeScene(int h_meshDescriptorCount, int h_meshSegmentCount) {
+extern "C" void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount) {
   Camera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
   initializeModelMatrix(h_camera.modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
   initializeInverseModelMatrix(h_camera.inverseModelMatrix, h_camera.modelMatrix);
@@ -257,7 +223,8 @@ extern "C" void initializeScene(int h_meshDescriptorCount, int h_meshSegmentCoun
   Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
 
-  initializeModels();
+  cudaMemcpyToSymbol(meshDescriptorCount, h_meshDescriptorCount, sizeof(int));
+  cudaMemcpyToSymbol(meshSegmentCount, h_meshSegmentCount, sizeof(int));
 }
 
 extern "C" void updateCamera(float x, float y, float z, float rotationX, float rotationY) {
@@ -271,7 +238,7 @@ extern "C" void updateScene() {
 
 }
 
-extern "C" void renderFrame(int blockDimX, int blockDimY, void* colorBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer) {
+extern "C" void renderFrame(int blockDimX, int blockDimY, void* colorBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer) {
   dim3 block(blockDimX, blockDimY);
   dim3 grid((frameWidth + block.x - 1) / block.x, (frameHeight + block.y - 1) / block.y);
   lighting<<<grid, block>>>(lightingBuffer, meshDescriptorBuffer, meshSegmentBuffer, frameWidth, frameHeight);
@@ -286,7 +253,7 @@ extern "C" void renderFrame(int blockDimX, int blockDimY, void* colorBuffer, cud
   cudaGraphicsUnmapResources(1, cudaTextureResource, 0);
 }
 
-extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename) {
+extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer) {
   printf("\n");
 
   Analysis::setAbsoluteStart();

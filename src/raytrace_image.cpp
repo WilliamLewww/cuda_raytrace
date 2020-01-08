@@ -1,13 +1,13 @@
 #include "raytrace_image.h"
 
 extern "C" {
-  void initializeScene(int h_meshDescriptorCount, int h_meshSegmentCount);
+  void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount);
   
   void updateCamera(float x, float y, float z, float rotationX, float rotationY);
   void updateScene();
 
-  void renderFrame(int blockDimX, int blockDimY, void* colorBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer);
-  void renderImage(int blockDimX, int blockDimY, const char* filename);
+  void renderFrame(int blockDimX, int blockDimY, void* colorBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer);
+  void renderImage(int blockDimX, int blockDimY, const char* filename, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer);
 }
 
 void RaytraceImage::initialize() {
@@ -17,7 +17,32 @@ void RaytraceImage::initialize() {
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
   cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
 
-  initializeScene(0, 0);
+  modelList.push_back(createModelFromOBJ("res/cube.obj", 1));
+  modelList.push_back(createModelFromOBJ("res/donut.obj", 0));
+  initializeModelMatrix(&modelList[0].meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
+  initializeModelMatrix(&modelList[1].meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
+
+  std::vector<MeshDescriptor> h_meshDescriptorList;
+  std::vector<MeshSegment> h_meshSegmentList;
+
+  for (int x = 0; x < modelList.size(); x++) {
+    h_meshDescriptorList.push_back(modelList[x].meshDescriptor);
+
+    for (int y = 0; y < h_meshDescriptorList[x].segmentCount; y++) {
+      h_meshSegmentList.push_back(modelList[x].meshSegmentArray[y]);
+    }
+  }
+
+  h_meshDescriptorCount = h_meshDescriptorList.size();
+  h_meshSegmentCount = h_meshSegmentList.size();
+
+  cudaMalloc(&meshDescriptorBuffer, h_meshDescriptorCount*sizeof(MeshDescriptor));
+  cudaMalloc(&meshSegmentBuffer, h_meshSegmentCount*sizeof(MeshSegment));
+
+  cudaMemcpy(meshDescriptorBuffer, &h_meshDescriptorList[0], h_meshDescriptorCount*sizeof(MeshDescriptor), cudaMemcpyHostToDevice);
+  cudaMemcpy(meshSegmentBuffer, &h_meshSegmentList[0], h_meshSegmentCount*sizeof(MeshSegment), cudaMemcpyHostToDevice);
+
+  initializeScene(&h_meshDescriptorCount, &h_meshSegmentCount);
 }
 
 void RaytraceImage::updateResolution(int width, int height, GLuint textureResource) {
@@ -66,7 +91,7 @@ void RaytraceImage::update() {
   }
 
   if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CIRCLE) && shouldTakePhoto) {
-    renderImage(16, 16, "image.ppm");
+    renderImage(16, 16, "image.ppm", meshDescriptorBuffer, meshSegmentBuffer);
     shouldTakePhoto = false;
   }
   
@@ -75,5 +100,5 @@ void RaytraceImage::update() {
 }
 
 void RaytraceImage::render() {
-  renderFrame(16, 16, colorBuffer, &cudaTextureResource, frameWidth, frameHeight, lightingBuffer, reflectionsBuffer);
+  renderFrame(16, 16, colorBuffer, &cudaTextureResource, frameWidth, frameHeight, lightingBuffer, reflectionsBuffer, meshDescriptorBuffer, meshSegmentBuffer);
 }
