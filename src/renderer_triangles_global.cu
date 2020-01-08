@@ -194,21 +194,21 @@ void writeColorDataToFile(const char* filename, int imageWidth, int imageHeight,
 }
 
 __global__
-void combineLightingReflectionBuffers(unsigned int* colorBuffer, Tuple* lightingBuffer, Tuple* reflectionsBuffer, int renderWidth, int renderHeight) {
+void combineLightingReflectionBuffers(unsigned int* d_colorBuffer, Tuple* d_lightingBuffer, Tuple* d_reflectionsBuffer, int renderWidth, int renderHeight) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
   if (idx >= renderWidth || idy >= renderHeight) { return; }
 
   Tuple color;
-  if (reflectionsBuffer[(idy*renderWidth)+idx].w > 0) {
-    color = (0.2 * reflectionsBuffer[(idy*renderWidth)+idx]) + lightingBuffer[(idy*renderWidth)+idx];
+  if (d_reflectionsBuffer[(idy*renderWidth)+idx].w > 0) {
+    color = (0.2 * d_reflectionsBuffer[(idy*renderWidth)+idx]) + d_lightingBuffer[(idy*renderWidth)+idx];
   }
   else {
-    color = lightingBuffer[(idy*renderWidth)+idx];
+    color = d_lightingBuffer[(idy*renderWidth)+idx];
   }
 
-  colorBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
+  d_colorBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
 
 extern "C" void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount) {
@@ -235,22 +235,22 @@ extern "C" void updateScene() {
 
 }
 
-extern "C" void renderFrame(int blockDimX, int blockDimY, void* colorBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer) {
+extern "C" void renderFrame(int blockDimX, int blockDimY, void* d_colorBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* d_lightingBuffer, Tuple* d_reflectionsBuffer, MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer) {
   dim3 block(blockDimX, blockDimY);
   dim3 grid((frameWidth + block.x - 1) / block.x, (frameHeight + block.y - 1) / block.y);
-  lighting<<<grid, block>>>(lightingBuffer, meshDescriptorBuffer, meshSegmentBuffer, frameWidth, frameHeight);
-  reflections<<<grid, block>>>(reflectionsBuffer, meshDescriptorBuffer, meshSegmentBuffer, frameWidth, frameHeight);
-  combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)colorBuffer, lightingBuffer, reflectionsBuffer, frameWidth, frameHeight);
+  lighting<<<grid, block>>>(d_lightingBuffer, d_meshDescriptorBuffer, d_meshSegmentBuffer, frameWidth, frameHeight);
+  reflections<<<grid, block>>>(d_reflectionsBuffer, d_meshDescriptorBuffer, d_meshSegmentBuffer, frameWidth, frameHeight);
+  combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)d_colorBuffer, d_lightingBuffer, d_reflectionsBuffer, frameWidth, frameHeight);
 
   cudaArray *texture_ptr;
   cudaGraphicsMapResources(1, cudaTextureResource, 0);
   cudaGraphicsSubResourceGetMappedArray(&texture_ptr, *cudaTextureResource, 0, 0);
 
-  cudaMemcpy2DToArray(texture_ptr, 0, 0,  colorBuffer, frameWidth*4*sizeof(GLubyte), frameWidth*4*sizeof(GLubyte), frameHeight, cudaMemcpyDeviceToDevice);
+  cudaMemcpy2DToArray(texture_ptr, 0, 0,  d_colorBuffer, frameWidth*4*sizeof(GLubyte), frameWidth*4*sizeof(GLubyte), frameHeight, cudaMemcpyDeviceToDevice);
   cudaGraphicsUnmapResources(1, cudaTextureResource, 0);
 }
 
-extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename, int imageWidth, int imageHeight, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer) {
+extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename, int imageWidth, int imageHeight, MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer) {
   printf("\n");
 
   Analysis::setAbsoluteStart();
@@ -274,8 +274,8 @@ extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename, 
 
   Analysis::begin();
   printf("rendering ray traced image...\n");
-  lighting<<<grid, block>>>(d_lightingData, meshDescriptorBuffer, meshSegmentBuffer, imageWidth, imageHeight);
-  reflections<<<grid, block>>>(d_reflectionsData, meshDescriptorBuffer, meshSegmentBuffer, imageWidth, imageHeight);
+  lighting<<<grid, block>>>(d_lightingData, d_meshDescriptorBuffer, d_meshSegmentBuffer, imageWidth, imageHeight);
+  reflections<<<grid, block>>>(d_reflectionsData, d_meshDescriptorBuffer, d_meshSegmentBuffer, imageWidth, imageHeight);
   combineLightingReflectionBuffers<<<grid, block>>>(d_imageData, d_lightingData, d_reflectionsData, imageWidth, imageHeight);
   cudaDeviceSynchronize();
   printf("finished rendering\n");

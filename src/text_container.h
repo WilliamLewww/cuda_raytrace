@@ -16,7 +16,9 @@ private:
 
   SquiggleAnimationText squiggleAnimationText;
 public:
-  void initialize(GLuint* shaderProgramHandle, Font* font, std::string text, float positionX, float positionY);
+  TextContainer(GLuint* shaderProgramHandle, Font* font, std::string text, float positionX, float positionY);
+  ~TextContainer();
+
   void changeText(std::string text);
 
   void update();

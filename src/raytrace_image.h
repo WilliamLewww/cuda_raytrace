@@ -23,18 +23,20 @@ private:
   std::vector<Model> modelList;
   int h_meshDescriptorCount, h_meshSegmentCount;
 
-  MeshDescriptor* meshDescriptorBuffer;
-  MeshSegment* meshSegmentBuffer;
-
   struct cudaGraphicsResource* cudaTextureResource;
 
-  Tuple* lightingBuffer;
-  Tuple* reflectionsBuffer;
-  void* colorBuffer;
+  MeshDescriptor* d_meshDescriptorBuffer;
+  MeshSegment* d_meshSegmentBuffer;
+
+  Tuple* d_lightingBuffer;
+  Tuple* d_reflectionsBuffer;
+  void* d_colorBuffer;
 
   bool shouldTakePhoto;
-public:  
-  void initialize();
+public:
+  RaytraceImage();
+  ~RaytraceImage();
+
   void update();
   void render();
 

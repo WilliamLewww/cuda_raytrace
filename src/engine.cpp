@@ -1,6 +1,6 @@
 #include "engine.h"
 
-void Engine::initialize() {
+Engine::Engine() {
   glfwInit();
   window = glfwCreateWindow(1000, 1000, "cuda_raytrace", NULL, NULL);
   glfwMakeContextCurrent(window);
@@ -14,8 +14,16 @@ void Engine::initialize() {
   shaderHandler = new ShaderHandler();
   shaderHandler->addShaderProgram("shaders/textured_rectangle");
 
-  joiner = new Joiner();
-  joiner->initialize(shaderHandler, fontHandler);
+  joiner = new Joiner(shaderHandler, fontHandler);
+}
+
+Engine::~Engine() {
+  delete joiner;
+  delete shaderHandler;
+  delete fontHandler;
+
+  glfwDestroyWindow(window);
+  glfwTerminate();
 }
 
 void Engine::run() {
@@ -25,11 +33,6 @@ void Engine::run() {
     update();
     render();
   }
-}
-
-void Engine::exit() {
-  glfwDestroyWindow(window);
-  glfwTerminate();
 }
 
 void Engine::update() {

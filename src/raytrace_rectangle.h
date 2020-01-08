@@ -26,11 +26,13 @@ private:
 
   void initializeImage(int width, int height);
 public:
+  RaytraceRectangle(GLuint* shaderProgramHandle);
+  ~RaytraceRectangle();
+
   int getImageResolution();
   void incrementResolution();
   void decrementResolution();
   
-  void initialize(GLuint* shaderProgramHandle);
   void update();
   void render();
 };

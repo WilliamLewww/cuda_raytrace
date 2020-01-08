@@ -15,6 +15,9 @@ private:
   std::string readShaderSource(const char* filepath);
   GLuint createShaderProgram(std::string vertexShaderString, std::string fragmentShaderString);
 public:
+  ShaderHandler();
+  ~ShaderHandler();
+  
   GLuint* getShaderFromName(const char* name);
 
   void addShaderProgram(std::string filename);

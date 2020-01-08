@@ -1,5 +1,13 @@
 #include "shader_handler.h"
 
+ShaderHandler::ShaderHandler() {
+
+}
+
+ShaderHandler::~ShaderHandler() {
+
+}
+
 GLuint* ShaderHandler::getShaderFromName(const char* name) {
   for (int x = 0; x < shaderProgramList.size(); x++) {
     if (strcmp(shaderProgramList[x].first.c_str(), name) == 0) {

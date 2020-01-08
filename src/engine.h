@@ -21,7 +21,8 @@ private:
   void update();
   void render();
 public:
-  void initialize();
+  Engine();
+  ~Engine();
+
   void run();
-  void exit();
 };

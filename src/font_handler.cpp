@@ -3,6 +3,14 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+FontHandler::FontHandler() {
+
+}
+
+FontHandler::~FontHandler() {
+
+}
+
 int FontHandler::getIndexFromSymbol(Font font, char symbol) {
   for (int x = 0; x < font.characterList.size(); x++) {
     if (font.characterList[x].symbol == symbol) {

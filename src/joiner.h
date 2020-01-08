@@ -19,7 +19,9 @@ private:
   RaytraceRectangle* raytraceRectangle;
   TextContainer* textContainer;
 public:
-  void initialize(ShaderHandler* shaderHandler, FontHandler* fontHandler);
+  Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler);
+  ~Joiner();
+
   void update();
   void render();
 };
