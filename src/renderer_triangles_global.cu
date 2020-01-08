@@ -200,7 +200,7 @@ void writeColorDataToFile(const char* filename, unsigned int* colorData) {
 }
 
 __global__
-void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingBuffer, Tuple* reflectionsBuffer, int renderWidth, int renderHeight) {
+void combineLightingReflectionBuffers(unsigned int* colorBuffer, Tuple* lightingBuffer, Tuple* reflectionsBuffer, int renderWidth, int renderHeight) {
   int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
   int idy = (blockIdx.y * blockDim.y) + threadIdx.y;
 
@@ -214,7 +214,7 @@ void combineLightingReflectionBuffers(unsigned int* cudaBuffer, Tuple* lightingB
     color = lightingBuffer[(idy*renderWidth)+idx];
   }
 
-  cudaBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
+  colorBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
 
 void initializeModels() {
@@ -248,7 +248,7 @@ void initializeModels() {
   cudaMemcpyToSymbol(meshSegmentCount, &h_meshSegmentCount, sizeof(int));
 }
 
-extern "C" void initializeScene() {
+extern "C" void initializeScene(int h_meshDescriptorCount, int h_meshSegmentCount) {
   Camera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
   initializeModelMatrix(h_camera.modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
   initializeInverseModelMatrix(h_camera.inverseModelMatrix, h_camera.modelMatrix);
@@ -271,18 +271,18 @@ extern "C" void updateScene() {
 
 }
 
-extern "C" void renderFrame(int blockDimX, int blockDimY, void* cudaBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer) {
+extern "C" void renderFrame(int blockDimX, int blockDimY, void* colorBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer) {
   dim3 block(blockDimX, blockDimY);
   dim3 grid((frameWidth + block.x - 1) / block.x, (frameHeight + block.y - 1) / block.y);
   lighting<<<grid, block>>>(lightingBuffer, meshDescriptorBuffer, meshSegmentBuffer, frameWidth, frameHeight);
   reflections<<<grid, block>>>(reflectionsBuffer, meshDescriptorBuffer, meshSegmentBuffer, frameWidth, frameHeight);
-  combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)cudaBuffer, lightingBuffer, reflectionsBuffer, frameWidth, frameHeight);
+  combineLightingReflectionBuffers<<<grid, block>>>((unsigned int*)colorBuffer, lightingBuffer, reflectionsBuffer, frameWidth, frameHeight);
 
   cudaArray *texture_ptr;
   cudaGraphicsMapResources(1, cudaTextureResource, 0);
   cudaGraphicsSubResourceGetMappedArray(&texture_ptr, *cudaTextureResource, 0, 0);
 
-  cudaMemcpy2DToArray(texture_ptr, 0, 0,  cudaBuffer, frameWidth*4*sizeof(GLubyte), frameWidth*4*sizeof(GLubyte), frameHeight, cudaMemcpyDeviceToDevice);
+  cudaMemcpy2DToArray(texture_ptr, 0, 0,  colorBuffer, frameWidth*4*sizeof(GLubyte), frameWidth*4*sizeof(GLubyte), frameHeight, cudaMemcpyDeviceToDevice);
   cudaGraphicsUnmapResources(1, cudaTextureResource, 0);
 }
 

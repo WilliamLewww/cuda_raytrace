@@ -8,6 +8,7 @@
 #include <cuda_gl_interop.h>
 
 #include "raytrace_structures.h"
+#include "model.h"
 #include "input.h"
 
 class RaytraceImage {
@@ -21,7 +22,7 @@ private:
 
   Tuple* lightingBuffer;
   Tuple* reflectionsBuffer;
-  void* cudaBuffer;
+  void* colorBuffer;
 
   bool shouldTakePhoto;
 public:  
