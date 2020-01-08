@@ -15,6 +15,7 @@
 class RaytraceImage {
 private:
   int frameWidth, frameHeight;
+  int imageWidth, imageHeight;
 
   float cameraPositionX, cameraPositionY, cameraPositionZ;
   float cameraRotationX, cameraRotationY;

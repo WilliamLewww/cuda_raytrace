@@ -10,9 +10,6 @@
 #include "model.h"
 #include "analysis.h"
 
-#define IMAGE_WIDTH 5000
-#define IMAGE_HEIGHT 5000
-
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define SHADOW_EPILSON 0.00001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
@@ -182,12 +179,12 @@ void reflections(Tuple* colorOut, MeshDescriptor* meshDescriptorArray, MeshSegme
   colorOut[(idy*renderWidth)+idx] = colorFromRay(rayFromReflection(ray, meshDescriptorArray, meshSegmentArray), meshDescriptorArray, meshSegmentArray);
 }
 
-void writeColorDataToFile(const char* filename, unsigned int* colorData) {
+void writeColorDataToFile(const char* filename, int imageWidth, int imageHeight, unsigned int* colorData) {
   std::ofstream file;
   file.open(filename);
-  file << "P3\n" << IMAGE_WIDTH << " " << IMAGE_HEIGHT << "\n255\n";
+  file << "P3\n" << imageWidth << " " << imageHeight << "\n255\n";
 
-  for (int x = 0; x < IMAGE_WIDTH * IMAGE_HEIGHT; x++) {
+  for (int x = 0; x < imageWidth * imageHeight; x++) {
     file << int(colorData[x] & 0x0000FF) << " ";
     file << int((colorData[x] & 0x00FF00) >> 8) << " ";
     file << int((colorData[x] & 0xFF0000) >> 16) << "\n";
@@ -253,7 +250,7 @@ extern "C" void renderFrame(int blockDimX, int blockDimY, void* colorBuffer, cud
   cudaGraphicsUnmapResources(1, cudaTextureResource, 0);
 }
 
-extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer) {
+extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename, int imageWidth, int imageHeight, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer) {
   printf("\n");
 
   Analysis::setAbsoluteStart();
@@ -263,37 +260,37 @@ extern "C" void renderImage(int blockDimX, int blockDimY, const char* filename, 
   Analysis::createLabel(3, "create_image");
 
   Analysis::begin();
-  unsigned int* h_imageData = (unsigned int*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte));
+  unsigned int* h_imageData = (unsigned int*)malloc(imageWidth*imageHeight*4*sizeof(GLubyte));
   unsigned int* d_imageData;
-  cudaMalloc((unsigned int**)&d_imageData, IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte));
+  cudaMalloc((unsigned int**)&d_imageData, imageWidth*imageHeight*4*sizeof(GLubyte));
 
   Tuple *d_lightingData, *d_reflectionsData;
-  cudaMalloc((Tuple**)&d_lightingData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
-  cudaMalloc((Tuple**)&d_reflectionsData, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(Tuple));
+  cudaMalloc((Tuple**)&d_lightingData, imageWidth*imageHeight*sizeof(Tuple));
+  cudaMalloc((Tuple**)&d_reflectionsData, imageWidth*imageHeight*sizeof(Tuple));
   Analysis::end(0);
 
   dim3 block(blockDimX, blockDimY);
-  dim3 grid((IMAGE_WIDTH + block.x - 1) / block.x, (IMAGE_HEIGHT + block.y - 1) / block.y);
+  dim3 grid((imageWidth + block.x - 1) / block.x, (imageHeight + block.y - 1) / block.y);
 
   Analysis::begin();
   printf("rendering ray traced image...\n");
-  lighting<<<grid, block>>>(d_lightingData, meshDescriptorBuffer, meshSegmentBuffer, IMAGE_WIDTH, IMAGE_HEIGHT);
-  reflections<<<grid, block>>>(d_reflectionsData, meshDescriptorBuffer, meshSegmentBuffer, IMAGE_WIDTH, IMAGE_HEIGHT);
-  combineLightingReflectionBuffers<<<grid, block>>>(d_imageData, d_lightingData, d_reflectionsData, IMAGE_WIDTH, IMAGE_HEIGHT);
+  lighting<<<grid, block>>>(d_lightingData, meshDescriptorBuffer, meshSegmentBuffer, imageWidth, imageHeight);
+  reflections<<<grid, block>>>(d_reflectionsData, meshDescriptorBuffer, meshSegmentBuffer, imageWidth, imageHeight);
+  combineLightingReflectionBuffers<<<grid, block>>>(d_imageData, d_lightingData, d_reflectionsData, imageWidth, imageHeight);
   cudaDeviceSynchronize();
   printf("finished rendering\n");
   Analysis::end(1);
 
   Analysis::begin();
-  cudaMemcpy(h_imageData, d_imageData, IMAGE_WIDTH*IMAGE_HEIGHT*4*sizeof(GLubyte), cudaMemcpyDeviceToHost);
+  cudaMemcpy(h_imageData, d_imageData, imageWidth*imageHeight*4*sizeof(GLubyte), cudaMemcpyDeviceToHost);
   Analysis::end(2);
 
   Analysis::begin();
-  writeColorDataToFile(filename, h_imageData);
+  writeColorDataToFile(filename, imageWidth, imageHeight, h_imageData);
   printf("saved image as: [%s]\n", filename);
   Analysis::end(3);
 
-  Analysis::printAll(IMAGE_WIDTH, IMAGE_HEIGHT);
+  Analysis::printAll(imageWidth, imageHeight);
 
   free(h_imageData);
   cudaFree(d_imageData);

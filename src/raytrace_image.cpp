@@ -7,12 +7,15 @@ extern "C" {
   void updateScene();
 
   void renderFrame(int blockDimX, int blockDimY, void* colorBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* lightingBuffer, Tuple* reflectionsBuffer, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer);
-  void renderImage(int blockDimX, int blockDimY, const char* filename, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer);
+  void renderImage(int blockDimX, int blockDimY, const char* filename, int imageWidth, int imageHeight, MeshDescriptor* meshDescriptorBuffer, MeshSegment* meshSegmentBuffer);
 }
 
 void RaytraceImage::initialize() {
   frameWidth = 250;
   frameHeight = 250;
+
+  imageWidth = 5000;
+  imageHeight = 5000;
 
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
   cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
@@ -91,7 +94,7 @@ void RaytraceImage::update() {
   }
 
   if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CIRCLE) && shouldTakePhoto) {
-    renderImage(16, 16, "image.ppm", meshDescriptorBuffer, meshSegmentBuffer);
+    renderImage(16, 16, "image.ppm", imageWidth, imageHeight, meshDescriptorBuffer, meshSegmentBuffer);
     shouldTakePhoto = false;
   }
   
