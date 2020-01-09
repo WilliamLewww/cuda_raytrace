@@ -20,9 +20,12 @@ private:
   void importVertexDataFromFile(const char* filename);
 public:
   Model(const char* filename, int reflective);
+  Model(const Model& model);
   ~Model();
 
   void setModelMatrix(float* modelMatrix);
+
+  Model* createReducedModel();
 
   MeshDescriptor createMeshDescriptor();
   std::vector<MeshSegment> createMeshSegmentList();

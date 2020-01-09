@@ -8,6 +8,19 @@ Model::Model(const char* filename, int reflective = 0) {
   initializeInverseModelMatrix(inverseModelMatrix, createIdentityMatrix());
 }
 
+Model::Model(const Model& model) {
+  this->vertexList = model.vertexList;
+  this->normalList = model.normalList;
+  this->indexList = model.indexList;
+
+  this->reflective = model.reflective;
+
+  for (int x = 0; x < 16; x++) {
+    this->modelMatrix[x] = model.modelMatrix[x];
+    this->inverseModelMatrix[x] = model.inverseModelMatrix[x];
+  }
+}
+
 Model::~Model() {
 
 }
@@ -100,6 +113,33 @@ MeshDescriptor Model::createMeshDescriptor() {
   initializeModelMatrix(&meshDescriptor, modelMatrix);
 
   return meshDescriptor;
+}
+
+Model* Model::createReducedModel() {
+  Model* model = new Model(*this);
+
+  int deleteIndex = 1;
+  int reducedSize = model->vertexList.size() / 2;
+  for (int x = 0; x < reducedSize; x++) {
+    model->vertexList.erase(model->vertexList.begin() + deleteIndex);
+    deleteIndex += 1;
+  }
+
+  deleteIndex = 0;
+  reducedSize = model->indexList.size() / 6;
+  for (int x = 0; x < reducedSize; x++) {
+    model->indexList.erase(model->indexList.begin() + deleteIndex);
+    model->indexList.erase(model->indexList.begin() + deleteIndex);
+    model->indexList.erase(model->indexList.begin() + deleteIndex);
+
+    deleteIndex += 3;
+  }
+
+  for (int x = 0; x < model->indexList.size(); x++) {
+    model->indexList[x].x = ceil(model->indexList[x].x / 2.0);
+  }
+
+  return model;
 }
 
 std::vector<MeshSegment> Model::createMeshSegmentList() {

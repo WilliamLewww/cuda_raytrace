@@ -14,6 +14,10 @@ void ModelHandler::addModel(const char* filename, int reflective = 0) {
   modelList.push_back(new Model(filename, reflective));
 }
 
+void ModelHandler::removeModel(int index) {
+  modelList.erase(modelList.begin() + index);
+}
+
 void ModelHandler::setModelMatrix(int index, float* modelMatrix) {
   modelList[index]->setModelMatrix(modelMatrix);
 }
@@ -37,6 +41,10 @@ std::vector<MeshSegment> ModelHandler::getCollectiveMeshSegmentList() {
   }
 
   return collectiveMeshSegmentList;
+}
+
+Model* ModelHandler::createReducedModel(int index) {
+  return modelList[index]->createReducedModel();
 }
 
 void ModelHandler::createReducedOBJ(const char* source, const char* target) {

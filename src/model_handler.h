@@ -11,10 +11,13 @@ public:
   ~ModelHandler();
 
   void addModel(const char* filename, int reflective);
+  void removeModel(int index);
+  
   void setModelMatrix(int index, float* modelMatrix);
 
   std::vector<MeshDescriptor> getCollectiveMeshDescriptorList();
   std::vector<MeshSegment> getCollectiveMeshSegmentList();
 
+  Model* createReducedModel(int index);
   void createReducedOBJ(const char* source, const char* target);
 };

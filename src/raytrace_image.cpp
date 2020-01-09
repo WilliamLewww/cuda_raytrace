@@ -17,6 +17,8 @@ RaytraceImage::RaytraceImage(ModelHandler* modelHandler) {
   imageWidth = 5000;
   imageHeight = 5000;
 
+  shouldTakePhoto = false;
+
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
   cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
   
