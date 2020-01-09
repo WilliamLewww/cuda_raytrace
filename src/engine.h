@@ -2,9 +2,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <cuda_runtime.h>
-#include <cuda_gl_interop.h>
-
 #include "input.h"
 #include "font_handler.h"
 #include "model_handler.h"
