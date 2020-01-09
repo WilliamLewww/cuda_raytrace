@@ -23,12 +23,6 @@ void TextContainer::changeText(std::string text) {
     characterRectangleList[characterRectangleList.size() - 1].initialize(shaderProgramHandle, font, text[x], positionX + offsetX, positionY);
     offsetX += characterRectangleList[characterRectangleList.size() - 1].getOffsetX();
   }
-
-  squiggleAnimationText.initialize(&characterRectangleList);
-}
-
-void TextContainer::update() {
-  squiggleAnimationText.animate();
 }
 
 void TextContainer::render() {

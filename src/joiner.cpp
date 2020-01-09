@@ -1,48 +1,22 @@
 #include "joiner.h"
 
 Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler) {
-  shouldDecreaseImageResolution = false;
-  shouldIncreaseImageResolution = false;
-  
-  raytraceRectangle = new RaytraceRectangle(shaderHandler->getShaderFromName("textured_rectangle"), modelHandler);
+  modelHandler->addModel("res/cube.obj", 1);
+  modelHandler->addModel("res/donut.obj", 0);
+  modelHandler->setModelMatrix(0, createScaleMatrix(5.0, 0.15, 5.0));
+  modelHandler->setModelMatrix(1, createTranslateMatrix(0.0, -2.0, 0.0));
 
-  std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
-  textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), resolutionString, -0.95, 0.85);
+  raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelHandler);
 }
 
 Joiner::~Joiner() {
-  delete textContainer;
-  delete raytraceRectangle;
+  delete raytraceContainer;
 }
 
 void Joiner::update() {
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && !shouldIncreaseImageResolution) {
-    shouldIncreaseImageResolution = true;
-  }
-
-  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && shouldIncreaseImageResolution) {
-    raytraceRectangle->incrementResolution();
-    std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
-    textContainer->changeText(resolutionString);
-    shouldIncreaseImageResolution = false;
-  }
-
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && !shouldDecreaseImageResolution) {
-    shouldDecreaseImageResolution = true;
-  }
-
-  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && shouldDecreaseImageResolution) {
-    raytraceRectangle->decrementResolution();
-    std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
-    textContainer->changeText(resolutionString);
-    shouldDecreaseImageResolution = false;
-  }
-
-  raytraceRectangle->update();
-  textContainer->update();
+  raytraceContainer->update();
 }
 
 void Joiner::render() {
-  raytraceRectangle->render();
-  textContainer->render();
+  raytraceContainer->render();
 }

@@ -10,15 +10,11 @@
 #include "input.h"
 #include "model_handler.h"
 #include "shader_handler.h"
-#include "raytrace_rectangle.h"
-#include "text_container.h"
+#include "raytrace_container.h"
 
 class Joiner {
 private:
-  bool shouldDecreaseImageResolution, shouldIncreaseImageResolution;
-  
-  RaytraceRectangle* raytraceRectangle;
-  TextContainer* textContainer;
+  RaytraceContainer* raytraceContainer;
 public:
   Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler);
   ~Joiner();
