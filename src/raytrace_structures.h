@@ -49,6 +49,23 @@ struct Triangle {
   float inverseModelMatrix[16];
 };
 
+struct MeshDescriptor {
+  int segmentCount;
+  int reflective;
+
+  float modelMatrix[16];
+  float inverseModelMatrix[16];
+};
+
+struct MeshSegment {
+  Tuple vertexA;
+  Tuple vertexB;
+  Tuple vertexC;
+  Tuple normal;
+
+  Tuple color;
+};
+
 struct Camera {
   Tuple position;
   Tuple direction;

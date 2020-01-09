@@ -101,6 +101,15 @@ void initializeInverseModelMatrix(float* dst, float* src) {
   for (int x = 0; x < 16; x++) { dst[x] = inverseModelMatrix[x]; }
 }
 
+void initializeModelMatrix(MeshDescriptor* meshDescriptor, float* matrix) {
+  float* modelMatrix = meshDescriptor->modelMatrix;
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
+
+  modelMatrix = meshDescriptor->inverseModelMatrix;
+  float* inverseModelMatrix = inverseMatrix(meshDescriptor->modelMatrix);
+  for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
+}
+
 void initializeModelMatrix(Sphere* sphere, float* matrix) {
   float* modelMatrix = sphere->modelMatrix;
   for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }

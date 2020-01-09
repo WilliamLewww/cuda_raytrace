@@ -20,7 +20,7 @@ private:
   float cameraPositionX, cameraPositionY, cameraPositionZ;
   float cameraRotationX, cameraRotationY;
 
-  std::vector<Model> modelList;
+  std::vector<Model*> modelList;
   int h_meshDescriptorCount, h_meshSegmentCount;
 
   struct cudaGraphicsResource* cudaTextureResource;

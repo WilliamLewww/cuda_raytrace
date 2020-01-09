@@ -20,20 +20,19 @@ RaytraceImage::RaytraceImage() {
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
   cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
 
-  modelList.push_back(createModelFromOBJ("res/cube.obj", 1));
-  modelList.push_back(createModelFromOBJ("res/donut.obj", 0));
-  initializeModelMatrix(&modelList[0].meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
-  initializeModelMatrix(&modelList[1].meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
+  modelList.push_back(new Model("res/cube.obj", 1));
+  modelList.push_back(new Model("res/donut.obj", 0));
+  // initializeModelMatrix(&modelList[0]->meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
+  // initializeModelMatrix(&modelList[1]->meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
 
   std::vector<MeshDescriptor> h_meshDescriptorList;
   std::vector<MeshSegment> h_meshSegmentList;
 
   for (int x = 0; x < modelList.size(); x++) {
-    h_meshDescriptorList.push_back(modelList[x].meshDescriptor);
-
-    for (int y = 0; y < h_meshDescriptorList[x].segmentCount; y++) {
-      h_meshSegmentList.push_back(modelList[x].meshSegmentArray[y]);
-    }
+    h_meshDescriptorList.push_back(modelList[x]->createMeshDescriptor());
+    
+    std::vector<MeshSegment> tempMeshSegmentList = modelList[x]->createMeshSegmentList();
+    h_meshSegmentList.insert(h_meshSegmentList.end(), tempMeshSegmentList.begin(), tempMeshSegmentList.end());
   }
 
   h_meshDescriptorCount = h_meshDescriptorList.size();

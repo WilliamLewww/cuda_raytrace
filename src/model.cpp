@@ -1,6 +1,122 @@
 #include "model.h"
 
-Model createReducedOBJ(const char* source, const char* target) {
+Model::Model(const char* filename, int reflective = 0) {
+  importVertexDataFromFile(filename);
+  this->reflective = reflective;
+
+  initializeModelMatrix(modelMatrix, createIdentityMatrix());
+  initializeInverseModelMatrix(inverseModelMatrix, createIdentityMatrix());
+}
+
+Model::~Model() {
+
+}
+
+void Model::importVertexDataFromFile(const char* filename) {
+  std::ifstream file(filename);
+  std::string line;
+
+  while (std::getline(file, line)) {
+    if (line.substr(0, line.find_first_of(' ')) == "v") {
+      std::string temp = line.substr(line.find_first_of(' ') + 1);
+      float x, y, z;
+
+      if (temp.at(0) == '-') { x = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
+      else { x = std::stof(temp.substr(0, temp.find_first_of(' '))); }
+      temp = temp.substr(temp.find_first_of(' ') + 1);
+
+      if (temp.at(0) == '-') { y = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
+      else { y = std::stof(temp.substr(0, temp.find_first_of(' '))); }
+      temp = temp.substr(temp.find_first_of(' ') + 1);
+
+      if (temp.at(0) == '-') { z = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
+      else { z = std::stof(temp.substr(0, temp.find_first_of(' '))); }
+
+      vertexList.push_back({x, y, z, 1.0});
+    }
+
+    if (line.substr(0, line.find_first_of(' ')) == "vn") {
+      std::string temp = line.substr(line.find_first_of(' ') + 1);
+      float x, y, z;
+
+      if (temp.at(0) == '-') { x = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
+      else { x = std::stof(temp.substr(0, temp.find_first_of(' '))); }
+      temp = temp.substr(temp.find_first_of(' ') + 1);
+
+      if (temp.at(0) == '-') { y = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
+      else { y = std::stof(temp.substr(0, temp.find_first_of(' '))); }
+      temp = temp.substr(temp.find_first_of(' ') + 1);
+
+      if (temp.at(0) == '-') { z = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
+      else { z = std::stof(temp.substr(0, temp.find_first_of(' '))); }
+
+      normalList.push_back({x, y, z, 0.0});
+    }
+
+    if (line.substr(0, line.find_first_of(' ')) == "f") {
+      std::string temp = line.substr(line.find_first_of(' ') + 1);
+      Tuple a, b, c;
+
+      a.x = std::stof(temp.substr(0, temp.find_first_of('/')));
+      temp = temp.substr(temp.find_first_of('/') + 1);
+      // printf("%d\n", std::stof(temp.substr(0, temp.find_first_of('/'))));
+      temp = temp.substr(temp.find_first_of('/') + 1);
+      a.z = std::stof(temp.substr(0, temp.find_first_of(' ')));
+
+      temp = temp.substr(temp.find_first_of(' ') + 1);
+
+      b.x = std::stof(temp.substr(0, temp.find_first_of('/')));
+      temp = temp.substr(temp.find_first_of('/') + 1);
+      // printf("%d\n", std::stof(temp.substr(0, temp.find_first_of('/'))));
+      temp = temp.substr(temp.find_first_of('/') + 1);
+      b.z = std::stof(temp.substr(0, temp.find_first_of(' ')));
+
+      temp = temp.substr(temp.find_first_of(' ') + 1);
+
+      c.x = std::stof(temp.substr(0, temp.find_first_of('/')));
+      temp = temp.substr(temp.find_first_of('/') + 1);
+      // printf("%d\n", std::stof(temp.substr(0, temp.find_first_of('/'))));
+      temp = temp.substr(temp.find_first_of('/') + 1);
+      c.z = std::stof(temp.substr(0, temp.find_first_of(' ')));
+
+      indexList.push_back(a);
+      indexList.push_back(b);
+      indexList.push_back(c);
+    }
+  }
+
+  file.close();
+}
+
+MeshDescriptor Model::createMeshDescriptor() {
+  MeshDescriptor meshDescriptor;
+  meshDescriptor.segmentCount = indexList.size() / 3;
+  meshDescriptor.reflective = reflective;
+  initializeModelMatrix(&meshDescriptor, modelMatrix);
+
+  return meshDescriptor;
+}
+
+std::vector<MeshSegment> Model::createMeshSegmentList() {
+  std::vector<MeshSegment> meshSegmentList;
+
+  for (int x = 0; x < indexList.size() / 3; x++) {
+    MeshSegment segment;
+    segment.vertexA = vertexList[indexList[(3 * x)].x - 1];
+    segment.vertexB = vertexList[indexList[(3 * x) + 1].x - 1];
+    segment.vertexC = vertexList[indexList[(3 * x) + 2].x - 1];
+
+    segment.normal = normalList[indexList[(3 * x)].z - 1];
+
+    segment.color = {float(int(45.0 * x + 87) % 255), float(int(77.0 * x + 102) % 255), float(int(123.0 * x + 153) % 255), 1.0};
+  
+    meshSegmentList.push_back(segment);
+  }
+
+  return meshSegmentList;
+}
+
+void createReducedOBJ(const char* source, const char* target) {
   std::ifstream sourceFile(source);
   std::ofstream targetFile(target);
   std::string line;
@@ -58,107 +174,4 @@ Model createReducedOBJ(const char* source, const char* target) {
 
   sourceFile.close();
   targetFile.close();
-}
-
-Model createModelFromOBJ(const char* filename, int reflective) {
-  Model model;
-
-  std::ifstream file(filename);
-  std::string line;
-
-  while (std::getline(file, line)) {
-    if (line.substr(0, line.find_first_of(' ')) == "v") {
-      std::string temp = line.substr(line.find_first_of(' ') + 1);
-      float x, y, z;
-
-      if (temp.at(0) == '-') { x = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
-      else { x = std::stof(temp.substr(0, temp.find_first_of(' '))); }
-      temp = temp.substr(temp.find_first_of(' ') + 1);
-
-      if (temp.at(0) == '-') { y = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
-      else { y = std::stof(temp.substr(0, temp.find_first_of(' '))); }
-      temp = temp.substr(temp.find_first_of(' ') + 1);
-
-      if (temp.at(0) == '-') { z = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
-      else { z = std::stof(temp.substr(0, temp.find_first_of(' '))); }
-
-      model.vertexList.push_back({x, y, z, 1.0});
-    }
-
-    if (line.substr(0, line.find_first_of(' ')) == "vn") {
-      std::string temp = line.substr(line.find_first_of(' ') + 1);
-      float x, y, z;
-
-      if (temp.at(0) == '-') { x = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
-      else { x = std::stof(temp.substr(0, temp.find_first_of(' '))); }
-      temp = temp.substr(temp.find_first_of(' ') + 1);
-
-      if (temp.at(0) == '-') { y = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
-      else { y = std::stof(temp.substr(0, temp.find_first_of(' '))); }
-      temp = temp.substr(temp.find_first_of(' ') + 1);
-
-      if (temp.at(0) == '-') { z = -std::stof(temp.substr(1, temp.find_first_of(' '))); }
-      else { z = std::stof(temp.substr(0, temp.find_first_of(' '))); }
-
-      model.normalList.push_back({x, y, z, 0.0});
-    }
-
-    if (line.substr(0, line.find_first_of(' ')) == "f") {
-      std::string temp = line.substr(line.find_first_of(' ') + 1);
-      Tuple a, b, c;
-
-      a.x = std::stof(temp.substr(0, temp.find_first_of('/')));
-      temp = temp.substr(temp.find_first_of('/') + 1);
-      // printf("%d\n", std::stof(temp.substr(0, temp.find_first_of('/'))));
-      temp = temp.substr(temp.find_first_of('/') + 1);
-      a.z = std::stof(temp.substr(0, temp.find_first_of(' ')));
-
-      temp = temp.substr(temp.find_first_of(' ') + 1);
-
-      b.x = std::stof(temp.substr(0, temp.find_first_of('/')));
-      temp = temp.substr(temp.find_first_of('/') + 1);
-      // printf("%d\n", std::stof(temp.substr(0, temp.find_first_of('/'))));
-      temp = temp.substr(temp.find_first_of('/') + 1);
-      b.z = std::stof(temp.substr(0, temp.find_first_of(' ')));
-
-      temp = temp.substr(temp.find_first_of(' ') + 1);
-
-      c.x = std::stof(temp.substr(0, temp.find_first_of('/')));
-      temp = temp.substr(temp.find_first_of('/') + 1);
-      // printf("%d\n", std::stof(temp.substr(0, temp.find_first_of('/'))));
-      temp = temp.substr(temp.find_first_of('/') + 1);
-      c.z = std::stof(temp.substr(0, temp.find_first_of(' ')));
-
-      model.indexList.push_back(a);
-      model.indexList.push_back(b);
-      model.indexList.push_back(c);
-    }
-  }
-
-  file.close();
-
-  model.meshDescriptor.segmentCount = model.indexList.size() / 3;
-  model.meshSegmentArray = new MeshSegment[model.meshDescriptor.segmentCount];
-  for (int x = 0; x < model.meshDescriptor.segmentCount; x++) {
-    model.meshSegmentArray[x].vertexA = model.vertexList[model.indexList[(3 * x)].x - 1];
-    model.meshSegmentArray[x].vertexB = model.vertexList[model.indexList[(3 * x) + 1].x - 1];
-    model.meshSegmentArray[x].vertexC = model.vertexList[model.indexList[(3 * x) + 2].x - 1];
-
-    model.meshSegmentArray[x].normal = model.normalList[model.indexList[(3 * x)].z - 1];
-
-    model.meshSegmentArray[x].color = {float(int(45.0 * x + 87) % 255), float(int(77.0 * x + 102) % 255), float(int(123.0 * x + 153) % 255), 1.0};
-  }
-
-  model.meshDescriptor.reflective = reflective;
-
-  return model;
-}
-
-void initializeModelMatrix(MeshDescriptor* meshDescriptor, float* matrix) {
-  float* modelMatrix = meshDescriptor->modelMatrix;
-  for (int x = 0; x < 16; x++) { modelMatrix[x] = matrix[x]; }
-
-  modelMatrix = meshDescriptor->inverseModelMatrix;
-  float* inverseModelMatrix = inverseMatrix(meshDescriptor->modelMatrix);
-  for (int x = 0; x < 16; x++) { modelMatrix[x] = inverseModelMatrix[x]; }
 }

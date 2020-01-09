@@ -6,32 +6,25 @@
 
 #include "raytrace_structures.h"
 
-struct MeshDescriptor {
-  int segmentCount;
+class Model {
+private:
   int reflective;
 
-  float modelMatrix[16];
-  float inverseModelMatrix[16];
-};
-
-struct MeshSegment {
-  Tuple vertexA;
-  Tuple vertexB;
-  Tuple vertexC;
-  Tuple normal;
-
-  Tuple color;
-};
-
-struct Model {
   std::vector<Tuple> vertexList;
   std::vector<Tuple> normalList;
   std::vector<Tuple> indexList;
 
-  MeshDescriptor meshDescriptor;
-  MeshSegment* meshSegmentArray;
+  float modelMatrix[16];
+  float inverseModelMatrix[16];
+
+  void importVertexDataFromFile(const char* filename);
+public:
+  Model(const char* filename, int reflective);
+  ~Model();
+
+  MeshDescriptor createMeshDescriptor();
+  std::vector<MeshSegment> createMeshSegmentList();
 };
 
-Model createReducedOBJ(const char* source, const char* target);
-Model createModelFromOBJ(const char* filename, int reflective);
+void createReducedOBJ(const char* source, const char* target);
 void initializeModelMatrix(MeshDescriptor* meshDescriptor, float* matrix);
