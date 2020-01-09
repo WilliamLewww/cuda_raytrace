@@ -1,6 +1,6 @@
 #include "raytrace_rectangle.h"
 
-RaytraceRectangle::RaytraceRectangle(GLuint* shaderProgramHandle) {
+RaytraceRectangle::RaytraceRectangle(GLuint* shaderProgramHandle, ModelHandler* modelHandler) {
   imageResolution = 250;
 
   vertices[0] = -1.0;   vertices[1] = -1.0;
@@ -19,7 +19,7 @@ RaytraceRectangle::RaytraceRectangle(GLuint* shaderProgramHandle) {
 
   this->shaderProgramHandle = shaderProgramHandle;
 
-  image = new RaytraceImage();
+  image = new RaytraceImage(modelHandler);
   initializeImage(imageResolution, imageResolution);
 
   glGenVertexArrays(1, &vao);

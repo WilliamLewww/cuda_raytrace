@@ -1,7 +1,10 @@
 #include "joiner.h"
 
-Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
-  raytraceRectangle = new RaytraceRectangle(shaderHandler->getShaderFromName("textured_rectangle"));
+Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler) {
+  shouldDecreaseImageResolution = false;
+  shouldIncreaseImageResolution = false;
+  
+  raytraceRectangle = new RaytraceRectangle(shaderHandler->getShaderFromName("textured_rectangle"), modelHandler);
 
   std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
   textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), resolutionString, -0.95, 0.85);

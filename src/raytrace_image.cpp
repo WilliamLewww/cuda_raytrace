@@ -10,7 +10,7 @@ extern "C" {
   void renderImage(int blockDimX, int blockDimY, const char* filename, int imageWidth, int imageHeight, MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer);
 }
 
-RaytraceImage::RaytraceImage() {
+RaytraceImage::RaytraceImage(ModelHandler* modelHandler) {
   frameWidth = 250;
   frameHeight = 250;
   
@@ -19,21 +19,9 @@ RaytraceImage::RaytraceImage() {
 
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
   cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
-
-  modelList.push_back(new Model("res/cube.obj", 1));
-  modelList.push_back(new Model("res/donut.obj", 0));
-  modelList[0]->setModelMatrix(createScaleMatrix(5.0, 0.15, 5.0));
-  modelList[1]->setModelMatrix(createTranslateMatrix(0.0, -2.0, 0.0));
-
-  std::vector<MeshDescriptor> h_meshDescriptorList;
-  std::vector<MeshSegment> h_meshSegmentList;
-
-  for (int x = 0; x < modelList.size(); x++) {
-    h_meshDescriptorList.push_back(modelList[x]->createMeshDescriptor());
-
-    std::vector<MeshSegment> tempMeshSegmentList = modelList[x]->createMeshSegmentList();
-    h_meshSegmentList.insert(h_meshSegmentList.end(), tempMeshSegmentList.begin(), tempMeshSegmentList.end());
-  }
+  
+  std::vector<MeshDescriptor> h_meshDescriptorList = modelHandler->getCollectiveMeshDescriptorList();
+  std::vector<MeshSegment> h_meshSegmentList = modelHandler->getCollectiveMeshSegmentList();
 
   h_meshDescriptorCount = h_meshDescriptorList.size();
   h_meshSegmentCount = h_meshSegmentList.size();

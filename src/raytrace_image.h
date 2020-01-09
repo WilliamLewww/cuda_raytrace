@@ -9,6 +9,7 @@
 #include <cuda_gl_interop.h>
 
 #include "raytrace_structures.h"
+#include "model_handler.h"
 #include "model.h"
 #include "input.h"
 
@@ -34,7 +35,7 @@ private:
 
   bool shouldTakePhoto;
 public:
-  RaytraceImage();
+  RaytraceImage(ModelHandler* modelHandler);
   ~RaytraceImage();
 
   void update();

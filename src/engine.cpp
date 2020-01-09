@@ -14,11 +14,18 @@ Engine::Engine() {
   shaderHandler = new ShaderHandler();
   shaderHandler->addShaderProgram("shaders/textured_rectangle");
 
-  joiner = new Joiner(shaderHandler, fontHandler);
+  modelHandler = new ModelHandler();
+  modelHandler->addModel("res/cube.obj", 1);
+  modelHandler->addModel("res/donut.obj", 0);
+  modelHandler->setModelMatrix(0, createScaleMatrix(5.0, 0.15, 5.0));
+  modelHandler->setModelMatrix(1, createTranslateMatrix(0.0, -2.0, 0.0));
+
+  joiner = new Joiner(shaderHandler, fontHandler, modelHandler);
 }
 
 Engine::~Engine() {
   delete joiner;
+  delete modelHandler;
   delete shaderHandler;
   delete fontHandler;
 

@@ -8,11 +8,11 @@
 
 class Model {
 private:
-  int reflective;
-
   std::vector<Tuple> vertexList;
   std::vector<Tuple> normalList;
   std::vector<Tuple> indexList;
+
+  int reflective;
 
   float modelMatrix[16];
   float inverseModelMatrix[16];

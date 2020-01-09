@@ -26,7 +26,7 @@ private:
 
   void initializeImage(int width, int height);
 public:
-  RaytraceRectangle(GLuint* shaderProgramHandle);
+  RaytraceRectangle(GLuint* shaderProgramHandle, ModelHandler* modelHandler);
   ~RaytraceRectangle();
 
   int getImageResolution();

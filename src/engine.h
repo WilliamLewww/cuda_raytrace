@@ -7,6 +7,7 @@
 
 #include "input.h"
 #include "font_handler.h"
+#include "model_handler.h"
 #include "shader_handler.h"
 #include "joiner.h"
 
@@ -16,6 +17,8 @@ private:
 
   FontHandler* fontHandler;
   ShaderHandler* shaderHandler;
+  ModelHandler* modelHandler;
+  
   Joiner* joiner;
 
   void update();
