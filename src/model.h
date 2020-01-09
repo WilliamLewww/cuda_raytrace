@@ -10,7 +10,9 @@ class Model {
 private:
   std::vector<Tuple> vertexList;
   std::vector<Tuple> normalList;
-  std::vector<Tuple> indexList;
+  std::vector<int> vertexIndexList;
+  std::vector<int> textureIndexList;
+  std::vector<int> normalIndexList;
 
   int reflective;
 

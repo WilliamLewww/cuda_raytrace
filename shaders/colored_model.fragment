@@ -1,0 +1,5 @@
+#version 460
+
+void main() {
+  vec4 color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+}

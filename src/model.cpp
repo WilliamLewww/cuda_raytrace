@@ -11,7 +11,9 @@ Model::Model(const char* filename, int reflective = 0) {
 Model::Model(const Model& model) {
   this->vertexList = model.vertexList;
   this->normalList = model.normalList;
-  this->indexList = model.indexList;
+  this->vertexIndexList = model.vertexIndexList;
+  this->textureIndexList = model.textureIndexList;
+  this->normalIndexList = model.normalIndexList;
 
   this->reflective = model.reflective;
 
@@ -92,9 +94,17 @@ void Model::importVertexDataFromFile(const char* filename) {
       temp = temp.substr(temp.find_first_of('/') + 1);
       c.z = std::stof(temp.substr(0, temp.find_first_of(' ')));
 
-      indexList.push_back(a);
-      indexList.push_back(b);
-      indexList.push_back(c);
+      vertexIndexList.push_back(a.x);
+      textureIndexList.push_back(a.y);
+      normalIndexList.push_back(a.z);
+
+      vertexIndexList.push_back(b.x);
+      textureIndexList.push_back(b.y);
+      normalIndexList.push_back(b.z);
+
+      vertexIndexList.push_back(c.x);
+      textureIndexList.push_back(c.y);
+      normalIndexList.push_back(c.z);
     }
   }
 
@@ -104,15 +114,6 @@ void Model::importVertexDataFromFile(const char* filename) {
 void Model::setModelMatrix(float* modelMatrix) {
   initializeModelMatrix(this->modelMatrix, modelMatrix);
   initializeInverseModelMatrix(inverseModelMatrix, modelMatrix);
-}
-
-MeshDescriptor Model::createMeshDescriptor() {
-  MeshDescriptor meshDescriptor;
-  meshDescriptor.segmentCount = indexList.size() / 3;
-  meshDescriptor.reflective = reflective;
-  initializeModelMatrix(&meshDescriptor, modelMatrix);
-
-  return meshDescriptor;
 }
 
 Model* Model::createReducedModel() {
@@ -126,32 +127,43 @@ Model* Model::createReducedModel() {
   }
 
   deleteIndex = 0;
-  reducedSize = model->indexList.size() / 6;
+  reducedSize = model->vertexIndexList.size() / 6;
   for (int x = 0; x < reducedSize; x++) {
-    model->indexList.erase(model->indexList.begin() + deleteIndex);
-    model->indexList.erase(model->indexList.begin() + deleteIndex);
-    model->indexList.erase(model->indexList.begin() + deleteIndex);
+    for (int y = 0; y < 3; y++) {
+      model->vertexIndexList.erase(model->vertexIndexList.begin() + deleteIndex);
+      model->textureIndexList.erase(model->textureIndexList.begin() + deleteIndex);
+      model->normalIndexList.erase(model->normalIndexList.begin() + deleteIndex);
+    }
 
     deleteIndex += 3;
   }
 
-  for (int x = 0; x < model->indexList.size(); x++) {
-    model->indexList[x].x = ceil(model->indexList[x].x / 2.0);
+  for (int x = 0; x < model->vertexIndexList.size(); x++) {
+    model->vertexIndexList[x] = ceil(model->vertexIndexList[x] / 2.0);
   }
 
   return model;
 }
 
+MeshDescriptor Model::createMeshDescriptor() {
+  MeshDescriptor meshDescriptor;
+  meshDescriptor.segmentCount = vertexIndexList.size() / 3;
+  meshDescriptor.reflective = reflective;
+  initializeModelMatrix(&meshDescriptor, modelMatrix);
+
+  return meshDescriptor;
+}
+
 std::vector<MeshSegment> Model::createMeshSegmentList() {
   std::vector<MeshSegment> meshSegmentList;
 
-  for (int x = 0; x < indexList.size() / 3; x++) {
+  for (int x = 0; x < vertexIndexList.size() / 3; x++) {
     MeshSegment segment;
-    segment.vertexA = vertexList[indexList[(3 * x)].x - 1];
-    segment.vertexB = vertexList[indexList[(3 * x) + 1].x - 1];
-    segment.vertexC = vertexList[indexList[(3 * x) + 2].x - 1];
+    segment.vertexA = vertexList[vertexIndexList[(3 * x)] - 1];
+    segment.vertexB = vertexList[vertexIndexList[(3 * x) + 1] - 1];
+    segment.vertexC = vertexList[vertexIndexList[(3 * x) + 2] - 1];
 
-    segment.normal = normalList[indexList[(3 * x)].z - 1];
+    segment.normal = normalList[normalIndexList[(3 * x)] - 1];
 
     segment.color = {float(int(45.0 * x + 87) % 255), float(int(77.0 * x + 102) % 255), float(int(123.0 * x + 153) % 255), 1.0};
   
