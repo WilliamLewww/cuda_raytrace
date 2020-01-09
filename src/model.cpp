@@ -88,6 +88,11 @@ void Model::importVertexDataFromFile(const char* filename) {
   file.close();
 }
 
+void Model::setModelMatrix(float* modelMatrix) {
+  initializeModelMatrix(this->modelMatrix, modelMatrix);
+  initializeInverseModelMatrix(inverseModelMatrix, modelMatrix);
+}
+
 MeshDescriptor Model::createMeshDescriptor() {
   MeshDescriptor meshDescriptor;
   meshDescriptor.segmentCount = indexList.size() / 3;

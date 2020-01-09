@@ -22,6 +22,8 @@ public:
   Model(const char* filename, int reflective);
   ~Model();
 
+  void setModelMatrix(float* modelMatrix);
+
   MeshDescriptor createMeshDescriptor();
   std::vector<MeshSegment> createMeshSegmentList();
 };

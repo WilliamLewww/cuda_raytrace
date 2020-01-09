@@ -22,15 +22,15 @@ RaytraceImage::RaytraceImage() {
 
   modelList.push_back(new Model("res/cube.obj", 1));
   modelList.push_back(new Model("res/donut.obj", 0));
-  // initializeModelMatrix(&modelList[0]->meshDescriptor, createScaleMatrix(5.0, 0.15, 5.0));
-  // initializeModelMatrix(&modelList[1]->meshDescriptor, createTranslateMatrix(0.0, -2.0, 0.0));
+  modelList[0]->setModelMatrix(createScaleMatrix(5.0, 0.15, 5.0));
+  modelList[1]->setModelMatrix(createTranslateMatrix(0.0, -2.0, 0.0));
 
   std::vector<MeshDescriptor> h_meshDescriptorList;
   std::vector<MeshSegment> h_meshSegmentList;
 
   for (int x = 0; x < modelList.size(); x++) {
     h_meshDescriptorList.push_back(modelList[x]->createMeshDescriptor());
-    
+
     std::vector<MeshSegment> tempMeshSegmentList = modelList[x]->createMeshSegmentList();
     h_meshSegmentList.insert(h_meshSegmentList.end(), tempMeshSegmentList.begin(), tempMeshSegmentList.end());
   }
