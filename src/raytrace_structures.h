@@ -84,6 +84,7 @@ float* createRotationMatrixY(float radians);
 float* createRotationMatrixZ(float radians);
 void initializeModelMatrix(float* dst, float* src);
 void initializeInverseModelMatrix(float* dst, float* src);
+void initializeModelMatrix(MeshDescriptor* meshDescriptor, float* matrix);
 void initializeModelMatrix(Sphere* sphere, float* matrix);
 void initializeModelMatrix(Plane* plane, float* matrix);
 void initializeModelMatrix(Triangle* triangle, float* matrix);

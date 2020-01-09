@@ -27,6 +27,3 @@ public:
   MeshDescriptor createMeshDescriptor();
   std::vector<MeshSegment> createMeshSegmentList();
 };
-
-void createReducedOBJ(const char* source, const char* target);
-void initializeModelMatrix(MeshDescriptor* meshDescriptor, float* matrix);

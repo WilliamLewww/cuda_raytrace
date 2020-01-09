@@ -15,4 +15,6 @@ public:
 
   std::vector<MeshDescriptor> getCollectiveMeshDescriptorList();
   std::vector<MeshSegment> getCollectiveMeshSegmentList();
+
+  void createReducedOBJ(const char* source, const char* target);
 };
