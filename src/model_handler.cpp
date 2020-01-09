@@ -14,7 +14,12 @@ void ModelHandler::addModel(const char* filename, int reflective = 0) {
   modelList.push_back(new Model(filename, reflective));
 }
 
+void ModelHandler::addModel(Model* model) {
+  modelList.push_back(model);
+}
+
 void ModelHandler::removeModel(int index) {
+  delete modelList[index];
   modelList.erase(modelList.begin() + index);
 }
 

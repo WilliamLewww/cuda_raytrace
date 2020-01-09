@@ -11,8 +11,9 @@ public:
   ~ModelHandler();
 
   void addModel(const char* filename, int reflective);
+  void addModel(Model* model);
   void removeModel(int index);
-  
+
   void setModelMatrix(int index, float* modelMatrix);
 
   std::vector<MeshDescriptor> getCollectiveMeshDescriptorList();
