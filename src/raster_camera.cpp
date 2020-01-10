@@ -1,59 +1,58 @@
 #include "raster_camera.h"
 
 RasterCamera::RasterCamera() {
-  float scale = (1.0 / tan((90.0 / 2.0) * (M_PI / 180.0)));
-  float near = 0.01;
-  float far = 10.0;
+  position = glm::vec3(0.0f, 0.0f, 0.0f);
+  up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-  float a = -(far / (far - near));
-  float b = -((far * near) / (far - near));
-
-  projectionMatrix[0] =  scale;  projectionMatrix[1] =  0;  projectionMatrix[2] =  0;  projectionMatrix[3] =  0;
-  projectionMatrix[4] =  0;  projectionMatrix[5] =  scale;  projectionMatrix[6] =  0;  projectionMatrix[7] =  0;
-  projectionMatrix[8] =  0;  projectionMatrix[9] =  0;  projectionMatrix[10] = a;  projectionMatrix[11] = -1;
-  projectionMatrix[12] = 0;  projectionMatrix[13] = 0;  projectionMatrix[14] = b;  projectionMatrix[15] = 0;
-
-  position = {0.0, 0.0, 0.0, 1.0};
   pitch = 0.0;
   yaw = 0.0;
 
-  updateViewMatrix();
+  front = glm::vec3(cos(pitch) * cos(yaw), sin(pitch), cos(pitch) * sin(yaw));
+  front = glm::normalize(front);
+  viewMatrix = glm::lookAt(position, position + front, up);
+  
+  projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
 }
 
 RasterCamera::~RasterCamera() {
 
 }
 
-void RasterCamera::updateViewMatrix() {
-  Tuple x = {cos(yaw), 0, -sin(yaw), 0.0};
-  Tuple y = {sin(yaw) * sin(pitch), cos(pitch), cos(yaw) * sin(pitch), 0.0};
-  Tuple z = {sin(yaw) * cos(pitch), -sin(pitch), cos(pitch) * cos(yaw), 0.0};
-
-  viewMatrix[0] = x.x; viewMatrix[1] = x.y; viewMatrix[2] = x.z;  viewMatrix[3] = -dot(x, position);
-  viewMatrix[4] = y.x; viewMatrix[5] = y.y; viewMatrix[6] = y.z;  viewMatrix[7] = -dot(y, position);
-  viewMatrix[8] = z.x; viewMatrix[9] = z.y; viewMatrix[10] = z.z; viewMatrix[11] = -dot(z, position);
-  viewMatrix[12] = 0;  viewMatrix[13] = 0;  viewMatrix[14] = 0;   viewMatrix[15] = 1;
-}
-
 float* RasterCamera::getViewMatrix() {
-  return viewMatrix;
+  return glm::value_ptr(viewMatrix);
 }
 
 float* RasterCamera::getProjectionMatrix() {
-  return projectionMatrix;
+  return glm::value_ptr(projectionMatrix);
 }
 
 void RasterCamera::update() {
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
-    
+    position.x += cos(-yaw) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
+    position.z += sin(-yaw) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
   }
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y)) > 0.08) {
-
+    position.x += cos(-yaw + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
+    position.z += sin(-yaw + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
   }
+
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
-
+    yaw += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * 0.03;
   }
+
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
-
+    pitch += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -0.03;
   }
+
+  if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) > -0.92) {
+    position.y += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) + 1.0) * -0.03;
+  }
+
+  if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) > -0.92) {
+    position.y += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) + 1.0) * 0.03;
+  }
+
+  front = glm::vec3(cos(pitch) * cos(yaw), sin(pitch), cos(pitch) * sin(yaw));
+  front = glm::normalize(front);
+  viewMatrix = glm::lookAt(position, position + front, up);
 }
