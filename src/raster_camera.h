@@ -1,6 +1,7 @@
 #pragma once
 #include <math.h>
 
+#include "input.h"
 #include "raytrace_structures.h"
 
 class RasterCamera {
@@ -19,4 +20,6 @@ public:
 
   float* getViewMatrix();
   float* getProjectionMatrix();
+
+  void update();
 };

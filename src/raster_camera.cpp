@@ -42,3 +42,18 @@ float* RasterCamera::getViewMatrix() {
 float* RasterCamera::getProjectionMatrix() {
   return projectionMatrix;
 }
+
+void RasterCamera::update() {
+  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
+    
+  }
+  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y)) > 0.08) {
+
+  }
+  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
+
+  }
+  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
+
+  }
+}

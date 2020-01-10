@@ -11,19 +11,7 @@ RasterContainer::~RasterContainer() {
 }
 
 void RasterContainer::update() {
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
-
-  }
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y)) > 0.08) {
-
-  }
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
-
-  }
-
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
-
-  }
+  rasterCamera->update();
 }
 
 void RasterContainer::render() {
