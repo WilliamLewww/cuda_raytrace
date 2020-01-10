@@ -89,3 +89,8 @@ void initializeModelMatrix(Sphere* sphere, float* matrix);
 void initializeModelMatrix(Plane* plane, float* matrix);
 void initializeModelMatrix(Triangle* triangle, float* matrix);
 Tuple multiplyMatrixTuple(float* matrix, Tuple tuple);
+
+float magnitude(Tuple tuple);
+Tuple normalize(Tuple tuple);
+float dot(Tuple tupleA, Tuple tupleB);
+Tuple cross(Tuple tupleA, Tuple tupleB);

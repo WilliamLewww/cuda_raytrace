@@ -10,9 +10,11 @@ private:
   GLuint vao, vbo[2];
 
   GLuint modelMatrixLocationHandle;
+  GLuint viewMatrixLocationHandle;
+  GLuint projectionMatrixLocationHandle;
 public:
   RasterModel(GLuint* shaderProgramHandle, const Model& model);
   ~RasterModel();
 
-  void render();
+  void render(float* viewMatrix, float* projectionMatrix);
 };

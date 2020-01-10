@@ -23,35 +23,35 @@ __constant__ int meshDescriptorCount;
 __constant__ int meshSegmentCount;
 
 __device__ Tuple operator*(float* matrix, Tuple tuple) { return {(matrix[0] * tuple.x) + (matrix[1] * tuple.y) + (matrix[2] * tuple.z) + (matrix[3] * tuple.w), (matrix[4] * tuple.x) + (matrix[5] * tuple.y) + (matrix[6] * tuple.z) + (matrix[7] * tuple.w), (matrix[8] * tuple.x) + (matrix[9] * tuple.y) + (matrix[10] * tuple.z) + (matrix[11] * tuple.w), (matrix[12] * tuple.x) + (matrix[13] * tuple.y) + (matrix[14] * tuple.z) + (matrix[15] * tuple.w)}; }
-__device__ Ray transform(Ray ray, float* matrix) { return {(matrix * ray.origin), (matrix * ray.direction)}; }
 __device__ Tuple operator+(Tuple tupleA, Tuple tupleB) { return {tupleA.x + tupleB.x, tupleA.y + tupleB.y, tupleA.z + tupleB.z, tupleA.w + tupleB.w}; }
 __device__ Tuple operator-(Tuple tupleA, Tuple tupleB) { return {tupleA.x - tupleB.x, tupleA.y - tupleB.y, tupleA.z - tupleB.z, tupleA.w - tupleB.w}; }
 __device__ Tuple operator*(Tuple tuple, float scalar) { return {tuple.x * scalar, tuple.y * scalar, tuple.z * scalar, tuple.w * scalar}; }
 __device__ Tuple operator*(float scalar, Tuple tuple) { return {tuple.x * scalar, tuple.y * scalar, tuple.z * scalar, tuple.w * scalar}; }
-__device__ Tuple hadamardProduct(Tuple tupleA, Tuple tupleB) { return {tupleA.x * tupleB.x, tupleA.y * tupleB.y, tupleA.z * tupleB.z, tupleA.w * tupleB.w}; }
-__device__ float magnitude(Tuple tuple) { return sqrt(tuple.x * tuple.x + tuple.y * tuple.y + tuple.z * tuple.z + tuple.w * tuple.w); }
-__device__ Tuple normalize(Tuple tuple) { return {tuple.x / magnitude(tuple), tuple.y / magnitude(tuple), tuple.z / magnitude(tuple), tuple.w / magnitude(tuple)}; }
-__device__ Tuple negate(Tuple tuple) { return {-tuple.x, -tuple.y, -tuple.z, -tuple.w}; }
-__device__ Tuple project(Ray ray, float t) { return ray.origin + (ray.direction * t); }
-__device__ float dot(Tuple tupleA, Tuple tupleB) { return (tupleA.x * tupleB.x) + (tupleA.y * tupleB.y) + (tupleA.z * tupleB.z) + (tupleA.w * tupleB.w); }
-__device__ Tuple cross(Tuple tupleA, Tuple tupleB) { return {(tupleA.y * tupleB.z) - (tupleA.z * tupleB.y), (tupleA.z * tupleB.x) - (tupleA.x * tupleB.z), (tupleA.x * tupleB.y) - (tupleA.y * tupleB.x), 1.0f}; }
-__device__ Tuple reflect(Tuple tuple, Tuple normal) { return tuple - (normal * 2.0f * dot(tuple, normal)); }
+__device__ Ray d_transform(Ray ray, float* matrix) { return {(matrix * ray.origin), (matrix * ray.direction)}; }
+__device__ Tuple d_hadamardProduct(Tuple tupleA, Tuple tupleB) { return {tupleA.x * tupleB.x, tupleA.y * tupleB.y, tupleA.z * tupleB.z, tupleA.w * tupleB.w}; }
+__device__ float d_magnitude(Tuple tuple) { return sqrt(tuple.x * tuple.x + tuple.y * tuple.y + tuple.z * tuple.z + tuple.w * tuple.w); }
+__device__ Tuple d_normalize(Tuple tuple) { return {tuple.x / d_magnitude(tuple), tuple.y / d_magnitude(tuple), tuple.z / d_magnitude(tuple), tuple.w / d_magnitude(tuple)}; }
+__device__ Tuple d_negate(Tuple tuple) { return {-tuple.x, -tuple.y, -tuple.z, -tuple.w}; }
+__device__ Tuple d_project(Ray ray, float t) { return ray.origin + (ray.direction * t); }
+__device__ float d_dot(Tuple tupleA, Tuple tupleB) { return (tupleA.x * tupleB.x) + (tupleA.y * tupleB.y) + (tupleA.z * tupleB.z) + (tupleA.w * tupleB.w); }
+__device__ Tuple d_cross(Tuple tupleA, Tuple tupleB) { return {(tupleA.y * tupleB.z) - (tupleA.z * tupleB.y), (tupleA.z * tupleB.x) - (tupleA.x * tupleB.z), (tupleA.x * tupleB.y) - (tupleA.y * tupleB.x), 1.0f}; }
+__device__ Tuple d_reflect(Tuple tuple, Tuple normal) { return tuple - (normal * 2.0f * d_dot(tuple, normal)); }
 
 __device__
 int intersectTriangle(float* intersectionMagnitude, MeshDescriptor meshDescriptor, MeshSegment meshSegment, Ray ray) {
-  Ray transformedRay = transform(ray, meshDescriptor.inverseModelMatrix);
+  Ray transformedRay = d_transform(ray, meshDescriptor.inverseModelMatrix);
 
   Tuple edgeB = meshSegment.vertexB - meshSegment.vertexA;
   Tuple edgeC = meshSegment.vertexC - meshSegment.vertexA;
 
-  Tuple h = cross(transformedRay.direction, edgeC);
-  float a = dot(edgeB, h);
+  Tuple h = d_cross(transformedRay.direction, edgeC);
+  float a = d_dot(edgeB, h);
   float f = 1.0f / a;
   Tuple s = transformedRay.origin - meshSegment.vertexA;
-  float u = f * dot(s, h);
-  Tuple q = cross(s, edgeB);
-  float v = f * dot(transformedRay.direction, q);
-  float t = f * dot(edgeC, q);
+  float u = f * d_dot(s, h);
+  Tuple q = d_cross(s, edgeB);
+  float v = f * d_dot(transformedRay.direction, q);
+  float t = f * d_dot(edgeC, q);
 
   int intersecting = (t > TRIANGLE_INTERSECTION_EPILSON && t < 1.0f / TRIANGLE_INTERSECTION_EPILSON) * (a <= -TRIANGLE_INTERSECTION_EPILSON || a >= TRIANGLE_INTERSECTION_EPILSON) * (u >= 0.0f && u <= 1.0f) * (v >= 0.0f && u + v <= 1.0f);
   *intersectionMagnitude = t;
@@ -82,9 +82,9 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
   }
 
   if (intersectionIndex != -1) {
-    Ray transformedRay = transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
-    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude - SHADOW_EPILSON);
-    Ray lightRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, normalize(lightArray[0].position - (meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint))};
+    Ray transformedRay = d_transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
+    Tuple intersectionPoint = d_project(transformedRay, intersectionMagnitude - SHADOW_EPILSON);
+    Ray lightRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, d_normalize(lightArray[0].position - (meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint))};
 
     int intersecionCount = 0;
 
@@ -93,13 +93,13 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
     for (int y = 0; y < meshDescriptorCount; y++) {
       for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
         float point = 0;
-        intersecionCount += intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], lightRay) * (point < magnitude(lightArray[0].position - intersectionPoint));
+        intersecionCount += intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], lightRay) * (point < d_magnitude(lightArray[0].position - intersectionPoint));
       }
 
       segmentOffset += meshDescriptorArray[y].segmentCount;
     }
 
-    float lightNormalDifference = dot(meshSegmentArray[intersectionIndex].normal, lightRay.direction);
+    float lightNormalDifference = d_dot(meshSegmentArray[intersectionIndex].normal, lightRay.direction);
 
     color = (0.1f * meshSegmentArray[intersectionIndex].color) + 
             (0.7f * lightNormalDifference * meshSegmentArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0));
@@ -131,11 +131,11 @@ Ray rayFromReflection(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment*
 
   Ray reflectedRay = ray;
   if (intersectionDescriptorIndex != -1 && meshDescriptorArray[intersectionDescriptorIndex].reflective) {
-    Ray transformedRay = transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
-    Tuple intersectionPoint = project(transformedRay, intersectionMagnitude - REFLECTIVE_RAY_EPILSON);
+    Ray transformedRay = d_transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
+    Tuple intersectionPoint = d_project(transformedRay, intersectionMagnitude - REFLECTIVE_RAY_EPILSON);
     Tuple normal = meshSegmentArray[intersectionIndex].normal;
 
-    reflectedRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, reflect(ray.direction, normal)};
+    reflectedRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, d_reflect(ray.direction, normal)};
   }
 
   return reflectedRay;
@@ -153,9 +153,9 @@ void lighting(Tuple* colorOut, MeshDescriptor* meshDescriptorArray, MeshSegment*
     (idy - (renderHeight / 2.0f)) / renderHeight, 
     0.0f, 1.0f
   };
-  Tuple direction = normalize((pixel + camera.direction) - camera.position);
+  Tuple direction = d_normalize((pixel + camera.direction) - camera.position);
   Ray ray = {camera.position, direction};
-  ray = transform(ray, camera.modelMatrix);
+  ray = d_transform(ray, camera.modelMatrix);
 
   colorOut[(idy*renderWidth)+idx] = colorFromRay(ray, meshDescriptorArray, meshSegmentArray);
 }
@@ -172,9 +172,9 @@ void reflections(Tuple* colorOut, MeshDescriptor* meshDescriptorArray, MeshSegme
     (idy - (renderHeight / 2.0f)) / renderHeight, 
     0.0f, 1.0f
   };
-  Tuple direction = normalize((pixel + camera.direction) - camera.position);
+  Tuple direction = d_normalize((pixel + camera.direction) - camera.position);
   Ray ray = {camera.position, direction};
-  ray = transform(ray, camera.modelMatrix);
+  ray = d_transform(ray, camera.modelMatrix);
 
   colorOut[(idy*renderWidth)+idx] = colorFromRay(rayFromReflection(ray, meshDescriptorArray, meshSegmentArray), meshDescriptorArray, meshSegmentArray);
 }

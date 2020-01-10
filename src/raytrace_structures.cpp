@@ -145,3 +145,24 @@ Tuple multiplyMatrixTuple(float* matrix, Tuple tuple) {
     (matrix[12] * tuple.x) + (matrix[13] * tuple.y) + (matrix[14] * tuple.z) + (matrix[15] * tuple.w)
   };
 }
+
+float magnitude(Tuple tuple) { 
+  return sqrt(tuple.x * tuple.x + tuple.y * tuple.y + tuple.z * tuple.z + tuple.w * tuple.w); 
+}
+
+Tuple normalize(Tuple tuple) { 
+  return {tuple.x / magnitude(tuple), tuple.y / magnitude(tuple), tuple.z / magnitude(tuple), tuple.w / magnitude(tuple)}; 
+}
+
+float dot(Tuple tupleA, Tuple tupleB) { 
+  return (tupleA.x * tupleB.x) + (tupleA.y * tupleB.y) + (tupleA.z * tupleB.z) + (tupleA.w * tupleB.w); 
+}
+
+Tuple cross(Tuple tupleA, Tuple tupleB) { 
+  return {
+    (tupleA.y * tupleB.z) - (tupleA.z * tupleB.y), 
+    (tupleA.z * tupleB.x) - (tupleA.x * tupleB.z), 
+    (tupleA.x * tupleB.y) - (tupleA.y * tupleB.x), 
+    1.0f
+  }; 
+}
