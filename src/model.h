@@ -7,7 +7,7 @@
 #include "raytrace_structures.h"
 
 class Model {
-private:
+protected:
   std::vector<Tuple> vertexList;
   std::vector<Tuple> normalList;
   std::vector<int> vertexIndexList;

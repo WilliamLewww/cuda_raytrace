@@ -3,23 +3,24 @@
 Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler) {
   modelHandler->addModel("res/cube.obj", 1);
   modelHandler->addModel("res/donut.obj", 0);
-  modelHandler->addModel(modelHandler->createReducedModel(1));
-  modelHandler->removeModel(1);
-
   modelHandler->setModelMatrix(0, createScaleMatrix(5.0, 0.15, 5.0));
-  modelHandler->setModelMatrix(1, createTranslateMatrix(0.0, -2.0, 0.0));
+  modelHandler->setModelMatrix(1, createIdentityMatrix());
 
-  raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelHandler);
+  rasterContainer = new RasterContainer(shaderHandler, fontHandler, modelHandler);
+  // raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelHandler);
 }
 
 Joiner::~Joiner() {
-  delete raytraceContainer;
+  // delete raytraceContainer;
+  delete rasterContainer;
 }
 
 void Joiner::update() {
-  raytraceContainer->update();
+  rasterContainer->update();
+  // raytraceContainer->update();
 }
 
 void Joiner::render() {
-  raytraceContainer->render();
+  rasterContainer->render();
+  // raytraceContainer->render();
 }

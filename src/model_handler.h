@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "model.h"
+#include "raster_model.h"
 
 class ModelHandler {
 private:
@@ -19,6 +20,7 @@ public:
   std::vector<MeshDescriptor> getCollectiveMeshDescriptorList();
   std::vector<MeshSegment> getCollectiveMeshSegmentList();
 
+  RasterModel* createRasterModel(GLuint* shaderProgramHandle, int index);
   Model* createReducedModel(int index);
   void createReducedOBJ(const char* source, const char* target);
 };

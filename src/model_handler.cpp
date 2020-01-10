@@ -48,6 +48,11 @@ std::vector<MeshSegment> ModelHandler::getCollectiveMeshSegmentList() {
   return collectiveMeshSegmentList;
 }
 
+RasterModel* ModelHandler::createRasterModel(GLuint* shaderProgramHandle, int index) {
+  RasterModel* rasterModel = new RasterModel(shaderProgramHandle, *modelList[index]);
+  return rasterModel;
+}
+
 Model* ModelHandler::createReducedModel(int index) {
   return modelList[index]->createReducedModel();
 }
