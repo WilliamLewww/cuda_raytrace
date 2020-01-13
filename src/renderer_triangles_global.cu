@@ -16,7 +16,7 @@
 
 #define LIGHT_COUNT 1
 
-__constant__ Camera camera;
+__constant__ CudaCamera camera;
 __constant__ Light lightArray[LIGHT_COUNT];
 
 __constant__ int meshDescriptorCount;
@@ -212,10 +212,10 @@ void combineLightingReflectionBuffers(unsigned int* d_colorBuffer, Tuple* d_ligh
 }
 
 extern "C" void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount) {
-  Camera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
+  CudaCamera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
   initializeModelMatrix(h_camera.modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
   initializeInverseModelMatrix(h_camera.inverseModelMatrix, h_camera.modelMatrix);
-  cudaMemcpyToSymbol(camera, &h_camera, sizeof(Camera));
+  cudaMemcpyToSymbol(camera, &h_camera, sizeof(CudaCamera));
 
   Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
   cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
@@ -224,11 +224,11 @@ extern "C" void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCo
   cudaMemcpyToSymbol(meshSegmentCount, h_meshSegmentCount, sizeof(int));
 }
 
-extern "C" void updateCamera(float x, float y, float z, float rotationX, float rotationY) {
-  Camera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
-  initializeModelMatrix(h_camera.modelMatrix, multiply(multiply(createTranslateMatrix(x, y, z), createRotationMatrixY(rotationY)), createRotationMatrixX(rotationX)));
+extern "C" void updateCudaCamera(float x, float y, float z, float pitch, float yaw) {
+  CudaCamera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
+  initializeModelMatrix(h_camera.modelMatrix, multiply(multiply(createTranslateMatrix(x, y, z), createRotationMatrixY(yaw)), createRotationMatrixX(pitch)));
   initializeInverseModelMatrix(h_camera.inverseModelMatrix, h_camera.modelMatrix);
-  cudaMemcpyToSymbol(camera, &h_camera, sizeof(Camera));
+  cudaMemcpyToSymbol(camera, &h_camera, sizeof(CudaCamera));
 }
 
 extern "C" void updateScene() {

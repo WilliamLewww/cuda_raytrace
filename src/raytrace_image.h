@@ -19,7 +19,7 @@ private:
   int imageWidth, imageHeight;
 
   float cameraPositionX, cameraPositionY, cameraPositionZ;
-  float cameraRotationX, cameraRotationY;
+  float cameraPitch, cameraYaw;
 
   std::vector<Model*> modelList;
   int h_meshDescriptorCount, h_meshSegmentCount;

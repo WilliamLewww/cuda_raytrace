@@ -66,7 +66,7 @@ struct MeshSegment {
   Tuple color;
 };
 
-struct Camera {
+struct CudaCamera {
   Tuple position;
   Tuple direction;
 

@@ -3,7 +3,7 @@
 extern "C" {
   void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount);
   
-  void updateCamera(float x, float y, float z, float rotationX, float rotationY);
+  void updateCudaCamera(float x, float y, float z, float pitch, float yaw);
   void updateScene();
 
   void renderFrame(int blockDimX, int blockDimY, void* d_colorBuffer, cudaGraphicsResource_t* cudaTextureResource, int frameWidth, int frameHeight, Tuple* d_lightingBuffer, Tuple* d_reflectionsBuffer, MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer);
@@ -20,7 +20,7 @@ RaytraceImage::RaytraceImage(ModelHandler* modelHandler) {
   shouldTakePhoto = false;
 
   cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
-  cameraRotationX = -M_PI / 12.0; cameraRotationY = -M_PI / 4.5;
+  cameraPitch = -M_PI / 12.0; cameraYaw = -M_PI / 4.5;
   
   std::vector<MeshDescriptor> h_meshDescriptorList = modelHandler->getCollectiveMeshDescriptorList();
   std::vector<MeshSegment> h_meshSegmentList = modelHandler->getCollectiveMeshSegmentList();
@@ -63,20 +63,20 @@ void RaytraceImage::updateResolution(int width, int height, GLuint textureResour
 
 void RaytraceImage::update() {
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
-    cameraPositionX += cos(-cameraRotationY) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
-    cameraPositionZ += sin(-cameraRotationY) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
+    cameraPositionX += cos(-cameraYaw) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
+    cameraPositionZ += sin(-cameraYaw) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
   }
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y)) > 0.08) {
-    cameraPositionX += cos(-cameraRotationY + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
-    cameraPositionZ += sin(-cameraRotationY + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
+    cameraPositionX += cos(-cameraYaw + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
+    cameraPositionZ += sin(-cameraYaw + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
   }
 
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
-    cameraRotationY += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * 0.03;
+    cameraYaw += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * 0.03;
   }
 
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
-    cameraRotationX += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -0.03;
+    cameraPitch += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -0.03;
   }
 
   if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) > -0.92) {
@@ -96,7 +96,7 @@ void RaytraceImage::update() {
     shouldTakePhoto = false;
   }
   
-  updateCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraRotationX, cameraRotationY);
+  updateCudaCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraPitch, cameraYaw);
   updateScene();
 }
 

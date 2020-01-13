@@ -8,7 +8,7 @@
 class RasterContainer {
 private:
   RasterCamera* rasterCamera;
-  RasterModel* rasterModel;
+  std::vector<RasterModel*> rasterModelList;
 public:
   RasterContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler);
   ~RasterContainer();

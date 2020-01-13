@@ -94,17 +94,17 @@ void Model::importVertexDataFromFile(const char* filename) {
       temp = temp.substr(temp.find_first_of('/') + 1);
       c.z = std::stof(temp.substr(0, temp.find_first_of(' ')));
 
-      vertexIndexList.push_back(a.x);
-      textureIndexList.push_back(a.y);
-      normalIndexList.push_back(a.z);
+      vertexIndexList.push_back(a.x - 1);
+      textureIndexList.push_back(a.y - 1);
+      normalIndexList.push_back(a.z - 1);
 
-      vertexIndexList.push_back(b.x);
-      textureIndexList.push_back(b.y);
-      normalIndexList.push_back(b.z);
+      vertexIndexList.push_back(b.x - 1);
+      textureIndexList.push_back(b.y - 1);
+      normalIndexList.push_back(b.z - 1);
 
-      vertexIndexList.push_back(c.x);
-      textureIndexList.push_back(c.y);
-      normalIndexList.push_back(c.z);
+      vertexIndexList.push_back(c.x - 1);
+      textureIndexList.push_back(c.y - 1);
+      normalIndexList.push_back(c.z - 1);
     }
   }
 
@@ -159,11 +159,11 @@ std::vector<MeshSegment> Model::createMeshSegmentList() {
 
   for (int x = 0; x < vertexIndexList.size() / 3; x++) {
     MeshSegment segment;
-    segment.vertexA = vertexList[vertexIndexList[(3 * x)] - 1];
-    segment.vertexB = vertexList[vertexIndexList[(3 * x) + 1] - 1];
-    segment.vertexC = vertexList[vertexIndexList[(3 * x) + 2] - 1];
+    segment.vertexA = vertexList[vertexIndexList[(3 * x)]];
+    segment.vertexB = vertexList[vertexIndexList[(3 * x) + 1]];
+    segment.vertexC = vertexList[vertexIndexList[(3 * x) + 2]];
 
-    segment.normal = normalList[normalIndexList[(3 * x)] - 1];
+    segment.normal = normalList[normalIndexList[(3 * x)]];
 
     segment.color = {float(int(45.0 * x + 87) % 255), float(int(77.0 * x + 102) % 255), float(int(123.0 * x + 153) % 255), 1.0};
   
