@@ -22,6 +22,7 @@ RasterModel::~RasterModel() {
 }
 
 void RasterModel::render(float* viewMatrix, float* projectionMatrix) {
+  glEnable(GL_DEPTH_TEST);
   glUseProgram(*shaderProgramHandle);
 
   glBindVertexArray(vao);
@@ -36,4 +37,6 @@ void RasterModel::render(float* viewMatrix, float* projectionMatrix) {
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
   glDrawElements(GL_TRIANGLES, vertexIndexList.size(), GL_UNSIGNED_INT, 0);
+  
+  glDisable(GL_DEPTH_TEST);
 }
