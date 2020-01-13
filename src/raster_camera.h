@@ -9,13 +9,10 @@
 #include "camera.h"
 #include "raytrace_structures.h"
 
-class RasterCamera {
+class RasterCamera : private Camera {
 private:
-  glm::vec3 position;
   glm::vec3 front;
   glm::vec3 up;
-  float pitch;
-  float yaw;
 
   glm::mat4 viewMatrix;
   glm::mat4 projectionMatrix;
