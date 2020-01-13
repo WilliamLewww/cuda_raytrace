@@ -9,7 +9,7 @@
 #include "camera.h"
 #include "raytrace_structures.h"
 
-class RasterCamera : private Camera {
+class RasterCamera : public Camera {
 private:
   glm::vec3 front;
   glm::vec3 up;
@@ -22,6 +22,4 @@ public:
 
   float* getViewMatrix();
   float* getProjectionMatrix();
-
-  void update();
 };

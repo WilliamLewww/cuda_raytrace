@@ -1,4 +1,5 @@
 #pragma once
+#include "input.h"
 #include "raytrace_structures.h"
 
 class Camera {
@@ -9,4 +10,6 @@ protected:
 public:
   Camera();
   ~Camera();
+
+  void update();
 };
