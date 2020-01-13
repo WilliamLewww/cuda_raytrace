@@ -6,6 +6,7 @@ cuda_raytrace contains a real-time ray-tracer engine that uses OpenGL's interope
 - CUDA (cuda-10.1)
 - GLFW (glfw-3.3)
 - GLEW (glew-2.1.0)
+- GLM (glm-0.9.9.7)
 - GNU make
 
 ## Building
@@ -17,4 +18,5 @@ Edit the dependencies' path in the makefile. Use the makefile to compile or run 
 CUDA_PATH=/usr/local/cuda-10.1
 GLFW_PATH=/usr/local/glfw-3.3
 GLEW_PATH=/usr/local/glew-2.1.0
+GLM_PATH=/usr/local/glm-0.9.9.7
 ```
