@@ -4,7 +4,7 @@
 
 #include "model.h"
 
-class RasterModel : public Model {
+class RasterModel : private Model {
 private:
   GLuint* shaderProgramHandle;
   GLuint vao, vbo[2];

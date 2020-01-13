@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "input.h"
+#include "camera.h"
 #include "raytrace_structures.h"
 
 class RasterCamera {
