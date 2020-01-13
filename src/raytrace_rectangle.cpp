@@ -1,7 +1,7 @@
 #include "raytrace_rectangle.h"
 
 RaytraceRectangle::RaytraceRectangle(GLuint* shaderProgramHandle, ModelHandler* modelHandler) {
-  imageResolution = 250;
+  imageResolution = 50;
 
   vertices[0] = -1.0;   vertices[1] = -1.0;
   vertices[2] =  1.0;   vertices[3] = -1.0;
@@ -42,8 +42,8 @@ int RaytraceRectangle::getImageResolution() {
   return imageResolution;
 }
 
-void RaytraceRectangle::update() {
-  image->update();
+void RaytraceRectangle::update(Camera* camera) {
+  image->update(camera);
 }
 
 void RaytraceRectangle::incrementResolution() {

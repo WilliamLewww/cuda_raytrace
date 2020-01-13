@@ -8,6 +8,7 @@
 
 class Joiner {
 private:
+  Camera* camera;
   RasterContainer* rasterContainer;
   RaytraceContainer* raytraceContainer;
 public:

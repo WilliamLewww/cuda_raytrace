@@ -18,9 +18,6 @@ RaytraceImage::RaytraceImage(ModelHandler* modelHandler) {
   imageHeight = 5000;
 
   shouldTakePhoto = false;
-
-  cameraPositionX = 5.0; cameraPositionY = -3.5; cameraPositionZ = -6.0;
-  cameraPitch = -M_PI / 12.0; cameraYaw = -M_PI / 4.5;
   
   std::vector<MeshDescriptor> h_meshDescriptorList = modelHandler->getCollectiveMeshDescriptorList();
   std::vector<MeshSegment> h_meshSegmentList = modelHandler->getCollectiveMeshSegmentList();
@@ -61,42 +58,9 @@ void RaytraceImage::updateResolution(int width, int height, GLuint textureResour
   cudaMalloc(&d_reflectionsBuffer, frameWidth*frameHeight*sizeof(Tuple));
 }
 
-void RaytraceImage::update() {
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
-    cameraPositionX += cos(-cameraYaw) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
-    cameraPositionZ += sin(-cameraYaw) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * 0.05;
-  }
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y)) > 0.08) {
-    cameraPositionX += cos(-cameraYaw + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
-    cameraPositionZ += sin(-cameraYaw + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -0.05;
-  }
-
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
-    cameraYaw += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * 0.03;
-  }
-
-  if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
-    cameraPitch += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -0.03;
-  }
-
-  if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) > -0.92) {
-    cameraPositionY += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) + 1.0) * -0.03;
-  }
-
-  if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) > -0.92) {
-    cameraPositionY += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) + 1.0) * 0.03;
-  }
-
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CIRCLE) && !shouldTakePhoto) {
-    shouldTakePhoto = true;
-  }
-
-  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CIRCLE) && shouldTakePhoto) {
-    renderImage(16, 16, "image.ppm", imageWidth, imageHeight, d_meshDescriptorBuffer, d_meshSegmentBuffer);
-    shouldTakePhoto = false;
-  }
-  
-  updateCudaCamera(cameraPositionX, cameraPositionY, cameraPositionZ, cameraPitch, cameraYaw);
+void RaytraceImage::update(Camera* camera) {
+  Tuple cameraPosition = camera->getPosition();
+  updateCudaCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, camera->getPitch(), camera->getYaw());
   updateScene();
 }
 

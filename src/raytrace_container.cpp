@@ -15,7 +15,7 @@ RaytraceContainer::~RaytraceContainer() {
   delete raytraceRectangle;
 }
 
-void RaytraceContainer::update() {
+void RaytraceContainer::update(Camera* camera) {
   if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && !shouldIncreaseImageResolution) {
     shouldIncreaseImageResolution = true;
   }
@@ -38,7 +38,7 @@ void RaytraceContainer::update() {
     shouldDecreaseImageResolution = false;
   }
 
-  raytraceRectangle->update();
+  raytraceRectangle->update(camera);
 }
 
 void RaytraceContainer::render() {

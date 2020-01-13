@@ -33,6 +33,6 @@ public:
   void incrementResolution();
   void decrementResolution();
   
-  void update();
+  void update(Camera* camera);
   void render();
 };
