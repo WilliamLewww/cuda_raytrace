@@ -11,6 +11,8 @@ private:
   Camera* camera;
   RasterContainer* rasterContainer;
   RaytraceContainer* raytraceContainer;
+
+  bool currentMode = 0;
 public:
   Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler);
   ~Joiner();

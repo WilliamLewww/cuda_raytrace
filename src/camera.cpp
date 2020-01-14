@@ -28,7 +28,7 @@ float Camera::getYaw() {
 }
 
 float* Camera::getViewMatrix() {
-  front = glm::vec3(cos(pitch) * cos(yaw), sin(pitch), cos(pitch) * sin(yaw));
+  front = glm::vec3(cos(pitch) * cos(-yaw - (M_PI / 2)), sin(pitch), cos(pitch) * sin(-yaw - (M_PI / 2)));
   front = glm::normalize(front);
 
   glm::vec3 glmPosition = glm::vec3(position.x, position.y, position.z);
