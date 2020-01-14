@@ -6,7 +6,7 @@ Camera::Camera() {
   yaw = -M_PI / 4.5;
 
   up = glm::vec3(0.0f, -1.0f, 0.0f);
-  projectionMatrix = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
+  projectionMatrix = glm::perspective(glm::radians(45.0f), 1.0f, 0.01f, 100.0f);
 
   getViewMatrix();
 }
