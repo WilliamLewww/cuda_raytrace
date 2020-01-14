@@ -28,5 +28,5 @@ public:
   float* getViewMatrix();
   float* getProjectionMatrix();
 
-  void update();
+  void update(float deltaTime);
 };

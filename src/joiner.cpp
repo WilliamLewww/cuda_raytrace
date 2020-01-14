@@ -17,8 +17,8 @@ Joiner::~Joiner() {
   delete rasterContainer;
 }
 
-void Joiner::update() {
-  camera->update();
+void Joiner::update(float deltaTime) {
+  camera->update(deltaTime);
 
   if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_SQUARE)) {
     currentMode = 0;

@@ -30,17 +30,24 @@ Engine::~Engine() {
   glfwTerminate();
 }
 
+float frameStart, frameEnd, deltaTime;
 void Engine::run() {
-  while (!glfwWindowShouldClose(window)) {
-    glfwPollEvents();
+  frameEnd = glfwGetTime();
 
-    update();
+  while (!glfwWindowShouldClose(window)) {
+    frameStart = glfwGetTime();
+    deltaTime = frameStart - frameEnd;
+
+    update(deltaTime);
     render();
+
+    frameEnd = frameStart;
   }
 }
 
-void Engine::update() {
-  joiner->update();
+void Engine::update(float deltaTime) {
+  glfwPollEvents();
+  joiner->update(deltaTime);
   Input::refreshInput();
 }
 

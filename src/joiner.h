@@ -17,6 +17,6 @@ public:
   Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler);
   ~Joiner();
 
-  void update();
+  void update(float deltaTime);
   void render();
 };

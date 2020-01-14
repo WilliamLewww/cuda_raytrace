@@ -18,7 +18,7 @@ private:
   
   Joiner* joiner;
 
-  void update();
+  void update(float deltaTime);
   void render();
 public:
   Engine();
