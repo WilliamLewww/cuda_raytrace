@@ -10,6 +10,10 @@ ModelHandler::~ModelHandler() {
   }
 }
 
+int ModelHandler::getModelListSize() {
+  return modelList.size();
+}
+
 void ModelHandler::addModel(const char* filename, int reflective = 0) {
   modelList.push_back(new Model(filename, reflective));
 }

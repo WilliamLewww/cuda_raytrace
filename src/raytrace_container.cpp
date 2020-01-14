@@ -1,9 +1,6 @@
 #include "raytrace_container.h"
 
 RaytraceContainer::RaytraceContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler) {
-  shouldDecreaseImageResolution = false;
-  shouldIncreaseImageResolution = false;
-
   raytraceRectangle = new RaytraceRectangle(shaderHandler->getShaderFromName("textured_rectangle"), modelHandler);
 
   std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
@@ -16,26 +13,16 @@ RaytraceContainer::~RaytraceContainer() {
 }
 
 void RaytraceContainer::update(Camera* camera) {
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && !shouldIncreaseImageResolution) {
-    shouldIncreaseImageResolution = true;
-  }
-
-  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_TRIANGLE) && shouldIncreaseImageResolution) {
+  if (Input::checkTrianglePressed()) {
     raytraceRectangle->incrementResolution();
     std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
     textContainer->changeText(resolutionString);
-    shouldIncreaseImageResolution = false;
   }
 
-  if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && !shouldDecreaseImageResolution) {
-    shouldDecreaseImageResolution = true;
-  }
-
-  if (!Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_CROSS) && shouldDecreaseImageResolution) {
+  if (Input::checkCrossPressed()) {
     raytraceRectangle->decrementResolution();
     std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
     textContainer->changeText(resolutionString);
-    shouldDecreaseImageResolution = false;
   }
 
   raytraceRectangle->update(camera);

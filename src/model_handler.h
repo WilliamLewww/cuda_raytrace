@@ -11,6 +11,8 @@ public:
   ModelHandler();
   ~ModelHandler();
 
+  int getModelListSize();
+
   void addModel(const char* filename, int reflective);
   void addModel(Model* model);
   void removeModel(int index);

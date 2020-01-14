@@ -12,7 +12,7 @@ private:
   RasterContainer* rasterContainer;
   RaytraceContainer* raytraceContainer;
 
-  bool currentMode = 0;
+  int renderMode;
 public:
   Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler);
   ~Joiner();

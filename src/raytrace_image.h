@@ -30,8 +30,6 @@ private:
   Tuple* d_lightingBuffer;
   Tuple* d_reflectionsBuffer;
   void* d_colorBuffer;
-
-  bool shouldTakePhoto;
 public:
   RaytraceImage(ModelHandler* modelHandler);
   ~RaytraceImage();

@@ -14,10 +14,8 @@ RaytraceImage::RaytraceImage(ModelHandler* modelHandler) {
   frameWidth = 250;
   frameHeight = 250;
   
-  imageWidth = 5000;
-  imageHeight = 5000;
-
-  shouldTakePhoto = false;
+  imageWidth = 1000;
+  imageHeight = 1000;
   
   std::vector<MeshDescriptor> h_meshDescriptorList = modelHandler->getCollectiveMeshDescriptorList();
   std::vector<MeshSegment> h_meshSegmentList = modelHandler->getCollectiveMeshSegmentList();
@@ -59,6 +57,10 @@ void RaytraceImage::updateResolution(int width, int height, GLuint textureResour
 }
 
 void RaytraceImage::update(Camera* camera) {
+  if (Input::checkCirclePressed()) {
+    renderImage(16, 16, "image.ppm", imageWidth, imageHeight, d_meshDescriptorBuffer, d_meshSegmentBuffer);
+  }
+
   Tuple cameraPosition = camera->getPosition();
   updateCudaCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, camera->getPitch(), camera->getYaw());
   updateScene();

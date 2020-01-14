@@ -48,7 +48,10 @@ void Engine::run() {
 
 void Engine::update(float deltaTime) {
   glfwPollEvents();
+  Input::checkControllerPresses();
+
   joiner->update(deltaTime);
+  
   Input::refreshInput();
 }
 

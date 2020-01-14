@@ -6,9 +6,7 @@
 #include "text_container.h"
 
 class RaytraceContainer {
-private:
-  bool shouldDecreaseImageResolution, shouldIncreaseImageResolution;
-  
+private:  
   RaytraceRectangle* raytraceRectangle;
   TextContainer* textContainer;
 public:
