@@ -1,5 +1,8 @@
 #version 460
 
 void main() {
-  gl_FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+  float red = mod(45.0f * gl_PrimitiveID + 87.0f, 255.0f) / 255.0f;
+  float green = mod(77.0f * gl_PrimitiveID + 102.0f, 255.0f) / 255.0f;
+  float blue = mod(123.0f * gl_PrimitiveID + 153.0f, 255.0f) / 255.0f;
+  gl_FragColor = vec4(red, green, blue, 1.0f);
 }

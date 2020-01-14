@@ -165,7 +165,7 @@ std::vector<MeshSegment> Model::createMeshSegmentList() {
 
     segment.normal = normalList[normalIndexList[(3 * x)]];
 
-    segment.color = {float(int(45.0 * x + 87) % 255), float(int(77.0 * x + 102) % 255), float(int(123.0 * x + 153) % 255), 1.0};
+    segment.color = {float(int(45.0 * x + 87.0) % 255), float(int(77.0 * x + 102.0) % 255), float(int(123.0 * x + 153.0) % 255), 1.0};
   
     meshSegmentList.push_back(segment);
   }
