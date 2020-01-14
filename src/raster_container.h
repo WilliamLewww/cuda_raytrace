@@ -8,6 +8,8 @@
 class RasterContainer {
 private:
   std::vector<RasterModel*> rasterModelList;
+
+  TextContainer* textContainer;
 public:
   RasterContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler);
   ~RasterContainer();
