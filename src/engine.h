@@ -18,6 +18,10 @@ private:
   
   Joiner* joiner;
 
+  float frameStart;
+  float frameEnd;
+  float deltaTime;
+
   void update(float deltaTime);
   void render();
 public:

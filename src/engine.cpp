@@ -18,6 +18,10 @@ Engine::Engine() {
   modelHandler = new ModelHandler();
 
   joiner = new Joiner(shaderHandler, fontHandler, modelHandler);
+
+  frameStart = glfwGetTime();
+  frameEnd = glfwGetTime();
+  deltaTime = 0.0;
 }
 
 Engine::~Engine() {
@@ -30,10 +34,7 @@ Engine::~Engine() {
   glfwTerminate();
 }
 
-float frameStart, frameEnd, deltaTime;
 void Engine::run() {
-  frameEnd = glfwGetTime();
-
   while (!glfwWindowShouldClose(window)) {
     frameStart = glfwGetTime();
     deltaTime = frameStart - frameEnd;
