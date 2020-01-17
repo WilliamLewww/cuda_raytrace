@@ -119,27 +119,22 @@ void Model::setModelMatrix(float* modelMatrix) {
 Model* Model::createReducedModel() {
   Model* model = new Model(*this);
 
-  int deleteIndex = 1;
   int reducedSize = model->vertexList.size() / 2;
   for (int x = 0; x < reducedSize; x++) {
-    model->vertexList.erase(model->vertexList.begin() + deleteIndex);
-    deleteIndex += 1;
+    model->vertexList.erase(model->vertexList.begin() + x + 1);
   }
 
-  deleteIndex = 0;
   reducedSize = model->vertexIndexList.size() / 6;
   for (int x = 0; x < reducedSize; x++) {
     for (int y = 0; y < 3; y++) {
-      model->vertexIndexList.erase(model->vertexIndexList.begin() + deleteIndex);
-      model->textureIndexList.erase(model->textureIndexList.begin() + deleteIndex);
-      model->normalIndexList.erase(model->normalIndexList.begin() + deleteIndex);
+      model->vertexIndexList.erase(model->vertexIndexList.begin() + (x * 3));
+      model->textureIndexList.erase(model->textureIndexList.begin() + (x * 3));
+      model->normalIndexList.erase(model->normalIndexList.begin() + (x * 3));
     }
-
-    deleteIndex += 3;
   }
 
   for (int x = 0; x < model->vertexIndexList.size(); x++) {
-    model->vertexIndexList[x] = ceil(model->vertexIndexList[x] / 2.0);
+    model->vertexIndexList[x] = floor(model->vertexIndexList[x] / 2.0);
   }
 
   return model;

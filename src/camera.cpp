@@ -42,6 +42,10 @@ float* Camera::getProjectionMatrix() {
 }
 
 void Camera::update(float deltaTime) {
+  handleController(deltaTime);
+}
+
+void Camera::handleController(float deltaTime) {
   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
     position.x += cos(-yaw) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * (deltaTime * 2);
     position.z += sin(-yaw) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * (deltaTime * 2);

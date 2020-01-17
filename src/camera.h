@@ -17,6 +17,8 @@ protected:
 
   glm::mat4 viewMatrix;
   glm::mat4 projectionMatrix;
+
+  void handleController(float deltaTime);
 public:
   Camera();
   ~Camera();
