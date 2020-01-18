@@ -18,9 +18,11 @@ private:
   GLfloat vertices[12];
   GLfloat textureCoordinates[12];
 public:
+  CharacterRectangle(GLuint* shaderProgramHandle, Font* font, const char symbol, float positionX, float positionY);
+  ~CharacterRectangle();
+
   float getOffsetX();
   void addPosition(float positionX, float positionY);
 
-  void initialize(GLuint* shaderProgramHandle, Font* font, const char symbol, float positionX, float positionY);
   void render();
 };

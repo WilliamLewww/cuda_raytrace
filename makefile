@@ -36,7 +36,7 @@ all: clean $(EXEC) run
 SRCS := $(wildcard src/*.cpp)
 OBJS := $(SRCS:src/%.cpp=%.o)
 
-CUDA_SRCS := renderer_triangles_global.cu
+CUDA_SRCS := renderer_triangles_global.cu model_reduction.cu
 CUDA_OBJS := $(CUDA_SRCS:%.cu=%.o)
 
 $(EXEC): $(OBJS) $(CUDA_OBJS)

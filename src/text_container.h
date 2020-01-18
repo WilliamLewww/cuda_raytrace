@@ -6,7 +6,7 @@
 
 class TextContainer {
 private:
-  std::vector<CharacterRectangle> characterRectangleList;
+  std::vector<CharacterRectangle*> characterRectangleList;
   
   GLuint* shaderProgramHandle;
   Font* font;

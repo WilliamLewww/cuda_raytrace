@@ -11,7 +11,9 @@ TextContainer::TextContainer(GLuint* shaderProgramHandle, Font* font, std::strin
 }
 
 TextContainer::~TextContainer() {
-  
+  for (int x = 0; x < characterRectangleList.size(); x++) {
+    delete characterRectangleList[x];
+  }
 }
 
 void TextContainer::changeText(std::string text) {
@@ -19,14 +21,13 @@ void TextContainer::changeText(std::string text) {
   
   float offsetX = 0.0;
   for (int x = 0; x < text.size(); x++) {
-    characterRectangleList.push_back(CharacterRectangle());
-    characterRectangleList[characterRectangleList.size() - 1].initialize(shaderProgramHandle, font, text[x], positionX + offsetX, positionY);
-    offsetX += characterRectangleList[characterRectangleList.size() - 1].getOffsetX();
+    characterRectangleList.push_back(new CharacterRectangle(shaderProgramHandle, font, text[x], positionX + offsetX, positionY));
+    offsetX += characterRectangleList[characterRectangleList.size() - 1]->getOffsetX();
   }
 }
 
 void TextContainer::render() {
   for (int x = 0; x < characterRectangleList.size(); x++) {
-    characterRectangleList[x].render();
+    characterRectangleList[x]->render();
   }
 }

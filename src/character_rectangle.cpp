@@ -1,19 +1,6 @@
 #include "character_rectangle.h"
 
-float CharacterRectangle::getOffsetX() {
-  return (float(character->width) / font->width);
-}
-
-void CharacterRectangle::addPosition(float positionX, float positionY) {
-  vertices[0] +=  positionX;   vertices[1] +=  positionY;
-  vertices[2] +=  positionX;   vertices[3] +=  positionY;
-  vertices[4] +=  positionX;   vertices[5] +=  positionY;
-  vertices[6] +=  positionX;   vertices[7] +=  positionY;
-  vertices[8] +=  positionX;   vertices[9] +=  positionY;
-  vertices[10] += positionX;   vertices[11] += positionY;
-}
-
-void CharacterRectangle::initialize(GLuint* shaderProgramHandle, Font* font, const char symbol, float positionX, float positionY) {
+CharacterRectangle::CharacterRectangle(GLuint* shaderProgramHandle, Font* font, const char symbol, float positionX, float positionY) {
   this->font = font;
   int index = FontHandler::getIndexFromSymbol(*this->font, symbol);
 
@@ -56,6 +43,23 @@ void CharacterRectangle::initialize(GLuint* shaderProgramHandle, Font* font, con
   glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), textureCoordinates, GL_STATIC_DRAW);
 
   textureHandle = glGetUniformLocation(*this->shaderProgramHandle, "u_texture");
+}
+
+CharacterRectangle::~CharacterRectangle() {
+
+}
+
+float CharacterRectangle::getOffsetX() {
+  return (float(character->width) / font->width);
+}
+
+void CharacterRectangle::addPosition(float positionX, float positionY) {
+  vertices[0] +=  positionX;   vertices[1] +=  positionY;
+  vertices[2] +=  positionX;   vertices[3] +=  positionY;
+  vertices[4] +=  positionX;   vertices[5] +=  positionY;
+  vertices[6] +=  positionX;   vertices[7] +=  positionY;
+  vertices[8] +=  positionX;   vertices[9] +=  positionY;
+  vertices[10] += positionX;   vertices[11] += positionY;
 }
 
 void CharacterRectangle::render() {
