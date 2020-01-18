@@ -13,7 +13,7 @@ Engine::Engine() {
 
   shaderHandler = new ShaderHandler();
   shaderHandler->addShaderProgram("shaders/textured_rectangle");
-  shaderHandler->addShaderProgram("shaders/colored_model");
+  shaderHandler->addShaderProgram("shaders/random_colored_model");
 
   modelHandler = new ModelHandler();
 
