@@ -69,15 +69,17 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
 
     if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
       if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_RIGHT_THUMB)) {
-        roll += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
+        yaw += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
       }
       else {
-        yaw += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
+        roll += cos(camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
+        pitch += sin(camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
       }
     }
 
     if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
-      pitch += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -(deltaTime * 2);
+      roll += cos(camera->getYaw() + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * (deltaTime * 2);
+      pitch += sin(camera->getYaw() + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * (deltaTime * 2);
     }
 
     selectedModel->addTransformation(positionX, positionY, positionZ, 0.0, 0.0, 0.0, pitch, yaw, roll);
