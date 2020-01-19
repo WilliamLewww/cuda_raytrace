@@ -68,13 +68,8 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
     }
 
     if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
-      if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_RIGHT_THUMB)) {
-        yaw += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
-      }
-      else {
-        roll += cos(camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
-        pitch += sin(camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
-      }
+      roll += cos(camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
+      pitch += sin(camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
     }
 
     if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
