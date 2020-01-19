@@ -30,7 +30,7 @@ public:
 
   Model* getModel(int index);
 
-  void updateTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw);
+  void updateTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll);
   float* getModelMatrix(int index);
 
   MeshDescriptor* getDeviceMeshDescriptorBuffer();

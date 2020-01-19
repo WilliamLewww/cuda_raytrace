@@ -38,8 +38,8 @@ Model* ModelHandler::getModel(int index) {
   return modelList[index];
 }
 
-void ModelHandler::updateTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw) {
-  modelList[index]->updateTransformation(positionX, positionY, positionZ, scaleX, scaleY, scaleZ, pitch, yaw);
+void ModelHandler::updateTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll) {
+  modelList[index]->updateTransformation(positionX, positionY, positionZ, scaleX, scaleY, scaleZ, pitch, yaw, roll);
 }
 
 float* ModelHandler::getModelMatrix(int index) {

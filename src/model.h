@@ -20,6 +20,7 @@ protected:
   Tuple scale;
   float pitch;
   float yaw;
+  float roll;
 
   float modelMatrix[16];
   float inverseModelMatrix[16];
@@ -37,8 +38,8 @@ public:
   int* getVertexIndexArray();
   int getVertexIndexArraySize();
 
-  void addTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw);
-  void updateTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw);
+  void addTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll);
+  void updateTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll);
   float* getModelMatrix();
 
   Model* createReducedModel();

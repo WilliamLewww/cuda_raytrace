@@ -8,6 +8,7 @@ Model::Model(const char* filename, int reflective = 0) {
   scale = {1.0, 1.0, 1.0, 0.0};
   pitch = 0.0;
   yaw = 0.0;
+  roll = 0.0;
 
   updateModelMatrix();
 }
@@ -47,7 +48,7 @@ int Model::getVertexIndexArraySize() {
   return vertexIndexList.size();
 }
 
-void Model::addTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw) {
+void Model::addTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll) {
   position.x += positionX;
   position.y += positionY;
   position.z += positionZ;
@@ -57,11 +58,12 @@ void Model::addTransformation(float positionX, float positionY, float positionZ,
 
   this->pitch += pitch;
   this->yaw += yaw;
+  this->roll += roll;
 
   updateModelMatrix();
 }
 
-void Model::updateTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw) {
+void Model::updateTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll) {
   position.x = positionX;
   position.y = positionY;
   position.z = positionZ;
@@ -71,12 +73,13 @@ void Model::updateTransformation(float positionX, float positionY, float positio
 
   this->pitch = pitch;
   this->yaw = yaw;
+  this->roll = roll;
 
   updateModelMatrix();
 }
 
 void Model::updateModelMatrix() {
-  float* transformMatrix = multiply(multiply(multiply(createTranslateMatrix(position.x, position.y, position.z), createScaleMatrix(scale.x, scale.y, scale.z)), createRotationMatrixX(pitch)), createRotationMatrixY(yaw));
+  float* transformMatrix = multiply(multiply(multiply(multiply(createTranslateMatrix(position.x, position.y, position.z), createScaleMatrix(scale.x, scale.y, scale.z)), createRotationMatrixX(pitch)), createRotationMatrixY(yaw)), createRotationMatrixZ(roll));
 
   initializeModelMatrix(modelMatrix, transformMatrix);
   initializeInverseModelMatrix(inverseModelMatrix, transformMatrix);
