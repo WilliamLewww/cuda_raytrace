@@ -1,9 +1,6 @@
 #include "model_handler.h"
 
 ModelHandler::ModelHandler() {
-  d_meshDescriptorBuffer = nullptr;
-  d_meshSegmentBuffer = nullptr;
-
   h_meshDescriptorCount = 0;
   h_meshSegmentCount = 0;
 }
