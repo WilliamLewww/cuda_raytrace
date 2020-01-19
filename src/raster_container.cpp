@@ -14,6 +14,8 @@ RasterContainer::RasterContainer(ShaderHandler* shaderHandler, FontHandler* font
   }
 
   textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Raster", -0.95, 0.85);
+
+  selectedModel = nullptr;
 }
 
 RasterContainer::~RasterContainer() {
@@ -26,12 +28,26 @@ RasterContainer::~RasterContainer() {
 
 void RasterContainer::update(Camera* camera) {
   if (Input::checkCirclePressed()) {
-    Tuple cameraPosition = camera->getPosition();
-    updateCudaCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, camera->getPitch(), camera->getYaw());
-    
-    modelHandler->updateDeviceMesh();
+    if (selectedModel == nullptr) {
+      Tuple cameraPosition = camera->getPosition();
+      updateCudaCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, camera->getPitch(), camera->getYaw());
+      
+      modelHandler->updateDeviceMesh();
 
-    int closestHitDescriptor = getClosestHitDescriptor(modelHandler->getDeviceMeshDescriptorBuffer(), modelHandler->getDeviceMeshSegmentBuffer());
+      int closestHitDescriptor = getClosestHitDescriptor(modelHandler->getDeviceMeshDescriptorBuffer(), modelHandler->getDeviceMeshSegmentBuffer());
+      if (closestHitDescriptor != -1) {
+        selectedModel = modelHandler->getModel(closestHitDescriptor);
+        camera->setMoving(false);
+      }
+    }
+    else {
+      selectedModel = nullptr;
+      camera->setMoving(true);
+    }
+  }
+
+  if (selectedModel != nullptr) {
+
   }
 }
 

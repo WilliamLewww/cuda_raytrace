@@ -25,6 +25,10 @@ RasterModel::~RasterModel() {
 
 }
 
+Model* RasterModel::getModel() {
+  return model;
+}
+
 void RasterModel::render(float* viewMatrix, float* projectionMatrix) {
   glEnable(GL_DEPTH_TEST);
   glUseProgram(*shaderProgramHandle);

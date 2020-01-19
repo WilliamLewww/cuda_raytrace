@@ -8,6 +8,8 @@ Camera::Camera() {
   up = glm::vec3(0.0f, -1.0f, 0.0f);
   projectionMatrix = glm::perspective(glm::radians(45.0f), 1.0f, 0.01f, 100.0f);
 
+  isMoving = true;
+
   getViewMatrix();
 }
 
@@ -27,6 +29,14 @@ float Camera::getYaw() {
   return yaw;
 }
 
+void Camera::setMoving(bool isMoving) {
+  this->isMoving = isMoving;
+}
+
+bool Camera::getMoving() {
+  return isMoving;
+}
+
 float* Camera::getViewMatrix() {
   front = glm::vec3(cos(pitch) * cos(-yaw - (M_PI / 2)), sin(pitch), cos(pitch) * sin(-yaw - (M_PI / 2)));
   front = glm::normalize(front);
@@ -42,7 +52,9 @@ float* Camera::getProjectionMatrix() {
 }
 
 void Camera::update(float deltaTime) {
-  handleController(deltaTime);
+  if (isMoving) {
+    handleController(deltaTime);
+  }
 }
 
 void Camera::handleController(float deltaTime) {

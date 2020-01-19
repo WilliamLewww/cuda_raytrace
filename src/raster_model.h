@@ -18,5 +18,7 @@ public:
   RasterModel(GLuint* shaderProgramHandle, Model* model);
   ~RasterModel();
 
+  Model* getModel();
+
   void render(float* viewMatrix, float* projectionMatrix);
 };

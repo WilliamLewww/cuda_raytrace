@@ -28,7 +28,10 @@ public:
   void addModel(Model* model);
   void removeModel(int index);
 
+  Model* getModel(int index);
+
   void setModelMatrix(int index, float* modelMatrix);
+  float* getModelMatrix(int index);
 
   MeshDescriptor* getDeviceMeshDescriptorBuffer();
   MeshSegment* getDeviceMeshSegmentBuffer();

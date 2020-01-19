@@ -1,7 +1,11 @@
 #include "model_handler.h"
 
 ModelHandler::ModelHandler() {
+  d_meshDescriptorBuffer = nullptr;
+  d_meshSegmentBuffer = nullptr;
 
+  h_meshDescriptorCount = 0;
+  h_meshSegmentCount = 0;
 }
 
 ModelHandler::~ModelHandler() {
@@ -30,8 +34,16 @@ void ModelHandler::removeModel(int index) {
   modelList.erase(modelList.begin() + index);
 }
 
+Model* ModelHandler::getModel(int index) {
+  return modelList[index];
+}
+
 void ModelHandler::setModelMatrix(int index, float* modelMatrix) {
   modelList[index]->setModelMatrix(modelMatrix);
+}
+
+float* ModelHandler::getModelMatrix(int index) {
+  modelList[index]->getModelMatrix();
 }
 
 std::vector<MeshDescriptor> ModelHandler::getCollectiveMeshDescriptorList() {

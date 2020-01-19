@@ -18,6 +18,8 @@ protected:
   glm::mat4 viewMatrix;
   glm::mat4 projectionMatrix;
 
+  bool isMoving;
+
   void handleController(float deltaTime);
 public:
   Camera();
@@ -26,6 +28,9 @@ public:
   Tuple getPosition();
   float getPitch();
   float getYaw();
+
+  void setMoving(bool isMoving);
+  bool getMoving();
 
   float* getViewMatrix();
   float* getProjectionMatrix();
