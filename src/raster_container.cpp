@@ -76,9 +76,7 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
       pitch += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -(deltaTime * 2);
     }
 
-    selectedModel->setModelMatrix(multiply(selectedModel->getModelMatrix(), createTranslateMatrix(positionX, positionY, positionZ)));
-    selectedModel->setModelMatrix(multiply(selectedModel->getModelMatrix(), createRotationMatrixY(yaw)));
-    selectedModel->setModelMatrix(multiply(selectedModel->getModelMatrix(), createRotationMatrixX(pitch)));
+    selectedModel->addTransformation(positionX, positionY, positionZ, 0.0, 0.0, 0.0, pitch, yaw);
   }
 }
 

@@ -4,8 +4,12 @@ Model::Model(const char* filename, int reflective = 0) {
   importVertexDataFromFile(filename);
   this->reflective = reflective;
 
-  initializeModelMatrix(modelMatrix, createIdentityMatrix());
-  initializeInverseModelMatrix(inverseModelMatrix, createIdentityMatrix());
+  position = {0.0, 0.0, 0.0, 1.0};
+  scale = {1.0, 1.0, 1.0, 0.0};
+  pitch = 0.0;
+  yaw = 0.0;
+
+  updateModelMatrix();
 }
 
 Model::Model(const Model& model) {
@@ -41,6 +45,41 @@ int* Model::getVertexIndexArray() {
 
 int Model::getVertexIndexArraySize() {
   return vertexIndexList.size();
+}
+
+void Model::addTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw) {
+  position.x += positionX;
+  position.y += positionY;
+  position.z += positionZ;
+  scale.x += scaleX;
+  scale.y += scaleY;
+  scale.z += scaleZ;
+
+  this->pitch += pitch;
+  this->yaw += yaw;
+
+  updateModelMatrix();
+}
+
+void Model::updateTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw) {
+  position.x = positionX;
+  position.y = positionY;
+  position.z = positionZ;
+  scale.x = scaleX;
+  scale.y = scaleY;
+  scale.z = scaleZ;
+
+  this->pitch = pitch;
+  this->yaw = yaw;
+
+  updateModelMatrix();
+}
+
+void Model::updateModelMatrix() {
+  float* transformMatrix = multiply(multiply(multiply(createTranslateMatrix(position.x, position.y, position.z), createScaleMatrix(scale.x, scale.y, scale.z)), createRotationMatrixX(pitch)), createRotationMatrixY(yaw));
+
+  initializeModelMatrix(modelMatrix, transformMatrix);
+  initializeInverseModelMatrix(inverseModelMatrix, transformMatrix);
 }
 
 float* Model::getModelMatrix() {
@@ -129,11 +168,6 @@ void Model::importVertexDataFromFile(const char* filename) {
   }
 
   file.close();
-}
-
-void Model::setModelMatrix(float* modelMatrix) {
-  initializeModelMatrix(this->modelMatrix, modelMatrix);
-  initializeInverseModelMatrix(inverseModelMatrix, modelMatrix);
 }
 
 Model* Model::createReducedModel() {
