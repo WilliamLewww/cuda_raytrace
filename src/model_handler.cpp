@@ -8,6 +8,9 @@ ModelHandler::~ModelHandler() {
   for (int x = 0; x < modelList.size(); x++) {
     delete modelList[x];
   }
+
+  cudaFree(d_meshDescriptorBuffer);
+  cudaFree(d_meshSegmentBuffer);
 }
 
 int ModelHandler::getModelListSize() {
@@ -52,8 +55,38 @@ std::vector<MeshSegment> ModelHandler::getCollectiveMeshSegmentList() {
   return collectiveMeshSegmentList;
 }
 
+MeshDescriptor* ModelHandler::getDeviceMeshDescriptorBuffer() {
+  return d_meshDescriptorBuffer;
+}
+
+MeshSegment* ModelHandler::getDeviceMeshSegmentBuffer() {
+  return d_meshSegmentBuffer;
+}
+
+int* ModelHandler::getHostMeshDescriptorCount() {
+  return &h_meshDescriptorCount;
+}
+
+int* ModelHandler::getHostMeshSegmentCount() {
+  return &h_meshSegmentCount;
+}
+
+void ModelHandler::updateDeviceMesh() {
+  std::vector<MeshDescriptor> h_meshDescriptorList = getCollectiveMeshDescriptorList();
+  std::vector<MeshSegment> h_meshSegmentList = getCollectiveMeshSegmentList();
+
+  h_meshDescriptorCount = h_meshDescriptorList.size();
+  h_meshSegmentCount = h_meshSegmentList.size();
+
+  cudaMalloc(&d_meshDescriptorBuffer, h_meshDescriptorCount*sizeof(MeshDescriptor));
+  cudaMalloc(&d_meshSegmentBuffer, h_meshSegmentCount*sizeof(MeshSegment));
+
+  cudaMemcpy(d_meshDescriptorBuffer, &h_meshDescriptorList[0], h_meshDescriptorCount*sizeof(MeshDescriptor), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_meshSegmentBuffer, &h_meshSegmentList[0], h_meshSegmentCount*sizeof(MeshSegment), cudaMemcpyHostToDevice);
+}
+
 RasterModel* ModelHandler::createRasterModel(GLuint* shaderProgramHandle, int index) {
-  RasterModel* rasterModel = new RasterModel(shaderProgramHandle, *modelList[index]);
+  RasterModel* rasterModel = new RasterModel(shaderProgramHandle, modelList[index]);
   return rasterModel;
 }
 

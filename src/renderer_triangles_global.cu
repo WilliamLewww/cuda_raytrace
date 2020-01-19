@@ -211,6 +211,46 @@ void combineLightingReflectionBuffers(unsigned int* d_colorBuffer, Tuple* d_ligh
   d_colorBuffer[(idy*renderWidth)+idx] = (int(fmaxf(0, fminf(255, color.z))) << 16) | (int(fmaxf(0, fminf(255, color.y))) << 8) | (int(fmaxf(0, fminf(255, color.x))));
 }
 
+__global__
+void getClosestHitDescriptorKernel(int* result, MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer) {
+  Tuple pixel = {0.0f, 0.0f, 0.0f, 1.0f};
+  Tuple direction = d_normalize((pixel + camera.direction) - camera.position);
+  Ray ray = {camera.position, direction};
+  ray = d_transform(ray, camera.modelMatrix);
+
+  int intersectionDescriptorIndex = -1;
+  float intersectionMagnitude = 0.0f;
+
+  int segmentOffset = 0;
+  #pragma unroll
+  for (int y = 0; y < meshDescriptorCount; y++) {
+    for (int x = segmentOffset; x < segmentOffset + d_meshDescriptorBuffer[y].segmentCount; x++) {
+      float point;
+      int count = intersectTriangle(&point, d_meshDescriptorBuffer[y], d_meshSegmentBuffer[x], ray);
+
+      intersectionDescriptorIndex = (y * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionDescriptorIndex * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+      intersectionMagnitude = (point * (count > 0 && (point < intersectionMagnitude || intersectionMagnitude == 0))) + (intersectionMagnitude * (count <= 0 || (point >= intersectionMagnitude && intersectionMagnitude != 0)));
+    }
+
+    segmentOffset += d_meshDescriptorBuffer[y].segmentCount;
+  }
+
+  *result = intersectionDescriptorIndex;
+}
+
+extern "C" int getClosestHitDescriptor(MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer) {
+  int* h_closestHit = (int*)malloc(sizeof(int));
+  int* d_closestHit;
+  cudaMalloc((int**)&d_closestHit, sizeof(int));
+
+  getClosestHitDescriptorKernel<<<1, 1>>>(d_closestHit, d_meshDescriptorBuffer, d_meshSegmentBuffer);
+  cudaDeviceSynchronize();
+
+  cudaMemcpy(h_closestHit, d_closestHit, sizeof(int), cudaMemcpyDeviceToHost);
+
+  return *h_closestHit;
+}
+
 extern "C" void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount) {
   CudaCamera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
   initializeModelMatrix(h_camera.modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));

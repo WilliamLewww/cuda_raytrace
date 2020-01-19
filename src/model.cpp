@@ -27,6 +27,26 @@ Model::~Model() {
 
 }
 
+Tuple* Model::getVertexArray() {
+  return &vertexList[0];
+}
+
+int Model::getVertexArraySize() {
+  return vertexList.size();
+}
+
+int* Model::getVertexIndexArray() {
+  return &vertexIndexList[0];
+}
+
+int Model::getVertexIndexArraySize() {
+  return vertexIndexList.size();
+}
+
+float* Model::getModelMatrix() {
+  return modelMatrix;
+}
+
 void Model::importVertexDataFromFile(const char* filename) {
   std::ifstream file(filename);
   std::string line;

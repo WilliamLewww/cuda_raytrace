@@ -4,8 +4,10 @@
 
 #include "model.h"
 
-class RasterModel : private Model {
+class RasterModel {
 private:
+  Model* model;
+
   GLuint* shaderProgramHandle;
   GLuint vao, vbo[2];
 
@@ -13,7 +15,7 @@ private:
   GLuint viewMatrixLocationHandle;
   GLuint projectionMatrixLocationHandle;
 public:
-  RasterModel(GLuint* shaderProgramHandle, const Model& model);
+  RasterModel(GLuint* shaderProgramHandle, Model* model);
   ~RasterModel();
 
   void render(float* viewMatrix, float* projectionMatrix);

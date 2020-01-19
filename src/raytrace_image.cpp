@@ -11,34 +11,22 @@ extern "C" {
 }
 
 RaytraceImage::RaytraceImage(ModelHandler* modelHandler) {
+  this->modelHandler = modelHandler;
+  modelHandler->updateDeviceMesh();
+
+  initializeScene(modelHandler->getHostMeshDescriptorCount(), modelHandler->getHostMeshSegmentCount());
+
   frameWidth = 250;
   frameHeight = 250;
   
   imageWidth = 1000;
   imageHeight = 1000;
-  
-  std::vector<MeshDescriptor> h_meshDescriptorList = modelHandler->getCollectiveMeshDescriptorList();
-  std::vector<MeshSegment> h_meshSegmentList = modelHandler->getCollectiveMeshSegmentList();
-
-  h_meshDescriptorCount = h_meshDescriptorList.size();
-  h_meshSegmentCount = h_meshSegmentList.size();
-
-  cudaMalloc(&d_meshDescriptorBuffer, h_meshDescriptorCount*sizeof(MeshDescriptor));
-  cudaMalloc(&d_meshSegmentBuffer, h_meshSegmentCount*sizeof(MeshSegment));
-
-  cudaMemcpy(d_meshDescriptorBuffer, &h_meshDescriptorList[0], h_meshDescriptorCount*sizeof(MeshDescriptor), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_meshSegmentBuffer, &h_meshSegmentList[0], h_meshSegmentCount*sizeof(MeshSegment), cudaMemcpyHostToDevice);
-
-  initializeScene(&h_meshDescriptorCount, &h_meshSegmentCount);
 }
 
 RaytraceImage::~RaytraceImage() {
   cudaFree(d_colorBuffer);
   cudaFree(d_reflectionsBuffer);
   cudaFree(d_lightingBuffer);
-
-  cudaFree(d_meshSegmentBuffer);
-  cudaFree(d_meshDescriptorBuffer);
 }
 
 void RaytraceImage::updateResolution(int width, int height, GLuint textureResource) {
@@ -58,7 +46,7 @@ void RaytraceImage::updateResolution(int width, int height, GLuint textureResour
 
 void RaytraceImage::update(Camera* camera) {
   if (Input::checkCirclePressed()) {
-    renderImage(16, 16, "image.ppm", imageWidth, imageHeight, d_meshDescriptorBuffer, d_meshSegmentBuffer);
+    renderImage(16, 16, "image.ppm", imageWidth, imageHeight, modelHandler->getDeviceMeshDescriptorBuffer(), modelHandler->getDeviceMeshSegmentBuffer());
   }
 
   Tuple cameraPosition = camera->getPosition();
@@ -67,5 +55,5 @@ void RaytraceImage::update(Camera* camera) {
 }
 
 void RaytraceImage::render() {
-  renderFrame(16, 16, d_colorBuffer, &cudaTextureResource, frameWidth, frameHeight, d_lightingBuffer, d_reflectionsBuffer, d_meshDescriptorBuffer, d_meshSegmentBuffer);
+  renderFrame(16, 16, d_colorBuffer, &cudaTextureResource, frameWidth, frameHeight, d_lightingBuffer, d_reflectionsBuffer, modelHandler->getDeviceMeshDescriptorBuffer(), modelHandler->getDeviceMeshSegmentBuffer());
 }

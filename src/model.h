@@ -25,6 +25,13 @@ public:
   Model(const Model& model);
   ~Model();
 
+  Tuple* getVertexArray();
+  int getVertexArraySize();
+
+  int* getVertexIndexArray();
+  int getVertexIndexArraySize();
+
+  float* getModelMatrix();
   void setModelMatrix(float* modelMatrix);
 
   Model* createReducedModel();

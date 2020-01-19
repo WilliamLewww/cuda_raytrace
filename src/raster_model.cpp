@@ -1,6 +1,8 @@
 #include "raster_model.h"
 
-RasterModel::RasterModel(GLuint* shaderProgramHandle, const Model& model) : Model(model) {
+RasterModel::RasterModel(GLuint* shaderProgramHandle, Model* model) {
+  this->model = model;
+
   this->shaderProgramHandle = shaderProgramHandle;
 
   glGenVertexArrays(1, &vao);
@@ -9,10 +11,10 @@ RasterModel::RasterModel(GLuint* shaderProgramHandle, const Model& model) : Mode
   glBindVertexArray(vao);
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-  glBufferData(GL_ARRAY_BUFFER, vertexList.size() * sizeof(Tuple), &vertexList[0], GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, model->getVertexArraySize() * sizeof(Tuple), model->getVertexArray(), GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertexIndexList.size() * sizeof(int), &vertexIndexList[0], GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->getVertexIndexArraySize() * sizeof(int), model->getVertexIndexArray(), GL_STATIC_DRAW);
 
   modelMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "modelMatrix");
   viewMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "viewMatrix");
@@ -33,12 +35,12 @@ void RasterModel::render(float* viewMatrix, float* projectionMatrix) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Tuple), nullptr);
   glEnableVertexAttribArray(0);
 
-  glUniformMatrix4fv(modelMatrixLocationHandle, 1, GL_TRUE, modelMatrix);
+  glUniformMatrix4fv(modelMatrixLocationHandle, 1, GL_TRUE, model->getModelMatrix());
   glUniformMatrix4fv(viewMatrixLocationHandle, 1, GL_FALSE, viewMatrix);
   glUniformMatrix4fv(projectionMatrixLocationHandle, 1, GL_FALSE, projectionMatrix);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
-  glDrawElements(GL_TRIANGLES, vertexIndexList.size(), GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, model->getVertexIndexArraySize(), GL_UNSIGNED_INT, nullptr);
 
   glDisable(GL_DEPTH_TEST);
 }

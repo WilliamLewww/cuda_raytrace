@@ -16,16 +16,14 @@
 
 class RaytraceImage {
 private:
+  ModelHandler* modelHandler;
+
   int frameWidth, frameHeight;
   int imageWidth, imageHeight;
 
   std::vector<Model*> modelList;
-  int h_meshDescriptorCount, h_meshSegmentCount;
 
   struct cudaGraphicsResource* cudaTextureResource;
-
-  MeshDescriptor* d_meshDescriptorBuffer;
-  MeshSegment* d_meshSegmentBuffer;
 
   Tuple* d_lightingBuffer;
   Tuple* d_reflectionsBuffer;
