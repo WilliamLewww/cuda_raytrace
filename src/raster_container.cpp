@@ -26,7 +26,7 @@ RasterContainer::~RasterContainer() {
   }
 }
 
-void RasterContainer::update(Camera* camera) {
+void RasterContainer::update(float deltaTime, Camera* camera) {
   if (Input::checkCirclePressed()) {
     if (selectedModel == nullptr) {
       Tuple cameraPosition = camera->getPosition();
@@ -47,7 +47,38 @@ void RasterContainer::update(Camera* camera) {
   }
 
   if (selectedModel != nullptr) {
+    float positionX = 0.0, positionY = 0.0, positionZ = 0.0;
+    float pitch = 0.0, yaw = 0.0;
 
+    if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X)) > 0.08) {
+      positionX += cos(-camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * (deltaTime * 2);
+      positionZ += sin(-camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_X) * (deltaTime * 2);
+    }
+
+    if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y)) > 0.08) {
+      positionX += cos(-camera->getYaw() + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -(deltaTime * 2);
+      positionZ += sin(-camera->getYaw() + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_Y) * -(deltaTime * 2);
+    }
+
+    if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) > -0.92) {
+      positionY += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) + 1.0) * -(deltaTime * 2);
+    }
+
+    if (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) > -0.92) {
+      positionY += (Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) + 1.0) * (deltaTime * 2);
+    }
+
+    if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
+      yaw += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
+    }
+
+    if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
+      pitch += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -(deltaTime * 2);
+    }
+
+    selectedModel->setModelMatrix(multiply(selectedModel->getModelMatrix(), createTranslateMatrix(positionX, positionY, positionZ)));
+    selectedModel->setModelMatrix(multiply(selectedModel->getModelMatrix(), createRotationMatrixY(yaw)));
+    selectedModel->setModelMatrix(multiply(selectedModel->getModelMatrix(), createRotationMatrixX(pitch)));
   }
 }
 

@@ -33,7 +33,7 @@ void Joiner::update(float deltaTime) {
   }
 
   if (renderMode == 0) {
-    rasterContainer->update(camera);
+    rasterContainer->update(deltaTime, camera);
   }
 
   if (renderMode == 1) {

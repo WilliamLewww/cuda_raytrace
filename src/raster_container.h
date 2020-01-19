@@ -19,6 +19,6 @@ public:
   RasterContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler);
   ~RasterContainer();
 
-  void update(Camera* camera);
+  void update(float deltaTime,Camera* camera);
   void render(Camera* camera);
 };
