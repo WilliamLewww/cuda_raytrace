@@ -31,8 +31,6 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
     if (selectedModel == nullptr) {
       Tuple cameraPosition = camera->getPosition();
       updateCudaCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, camera->getPitch(), camera->getYaw());
-      
-      modelHandler->updateDeviceMesh();
 
       int closestHitDescriptor = getClosestHitDescriptor(modelHandler->getDeviceMeshDescriptorBuffer(), modelHandler->getDeviceMeshSegmentBuffer());
       if (closestHitDescriptor != -1) {
@@ -44,6 +42,8 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
       selectedModel = nullptr;
       camera->setMoving(true);
     }
+
+    modelHandler->updateDeviceMesh();
   }
 
   if (selectedModel != nullptr) {
