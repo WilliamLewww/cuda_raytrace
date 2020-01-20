@@ -3,10 +3,14 @@
 extern "C" {
   int getClosestHitDescriptor(MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer);
 
+  void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount);
+
   void updateCudaCamera(float x, float y, float z, float pitch, float yaw);
 }
 
 RasterContainer::RasterContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler) { 
+  this->shaderHandler = shaderHandler;
+
   this->modelHandler = modelHandler;
   selectedModel = nullptr;
 
@@ -88,6 +92,28 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
       scaleX += -(deltaTime * 2);
       scaleY += -(deltaTime * 2);
       scaleZ += -(deltaTime * 2);
+    }
+
+    if (Input::checkTrianglePressed()) {
+      modelHandler->addModel(modelHandler->createModel(selectedModel));
+      rasterModelList.push_back(modelHandler->createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelHandler->getModelListSize() - 1));
+
+      modelHandler->updateDeviceMesh();
+      initializeScene(modelHandler->getHostMeshDescriptorCount(), modelHandler->getHostMeshSegmentCount());
+    }
+
+    if (Input::checkCrossPressed()) {
+      modelHandler->addModel(selectedModel->createReducedModel());
+      int index = modelHandler->getIndexFromAddress(selectedModel);
+
+      modelHandler->removeModel(index);
+      rasterModelList.erase(rasterModelList.begin() + index);
+
+      rasterModelList.push_back(modelHandler->createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelHandler->getModelListSize() - 1));
+      selectedModel = modelHandler->getModel(modelHandler->getModelListSize() - 1);
+
+      modelHandler->updateDeviceMesh();
+      initializeScene(modelHandler->getHostMeshDescriptorCount(), modelHandler->getHostMeshSegmentCount());
     }
 
     selectedModel->addTransformation(positionX, positionY, positionZ, scaleX, scaleY, scaleZ, pitch, yaw, roll);

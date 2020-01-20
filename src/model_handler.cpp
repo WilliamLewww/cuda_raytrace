@@ -18,6 +18,21 @@ int ModelHandler::getModelListSize() {
   return modelList.size();
 }
 
+int ModelHandler::getIndexFromAddress(Model* model) {
+  for (int x = 0; x < modelList.size(); x++) {
+    if (model == modelList[x]) {
+      return x;
+    }
+  }
+
+  return -1;
+}
+
+Model* ModelHandler::createModel(Model* model) {
+  Model* cloneModel = new Model(*model);
+  return cloneModel;
+}
+
 void ModelHandler::addModel(const char* filename, int reflective = 0) {
   modelList.push_back(new Model(filename, reflective));
 }

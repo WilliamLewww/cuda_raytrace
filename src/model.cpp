@@ -22,6 +22,12 @@ Model::Model(const Model& model) {
 
   this->reflective = model.reflective;
 
+  this->position = {model.position.x, model.position.y, model.position.z, model.position.w};
+  this->scale = {model.scale.x, model.scale.y, model.scale.z, model.scale.w};
+  this->pitch = model.pitch;
+  this->yaw = model.yaw;
+  this->roll = model.roll;
+
   for (int x = 0; x < 16; x++) {
     this->modelMatrix[x] = model.modelMatrix[x];
     this->inverseModelMatrix[x] = model.inverseModelMatrix[x];

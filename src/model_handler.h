@@ -24,6 +24,10 @@ public:
 
   int getModelListSize();
 
+  int getIndexFromAddress(Model* model);
+
+  Model* createModel(Model* model);
+
   void addModel(const char* filename, int reflective);
   void addModel(Model* model);
   void removeModel(int index);

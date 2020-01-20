@@ -10,6 +10,8 @@
 class RasterContainer {
 private:
   ModelHandler* modelHandler;
+  ShaderHandler* shaderHandler;
+  
   Model* selectedModel;
 
   std::vector<RasterModel*> rasterModelList;
