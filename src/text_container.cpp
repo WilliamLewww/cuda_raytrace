@@ -23,6 +23,10 @@ void TextContainer::changeText(std::string text) {
   for (int x = 0; x < text.size(); x++) {
     characterRectangleList.push_back(new CharacterRectangle(shaderProgramHandle, font, text[x], positionX + offsetX, positionY));
     offsetX += characterRectangleList[characterRectangleList.size() - 1]->getOffsetX();
+
+    if (text[x] == ' ') {
+      offsetX += 0.05;
+    }
   }
 }
 

@@ -11,10 +11,13 @@ Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHand
   rasterContainer = new RasterContainer(shaderHandler, fontHandler, modelHandler);
   raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelHandler);
 
-  renderMode = 0;
+  modelLoaderContainer = new ModelLoaderContainer(shaderHandler, fontHandler);
+
+  renderMode = RENDERMODE_MODELLOADER;
 }
 
 Joiner::~Joiner() {
+  delete modelLoaderContainer;
   delete raytraceContainer;
   delete rasterContainer;
 }
@@ -23,28 +26,37 @@ void Joiner::update(float deltaTime) {
   camera->update(deltaTime);
 
   if (Input::checkSquarePressed()) {
-    renderMode += 1;
-    
-    if (renderMode > 1) {
-      renderMode = 0;
+    if (renderMode == RENDERMODE_RASTER) {
+      renderMode = RENDERMODE_RAYTRACE;
+    }
+    else {
+      renderMode = RENDERMODE_RASTER;
     }
   }
 
-  if (renderMode == 0) {
+  if (renderMode == RENDERMODE_RASTER) {
     rasterContainer->update(deltaTime, camera);
   }
 
-  if (renderMode == 1) {
+  if (renderMode == RENDERMODE_RAYTRACE) {
     raytraceContainer->update(camera);
+  }
+
+  if (renderMode == RENDERMODE_MODELLOADER) {
+    modelLoaderContainer->update();
   }
 }
 
 void Joiner::render() {
-  if (renderMode == 0) {
+  if (renderMode == RENDERMODE_RASTER) {
     rasterContainer->render(camera);
   }
   
-  if (renderMode == 1) {
+  if (renderMode == RENDERMODE_RAYTRACE) {
     raytraceContainer->render();
+  }
+
+  if (renderMode == RENDERMODE_MODELLOADER) {
+    modelLoaderContainer->render();
   }
 }
