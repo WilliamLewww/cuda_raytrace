@@ -96,6 +96,9 @@ int* ModelHandler::getHostMeshSegmentCount() {
 }
 
 void ModelHandler::updateDeviceMesh() {
+  cudaFree(d_meshDescriptorBuffer);
+  cudaFree(d_meshSegmentBuffer);
+  
   std::vector<MeshDescriptor> h_meshDescriptorList = getCollectiveMeshDescriptorList();
   std::vector<MeshSegment> h_meshSegmentList = getCollectiveMeshSegmentList();
 

@@ -87,8 +87,8 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
     Ray lightRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, d_normalize(lightArray[0].position - (meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint))};
 
     int intersecionCount = 0;
-
     segmentOffset = 0;
+
     #pragma unroll
     for (int y = 0; y < meshDescriptorCount; y++) {
       for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
@@ -99,7 +99,7 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
       segmentOffset += meshDescriptorArray[y].segmentCount;
     }
 
-    float lightNormalDifference = d_dot(meshSegmentArray[intersectionIndex].normal, lightRay.direction);
+    float lightNormalDifference = d_dot(d_normalize(meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * meshSegmentArray[intersectionIndex].normal), lightRay.direction);
 
     color = (0.1f * meshSegmentArray[intersectionIndex].color) + 
             (0.7f * lightNormalDifference * meshSegmentArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0));
@@ -133,7 +133,7 @@ Ray rayFromReflection(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment*
   if (intersectionDescriptorIndex != -1 && meshDescriptorArray[intersectionDescriptorIndex].reflective) {
     Ray transformedRay = d_transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
     Tuple intersectionPoint = d_project(transformedRay, intersectionMagnitude - REFLECTIVE_RAY_EPILSON);
-    Tuple normal = meshSegmentArray[intersectionIndex].normal;
+    Tuple normal = d_normalize(meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * meshSegmentArray[intersectionIndex].normal);
 
     reflectedRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, d_reflect(ray.direction, normal)};
   }
