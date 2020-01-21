@@ -22,8 +22,6 @@ private:
   int frameWidth, frameHeight;
   int imageWidth, imageHeight;
 
-  std::vector<Model*> modelList;
-
   struct cudaGraphicsResource* cudaTextureResource;
 
   Tuple* d_lightingBuffer;
