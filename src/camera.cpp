@@ -57,23 +57,12 @@ float* Camera::getViewMatrix() {
   Tuple xaxis = normalize(cross(normalize(up), zaxis));
   Tuple yaxis = cross(zaxis, xaxis);
 
-  float* translation = createIdentityMatrix();
-  translation[3] = -position.x;
-  translation[7] = -position.y;
-  translation[11] = -position.z;
+  Tuple positionVector = {-position.x, -position.y, -position.z, 0.0};
 
-  float* rotation = createIdentityMatrix();
-  rotation[0] = xaxis.x;
-  rotation[1] = xaxis.y;
-  rotation[2] = xaxis.z;
-  rotation[4] = yaxis.x;
-  rotation[5] = yaxis.y;
-  rotation[6] = yaxis.z;
-  rotation[8] = zaxis.x;
-  rotation[9] = zaxis.y;
-  rotation[10] = zaxis.z;
-
-  initializeModelMatrix(viewMatrix, multiply(rotation, translation));
+  viewMatrix[0] = xaxis.x; viewMatrix[1] = xaxis.y; viewMatrix[2] = xaxis.z; viewMatrix[3] = dot(xaxis, positionVector);
+  viewMatrix[4] = yaxis.x; viewMatrix[5] = yaxis.y; viewMatrix[6] = yaxis.z; viewMatrix[7] = dot(yaxis, positionVector);
+  viewMatrix[8] = zaxis.x; viewMatrix[9] = zaxis.y; viewMatrix[10] = zaxis.z; viewMatrix[11] = dot(zaxis, positionVector);
+  viewMatrix[12] = 0.0; viewMatrix[13] = 0.0; viewMatrix[14] = 0.0; viewMatrix[15] = 1.0;
 
   return viewMatrix;
 }
