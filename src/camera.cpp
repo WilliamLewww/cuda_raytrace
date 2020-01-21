@@ -5,11 +5,19 @@ Camera::Camera() {
   pitch = -M_PI / 12.0;
   yaw = -M_PI / 4.5;
 
-  up = glm::vec3(0.0f, -1.0f, 0.0f);
-  projectionMatrix = glm::perspective(glm::radians(45.0f), 1.0f, 0.01f, 100.0f);
+  initializeModelMatrix(projectionMatrix, createZeroMatrix());
+  projectionMatrix[0] = (1.0 / tan((M_PI / 4.0) / 2.0)) / 1.0;
+  projectionMatrix[5] = (1.0 / tan((M_PI / 4.0) / 2.0));
+  projectionMatrix[10] = (100.0 + 0.01) / (0.01 - 100.0);
+  projectionMatrix[11] = (2.0 * 100.0 * 0.01) / (0.01 - 100.0);
+  projectionMatrix[14] = -1.0;
 
   isMoving = true;
 
+  direction = {0.0, 0.0, 0.0, 0.0};
+  up = {0.0, -1.0, 0.0, 0.0};
+
+  initializeModelMatrix(viewMatrix, createIdentityMatrix());
   getViewMatrix();
 }
 
@@ -38,17 +46,40 @@ bool Camera::getMoving() {
 }
 
 float* Camera::getViewMatrix() {
-  front = glm::vec3(cos(pitch) * cos(-yaw - (M_PI / 2)), sin(pitch), cos(pitch) * sin(-yaw - (M_PI / 2)));
-  front = glm::normalize(front);
+  direction = {cosf(pitch) * cosf(-yaw - (M_PI / 2.0)), sinf(pitch), cosf(pitch) * sinf(-yaw - (M_PI / 2.0)), 0.0};
+  direction = normalize(direction);
 
-  glm::vec3 glmPosition = glm::vec3(position.x, position.y, position.z);
-  viewMatrix = glm::lookAt(glmPosition, glmPosition - front, up);
+  Tuple difference = {position.x - direction.x, position.y - direction.y, position.z - direction.z, position.w - direction.w};
 
-  return glm::value_ptr(viewMatrix);
+  Tuple zaxis = {position.x - difference.x, position.y - difference.y, position.z - difference.z, position.w - difference.w};
+  zaxis = normalize(zaxis);
+
+  Tuple xaxis = normalize(cross(normalize(up), zaxis));
+  Tuple yaxis = cross(zaxis, xaxis);
+
+  float* translation = createIdentityMatrix();
+  translation[3] = -position.x;
+  translation[7] = -position.y;
+  translation[11] = -position.z;
+
+  float* rotation = createIdentityMatrix();
+  rotation[0] = xaxis.x;
+  rotation[1] = xaxis.y;
+  rotation[2] = xaxis.z;
+  rotation[4] = yaxis.x;
+  rotation[5] = yaxis.y;
+  rotation[6] = yaxis.z;
+  rotation[8] = zaxis.x;
+  rotation[9] = zaxis.y;
+  rotation[10] = zaxis.z;
+
+  initializeModelMatrix(viewMatrix, multiply(rotation, translation));
+
+  return viewMatrix;
 }
 
 float* Camera::getProjectionMatrix() {
-  return glm::value_ptr(projectionMatrix);
+  return projectionMatrix;
 }
 
 void Camera::update(float deltaTime) {

@@ -76,6 +76,7 @@ struct CudaCamera {
 
 float* inverseMatrix(float* matrix);
 float* multiply(float* a, float* b);
+float* createZeroMatrix();
 float* createIdentityMatrix();
 float* createTranslateMatrix(float x, float y, float z);
 float* createScaleMatrix(float x, float y, float z);

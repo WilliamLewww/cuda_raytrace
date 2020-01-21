@@ -40,8 +40,8 @@ void RasterModel::render(float* viewMatrix, float* projectionMatrix) {
   glEnableVertexAttribArray(0);
 
   glUniformMatrix4fv(modelMatrixLocationHandle, 1, GL_TRUE, model->getModelMatrix());
-  glUniformMatrix4fv(viewMatrixLocationHandle, 1, GL_FALSE, viewMatrix);
-  glUniformMatrix4fv(projectionMatrixLocationHandle, 1, GL_FALSE, projectionMatrix);
+  glUniformMatrix4fv(viewMatrixLocationHandle, 1, GL_TRUE, viewMatrix);
+  glUniformMatrix4fv(projectionMatrixLocationHandle, 1, GL_TRUE, projectionMatrix);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
   glDrawElements(GL_TRIANGLES, model->getVertexIndexArraySize(), GL_UNSIGNED_INT, nullptr);

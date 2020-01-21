@@ -47,6 +47,15 @@ float* multiply(float* a, float* b) {
   return result;
 }
 
+float* createZeroMatrix() {
+  float* matrix = (float*)malloc(16*sizeof(float));
+  for (int x = 0; x < 16; x++) {
+    matrix[x] = 0.0;
+  }
+
+  return matrix;
+}
+
 float* createIdentityMatrix() {
   float* matrix = (float*)malloc(16*sizeof(float));
   matrix[0] = 1.0;  matrix[1] = 0.0;  matrix[2] = 0.0;  matrix[3] = 0.0;

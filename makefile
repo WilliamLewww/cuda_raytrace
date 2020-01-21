@@ -1,7 +1,6 @@
 CUDA_PATH=/usr/local/cuda-10.1
 GLFW_PATH=/usr/local/glfw-3.3
 GLEW_PATH=/usr/local/glew-2.1.0
-GLM_PATH=/usr/local/glm-0.9.9.7
 
 CURRENT_PATH=$(shell pwd)
 
@@ -14,8 +13,6 @@ GLFW_INCLUDE_PATH=$(GLFW_PATH)/include
 GLEW_LIBRARY_PATH=$(GLEW_PATH)/lib
 GLEW_INCLUDE_PATH=$(GLEW_PATH)/include
 
-GLM_INCLUDE_PATH=$(GLM_PATH)
-
 CC=g++
 NVCC=$(CUDA_PATH)/bin/nvcc
 NVPROF=$(CUDA_PATH)/bin/nvprof
@@ -26,7 +23,7 @@ MEMCHECK=$(CUDA_PATH)/bin/cuda-memcheck
 
 CUDA_FLAGS=--gpu-architecture=sm_30
 LIBRARIES=-lglfw3 -lGLEW -lGL -lGLU -lXrandr -lXext -lX11
-LINKER_ARGUMENTS=-L$(GLFW_LIBRARY_PATH) -L$(GLEW_LIBRARY_PATH) -I$(GLFW_INCLUDE_PATH) -I$(GLEW_INCLUDE_PATH) -I$(GLM_INCLUDE_PATH) $(LIBRARIES)
+LINKER_ARGUMENTS=-L$(GLFW_LIBRARY_PATH) -L$(GLEW_LIBRARY_PATH) -I$(GLFW_INCLUDE_PATH) -I$(GLEW_INCLUDE_PATH) $(LIBRARIES)
 
 EXEC=raytrace_renderer.out
 EXEC_ARGS=bin/image.ppm 16 16

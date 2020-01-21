@@ -13,7 +13,7 @@ Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHand
 
   modelLoaderContainer = new ModelLoaderContainer(shaderHandler, fontHandler);
 
-  renderMode = RENDERMODE_MODELLOADER;
+  renderMode = RENDERMODE_RASTER;
 }
 
 Joiner::~Joiner() {

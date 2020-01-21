@@ -1,8 +1,4 @@
 #pragma once
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "input.h"
 #include "raytrace_structures.h"
 
@@ -12,11 +8,11 @@ protected:
   float pitch;
   float yaw;
 
-  glm::vec3 front;
-  glm::vec3 up;
+  Tuple direction;
+  Tuple up;
 
-  glm::mat4 viewMatrix;
-  glm::mat4 projectionMatrix;
+  float viewMatrix[16];
+  float projectionMatrix[16];
 
   bool isMoving;
 
