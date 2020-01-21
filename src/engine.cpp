@@ -18,9 +18,7 @@ Engine::Engine() {
   shaderHandler->addShaderProgram("shaders/textured_rectangle");
   shaderHandler->addShaderProgram("shaders/random_colored_model");
 
-  modelHandler = new ModelHandler();
-
-  joiner = new Joiner(shaderHandler, fontHandler, modelHandler);
+  joiner = new Joiner(shaderHandler, fontHandler);
 
   frameStart = glfwGetTime();
   frameEnd = glfwGetTime();
@@ -29,7 +27,6 @@ Engine::Engine() {
 
 Engine::~Engine() {
   delete joiner;
-  delete modelHandler;
   delete shaderHandler;
   delete fontHandler;
 

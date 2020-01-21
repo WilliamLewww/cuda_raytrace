@@ -7,45 +7,10 @@
 #include "raster_model.h"
 
 class ModelHandler {
-private:
-  std::vector<Model*> modelList;
-
-  MeshDescriptor* d_meshDescriptorBuffer;
-  MeshSegment* d_meshSegmentBuffer;
-
-  int h_meshDescriptorCount;
-  int h_meshSegmentCount;
-
-  std::vector<MeshDescriptor> getCollectiveMeshDescriptorList();
-  std::vector<MeshSegment> getCollectiveMeshSegmentList();
 public:
-  ModelHandler();
-  ~ModelHandler();
-
-  int getModelListSize();
-
-  int getIndexFromAddress(Model* model);
-
-  Model* createModel(Model* model);
-
-  void addModel(const char* filename, int reflective);
-  void addModel(Model* model);
-  void removeModel(int index);
-
-  Model* getModel(int index);
-
-  void updateTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll);
-  float* getModelMatrix(int index);
-
-  MeshDescriptor* getDeviceMeshDescriptorBuffer();
-  MeshSegment* getDeviceMeshSegmentBuffer();
-
-  int* getHostMeshDescriptorCount();
-  int* getHostMeshSegmentCount();
-
-  void updateDeviceMesh();
-
-  RasterModel* createRasterModel(GLuint* shaderProgramHandle, int index);
-  Model* createReducedModel(int index);
-  void createReducedOBJ(const char* source, const char* target);
+  static Model* createModel(const char* filename, int reflective);
+  static Model* createModel(Model* model);
+  static RasterModel* createRasterModel(GLuint* shaderProgramHandle, Model* model);
+  static Model* createReducedModel(Model* model);
+  static void createReducedOBJ(const char* source, const char* target);
 };

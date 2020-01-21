@@ -10,11 +10,11 @@ extern "C" {
   void renderImage(int blockDimX, int blockDimY, const char* filename, int imageWidth, int imageHeight, MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer);
 }
 
-RaytraceImage::RaytraceImage(ModelHandler* modelHandler) {
-  this->modelHandler = modelHandler;
-  modelHandler->updateDeviceMesh();
+RaytraceImage::RaytraceImage(ModelContainer* modelContainer) {
+  this->modelContainer = modelContainer;
+  modelContainer->updateDeviceMesh();
 
-  initializeScene(modelHandler->getHostMeshDescriptorCount(), modelHandler->getHostMeshSegmentCount());
+  initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
 
   frameWidth = 250;
   frameHeight = 250;
@@ -46,7 +46,7 @@ void RaytraceImage::updateResolution(int width, int height, GLuint textureResour
 
 void RaytraceImage::update(Camera* camera) {
   if (Input::checkCirclePressed()) {
-    renderImage(16, 16, "image.ppm", imageWidth, imageHeight, modelHandler->getDeviceMeshDescriptorBuffer(), modelHandler->getDeviceMeshSegmentBuffer());
+    renderImage(16, 16, "image.ppm", imageWidth, imageHeight, modelContainer->getDeviceMeshDescriptorBuffer(), modelContainer->getDeviceMeshSegmentBuffer());
   }
 
   Tuple cameraPosition = camera->getPosition();
@@ -55,5 +55,5 @@ void RaytraceImage::update(Camera* camera) {
 }
 
 void RaytraceImage::render() {
-  renderFrame(16, 16, d_colorBuffer, &cudaTextureResource, frameWidth, frameHeight, d_lightingBuffer, d_reflectionsBuffer, modelHandler->getDeviceMeshDescriptorBuffer(), modelHandler->getDeviceMeshSegmentBuffer());
+  renderFrame(16, 16, d_colorBuffer, &cudaTextureResource, frameWidth, frameHeight, d_lightingBuffer, d_reflectionsBuffer, modelContainer->getDeviceMeshDescriptorBuffer(), modelContainer->getDeviceMeshSegmentBuffer());
 }

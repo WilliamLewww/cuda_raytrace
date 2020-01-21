@@ -8,14 +8,14 @@ extern "C" {
   void updateCudaCamera(float x, float y, float z, float pitch, float yaw);
 }
 
-RasterContainer::RasterContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler) { 
+RasterContainer::RasterContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* modelContainer) { 
   this->shaderHandler = shaderHandler;
 
-  this->modelHandler = modelHandler;
+  this->modelContainer = modelContainer;
   selectedModel = nullptr;
 
-  for (int x = 0; x < modelHandler->getModelListSize(); x++) {
-    rasterModelList.push_back(modelHandler->createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), x));
+  for (int x = 0; x < modelContainer->getSize(); x++) {
+    rasterModelList.push_back(ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelContainer->getModel(x)));
   }
 
   textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Raster", -0.95, 0.85);
@@ -35,9 +35,9 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
       Tuple cameraPosition = camera->getPosition();
       updateCudaCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, camera->getPitch(), camera->getYaw());
 
-      int closestHitDescriptor = getClosestHitDescriptor(modelHandler->getDeviceMeshDescriptorBuffer(), modelHandler->getDeviceMeshSegmentBuffer());
+      int closestHitDescriptor = getClosestHitDescriptor(modelContainer->getDeviceMeshDescriptorBuffer(), modelContainer->getDeviceMeshSegmentBuffer());
       if (closestHitDescriptor != -1) {
-        selectedModel = modelHandler->getModel(closestHitDescriptor);
+        selectedModel = modelContainer->getModel(closestHitDescriptor);
         camera->setMoving(false);
       }
     }
@@ -46,7 +46,7 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
       camera->setMoving(true);
     }
 
-    modelHandler->updateDeviceMesh();
+    modelContainer->updateDeviceMesh();
   }
 
   if (selectedModel != nullptr) {
@@ -95,25 +95,25 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
     }
 
     if (Input::checkTrianglePressed()) {
-      modelHandler->addModel(modelHandler->createModel(selectedModel));
-      rasterModelList.push_back(modelHandler->createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelHandler->getModelListSize() - 1));
+      modelContainer->addModel(ModelHandler::createModel(selectedModel));
+      rasterModelList.push_back(ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelContainer->getModel(modelContainer->getSize() - 1)));
 
-      modelHandler->updateDeviceMesh();
-      initializeScene(modelHandler->getHostMeshDescriptorCount(), modelHandler->getHostMeshSegmentCount());
+      modelContainer->updateDeviceMesh();
+      initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
     }
 
     if (Input::checkCrossPressed()) {
-      modelHandler->addModel(selectedModel->createReducedModel());
-      int index = modelHandler->getIndexFromAddress(selectedModel);
+      modelContainer->addModel(selectedModel->createReducedModel());
+      int index = modelContainer->getModelIndexFromAddress(selectedModel);
 
-      modelHandler->removeModel(index);
+      modelContainer->removeModel(index);
       rasterModelList.erase(rasterModelList.begin() + index);
 
-      rasterModelList.push_back(modelHandler->createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelHandler->getModelListSize() - 1));
-      selectedModel = modelHandler->getModel(modelHandler->getModelListSize() - 1);
+      rasterModelList.push_back(ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelContainer->getModel(modelContainer->getSize() - 1)));
+      selectedModel = modelContainer->getModel(modelContainer->getSize() - 1);
 
-      modelHandler->updateDeviceMesh();
-      initializeScene(modelHandler->getHostMeshDescriptorCount(), modelHandler->getHostMeshSegmentCount());
+      modelContainer->updateDeviceMesh();
+      initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
     }
 
     selectedModel->addTransformation(positionX, positionY, positionZ, scaleX, scaleY, scaleZ, pitch, yaw, roll);

@@ -1,15 +1,16 @@
 #include "joiner.h"
 
-Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler) {
+Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
   camera = new Camera();
+  modelContainer = new ModelContainer();
 
-  modelHandler->addModel("res/cube.obj", 1);
-  modelHandler->addModel("res/donut.obj", 0);
-  modelHandler->updateTransformation(0, 0.0, 0.0, 0.0, 5.0, 0.15, 5.0, 0.0, 0.0, 0.0);
-  modelHandler->updateTransformation(1, 0.0, -2.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+  modelContainer->addModel(ModelHandler::createModel("res/cube.obj", 1));
+  modelContainer->addModel(ModelHandler::createModel("res/donut.obj", 0));
+  modelContainer->updateTransformation(0, 0.0, 0.0, 0.0, 5.0, 0.15, 5.0, 0.0, 0.0, 0.0);
+  modelContainer->updateTransformation(1, 0.0, -2.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
 
-  rasterContainer = new RasterContainer(shaderHandler, fontHandler, modelHandler);
-  raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelHandler);
+  rasterContainer = new RasterContainer(shaderHandler, fontHandler, modelContainer);
+  raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelContainer);
 
   modelLoaderContainer = new ModelLoaderContainer(shaderHandler, fontHandler);
 
@@ -20,6 +21,8 @@ Joiner::~Joiner() {
   delete modelLoaderContainer;
   delete raytraceContainer;
   delete rasterContainer;
+  delete modelContainer;
+  delete camera;
 }
 
 void Joiner::update(float deltaTime) {

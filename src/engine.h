@@ -14,7 +14,6 @@ private:
 
   FontHandler* fontHandler;
   ShaderHandler* shaderHandler;
-  ModelHandler* modelHandler;
   
   Joiner* joiner;
 

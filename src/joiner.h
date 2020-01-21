@@ -5,6 +5,7 @@
 #include "model_handler.h"
 #include "raster_container.h"
 #include "raytrace_container.h"
+#include "model_container.h"
 #include "model_loader_container.h"
 
 class Joiner {
@@ -16,6 +17,8 @@ private:
   };
 
   Camera* camera;
+  ModelContainer* modelContainer;
+
   RasterContainer* rasterContainer;
   RaytraceContainer* raytraceContainer;
 
@@ -23,7 +26,7 @@ private:
 
   RenderMode renderMode;
 public:
-  Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelHandler* modelHandler);
+  Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler);
   ~Joiner();
 
   void update(float deltaTime);

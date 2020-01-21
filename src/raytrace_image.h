@@ -11,12 +11,13 @@
 #include "raytrace_structures.h"
 #include "camera.h"
 #include "model_handler.h"
+#include "model_container.h"
 #include "model.h"
 #include "input.h"
 
 class RaytraceImage {
 private:
-  ModelHandler* modelHandler;
+  ModelContainer* modelContainer;
 
   int frameWidth, frameHeight;
   int imageWidth, imageHeight;
@@ -29,7 +30,7 @@ private:
   Tuple* d_reflectionsBuffer;
   void* d_colorBuffer;
 public:
-  RaytraceImage(ModelHandler* modelHandler);
+  RaytraceImage(ModelContainer* modelContainer);
   ~RaytraceImage();
 
   void update(Camera* camera);
