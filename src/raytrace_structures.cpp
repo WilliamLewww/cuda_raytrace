@@ -156,11 +156,11 @@ Tuple multiplyMatrixTuple(float* matrix, Tuple tuple) {
 }
 
 float magnitude(Tuple tuple) { 
-  return sqrt(tuple.x * tuple.x + tuple.y * tuple.y + tuple.z * tuple.z + tuple.w * tuple.w); 
+  return sqrt(tuple.x * tuple.x + tuple.y * tuple.y + tuple.z * tuple.z); 
 }
 
 Tuple normalize(Tuple tuple) { 
-  return {tuple.x / magnitude(tuple), tuple.y / magnitude(tuple), tuple.z / magnitude(tuple), tuple.w / magnitude(tuple)}; 
+  return {tuple.x / magnitude(tuple), tuple.y / magnitude(tuple), tuple.z / magnitude(tuple), tuple.w}; 
 }
 
 float dot(Tuple tupleA, Tuple tupleB) { 
