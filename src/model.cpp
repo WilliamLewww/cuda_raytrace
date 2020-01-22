@@ -91,6 +91,10 @@ void Model::updateModelMatrix() {
   initializeInverseModelMatrix(inverseModelMatrix, transformMatrix);
 }
 
+void Model::setModelMatrix(float* modelMatrix) {
+  initializeModelMatrix(this->modelMatrix, modelMatrix);
+}
+
 float* Model::getModelMatrix() {
   return modelMatrix;
 }

@@ -2,7 +2,7 @@
 
 Camera::Camera() {
   position = {5.0, -3.5, -6.0, 1.0};
-  pitch = -M_PI / 12.0;
+  pitch = -M_PI / 8.0;
   yaw = -M_PI / 4.5;
 
   initializeModelMatrix(projectionMatrix, createZeroMatrix());
@@ -23,6 +23,18 @@ Camera::Camera() {
 
 Camera::~Camera() {
 
+}
+
+void Camera::setPosition(float x, float y, float z) {
+  this->position = {x, y, z, 1.0};
+}
+
+void Camera::setPitch(float pitch) {
+  this->pitch = pitch;
+}
+
+void Camera::setYaw(float yaw) {
+  this->yaw = yaw;
 }
 
 Tuple Camera::getPosition() {

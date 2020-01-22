@@ -58,8 +58,16 @@ void ModelContainer::removeModel(int index) {
   modelList.erase(modelList.begin() + index);
 }
 
+void ModelContainer::setModelMatrix(int index, float* modelMatrix) {
+  modelList[index]->setModelMatrix(modelMatrix);
+}
+
 Model* ModelContainer::getModel(int index) {
   return modelList[index];
+}
+
+RasterModel* ModelContainer::getRasterModel(int index) {
+  return rasterModelList[index];
 }
 
 void ModelContainer::updateTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll) {

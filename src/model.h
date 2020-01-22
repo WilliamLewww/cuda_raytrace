@@ -40,6 +40,8 @@ public:
 
   void addTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll);
   void updateTransformation(float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll);
+  
+  void setModelMatrix(float* modelMatrix);
   float* getModelMatrix();
 
   Model* createReducedModel();

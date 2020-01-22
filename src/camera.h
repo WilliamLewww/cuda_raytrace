@@ -21,6 +21,10 @@ public:
   Camera();
   ~Camera();
 
+  void setPosition(float x, float y, float z);
+  void setPitch(float pitch);
+  void setYaw(float yaw);
+
   Tuple getPosition();
   float getPitch();
   float getYaw();
