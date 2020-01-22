@@ -14,11 +14,14 @@
 class ModelLoaderContainer {
 private:
   ShaderHandler* shaderHandler;
-  
+
   Camera* camera;
 
   TextContainer* textContainer;
   ModelContainer* modelContainer;
+
+  Model* selectedModelClone;
+  RasterModel* selectedRasterModelClone;
 
   ColoredRectangle* modelBackgroundRectangle;
   ColoredRectangle *upRectangle, *downRectangle;
@@ -28,6 +31,7 @@ private:
   std::vector<std::string> modelNameList;
 
   void loadModels();
+  void selectModel(Model* model);
 public:
   ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler);
   ~ModelLoaderContainer();

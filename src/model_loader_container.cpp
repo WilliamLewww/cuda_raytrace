@@ -32,9 +32,12 @@ ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHan
   loadedModelUpperBounds = 5;
 
   loadModels();
+  selectModel(modelContainer->getModel(0));
 }
 
 ModelLoaderContainer::~ModelLoaderContainer() {
+  delete selectedRasterModelClone;
+  delete selectedModelClone;
   delete downRectangle;
   delete upRectangle;
   delete modelBackgroundRectangle;
@@ -43,6 +46,8 @@ ModelLoaderContainer::~ModelLoaderContainer() {
 }
 
 void ModelLoaderContainer::update(float deltaTime) {
+  selectedModelClone->addTransformation(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
+
   for (int x = 0; x < modelContainer->getSize(); x++) {
     modelContainer->addTransformation(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
   }
@@ -65,6 +70,10 @@ void ModelLoaderContainer::update(float deltaTime) {
 
         loadModels();
       }
+
+      if (cursorPositionY > 175 && cursorPositionY < 925) {
+        selectModel(modelContainer->getModel(int(cursorPositionY - 175) / 150));
+      }
     }
   }
 }
@@ -78,7 +87,20 @@ void ModelLoaderContainer::loadModels() {
   }
 }
 
+void ModelLoaderContainer::selectModel(Model* model) {
+  delete selectedModelClone;
+  delete selectedRasterModelClone;
+
+  selectedModelClone = ModelHandler::createModel(model);
+  selectedRasterModelClone = ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
+}
+
 void ModelLoaderContainer::render() {
+  glViewport(0, 0, 1000, 1000);
+  if (selectedRasterModelClone != nullptr) {
+    selectedRasterModelClone->render(camera->getViewMatrix(), camera->getProjectionMatrix());
+  }
+
   for (int x = 0; x < modelContainer->getSize(); x++) {
     glViewport(0, 675 - (x * 150), 150, 150);
     modelBackgroundRectangle->render();
