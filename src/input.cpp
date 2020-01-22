@@ -3,6 +3,11 @@
 std::vector<int> Input::keyDownList;
 std::vector<int> Input::keyPressList;
 
+bool Input::isLeftClick;
+
+double Input::cursorPositionX;
+double Input::cursorPositionY;
+
 bool Input::isSquarePressed;
 bool Input::isSquareReleased;
 bool Input::isCrossPressed;
@@ -27,6 +32,19 @@ void Input::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
   }
 }
 
+void Input::cursorButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+  if (action == GLFW_PRESS) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+      isLeftClick = true;
+    }
+  }
+}
+
+void Input::cursorPositionCallback(GLFWwindow* window, double x, double y) {
+  cursorPositionX = x;
+  cursorPositionY = y;
+}
+
 bool Input::checkKeyDown(int key) {
   for (int x = 0; x < keyDownList.size(); x++) {
     if (key == keyDownList[x]) {
@@ -45,6 +63,18 @@ bool Input::checkKeyPress(int key) {
   }
 
   return false;
+}
+
+bool Input::checkLeftClick() {
+  return isLeftClick;
+}
+
+double Input::getCursorPositionX() {
+  return cursorPositionX;
+}
+
+double Input::getCursorPositionY() {
+  return cursorPositionY;
 }
 
 void Input::checkControllerPresses() {
@@ -107,6 +137,7 @@ bool Input::checkTrianglePressed() {
 
 void Input::refreshInput() {
   keyPressList.clear();
+  isLeftClick = false;
 
   isSquarePressed = false;
   isCrossPressed = false;

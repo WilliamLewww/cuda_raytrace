@@ -3,6 +3,7 @@
 #include <string>
 #include <dirent.h>
 
+#include "input.h"
 #include "camera.h"
 #include "shader_handler.h"
 #include "font_handler.h"

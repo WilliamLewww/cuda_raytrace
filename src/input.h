@@ -10,6 +10,11 @@ private:
   static std::vector<int> keyDownList;
   static std::vector<int> keyPressList;
 
+  static bool isLeftClick;
+
+  static double cursorPositionX;
+  static double cursorPositionY;
+
   static bool isSquarePressed;
   static bool isSquareReleased;
 
@@ -24,9 +29,16 @@ private:
 
 public:
   static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+  static void cursorButtonCallback(GLFWwindow* window, int button, int action, int mods);
+  static void cursorPositionCallback(GLFWwindow* window, double x, double y);
 
   static bool checkKeyDown(int key);
   static bool checkKeyPress(int key);
+
+  static bool checkLeftClick();
+
+  static double getCursorPositionX();
+  static double getCursorPositionY();
 
   static void checkControllerPresses();
   static bool checkSquarePressed();

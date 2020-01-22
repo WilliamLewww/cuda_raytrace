@@ -10,6 +10,8 @@ Engine::Engine() {
   glewInit();
 
   glfwSetKeyCallback(window, Input::keyCallback);
+  glfwSetCursorPosCallback(window, Input::cursorPositionCallback);
+  glfwSetMouseButtonCallback(window, Input::cursorButtonCallback);
   
   fontHandler = new FontHandler();
   fontHandler->addFontFromFile("res/font_ubuntu");

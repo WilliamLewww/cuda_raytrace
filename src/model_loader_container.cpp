@@ -47,6 +47,10 @@ void ModelLoaderContainer::update(float deltaTime) {
   for (int x = loadedModelLowerBounds; x < std::min(loadedModelUpperBounds, int(modelNameList.size())); x++) {
     modelContainer->addTransformation(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
   }
+
+  if (Input::checkLeftClick()) {
+    printf("%d %d\n", int(Input::getCursorPositionX()), int(Input::getCursorPositionY()));
+  }
 }
 
 void ModelLoaderContainer::render() {
