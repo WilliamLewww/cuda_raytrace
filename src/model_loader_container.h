@@ -8,6 +8,7 @@
 #include "font_handler.h"
 #include "text_container.h"
 #include "model_container.h"
+#include "colored_rectangle.h"
 
 class ModelLoaderContainer {
 private:
@@ -15,6 +16,8 @@ private:
 
   TextContainer* textContainer;
   ModelContainer* modelContainer;
+
+  ColoredRectangle* coloredRectangle;
 
   int loadedModelLowerBounds;
   int loadedModelUpperBounds;

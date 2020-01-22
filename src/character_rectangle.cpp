@@ -87,4 +87,5 @@ void CharacterRectangle::render() {
 
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_BLEND);
+  glUseProgram(0);
 }

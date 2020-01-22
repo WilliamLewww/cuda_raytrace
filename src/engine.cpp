@@ -17,6 +17,7 @@ Engine::Engine() {
   shaderHandler = new ShaderHandler();
   shaderHandler->addShaderProgram("shaders/textured_rectangle");
   shaderHandler->addShaderProgram("shaders/random_colored_model");
+  shaderHandler->addShaderProgram("shaders/colored_rectangle");
 
   joiner = new Joiner(shaderHandler, fontHandler);
 

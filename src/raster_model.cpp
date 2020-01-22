@@ -47,4 +47,5 @@ void RasterModel::render(float* viewMatrix, float* projectionMatrix) {
   glDrawElements(GL_TRIANGLES, model->getVertexIndexArraySize(), GL_UNSIGNED_INT, nullptr);
 
   glDisable(GL_DEPTH_TEST);
+  glUseProgram(0);
 }
