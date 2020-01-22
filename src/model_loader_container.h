@@ -13,6 +13,8 @@
 
 class ModelLoaderContainer {
 private:
+  ShaderHandler* shaderHandler;
+  
   Camera* camera;
 
   TextContainer* textContainer;
@@ -24,6 +26,8 @@ private:
   int loadedModelLowerBounds;
   int loadedModelUpperBounds;
   std::vector<std::string> modelNameList;
+
+  void loadModels();
 public:
   ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler);
   ~ModelLoaderContainer();

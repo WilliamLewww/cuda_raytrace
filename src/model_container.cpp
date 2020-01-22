@@ -50,6 +50,16 @@ void ModelContainer::deleteModel(int index) {
   rasterModelList.erase(rasterModelList.begin() + index);
 }
 
+void ModelContainer::deleteAllModels() {
+  for (int x = 0; x < modelList.size(); x++) {
+    delete modelList[x];
+    delete rasterModelList[x];
+  }
+
+  modelList.clear();
+  rasterModelList.clear();
+}
+
 void ModelContainer::addModel(Model* model) {
   modelList.push_back(model);
 }

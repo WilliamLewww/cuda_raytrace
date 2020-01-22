@@ -30,6 +30,7 @@ public:
   void emplaceModel(GLuint* shaderProgramHandle, const char* filename, int reflective);
   void emplaceModel(GLuint* shaderProgramHandle, Model* model);
   void deleteModel(int index);
+  void deleteAllModels();
 
   void addModel(Model* model);
   void removeModel(int index);

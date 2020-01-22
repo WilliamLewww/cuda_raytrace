@@ -1,6 +1,8 @@
 #include "model_loader_container.h"
 
 ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
+  this->shaderHandler = shaderHandler;
+
   camera = new Camera();
   camera->setPosition(0.0, 0.0, -5.0);
   camera->setPitch(0.0);
@@ -29,10 +31,7 @@ ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHan
   loadedModelLowerBounds = 0;
   loadedModelUpperBounds = 5;
 
-  for (int x = loadedModelLowerBounds; x < std::min(loadedModelUpperBounds, int(modelNameList.size())); x++) {
-    modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), modelNameList[x].c_str(), 1);
-    modelContainer->addTransformation(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 8.0, 0.0, 0.0);
-  }
+  loadModels();
 }
 
 ModelLoaderContainer::~ModelLoaderContainer() {
@@ -44,12 +43,38 @@ ModelLoaderContainer::~ModelLoaderContainer() {
 }
 
 void ModelLoaderContainer::update(float deltaTime) {
-  for (int x = loadedModelLowerBounds; x < std::min(loadedModelUpperBounds, int(modelNameList.size())); x++) {
+  for (int x = 0; x < modelContainer->getSize(); x++) {
     modelContainer->addTransformation(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
   }
 
   if (Input::checkLeftClick()) {
-    printf("%d %d\n", int(Input::getCursorPositionX()), int(Input::getCursorPositionY()));
+    double cursorPositionX = Input::getCursorPositionX();
+    double cursorPositionY = Input::getCursorPositionY();
+
+    if (cursorPositionX >= 0 && cursorPositionX <= 150) {
+      if (loadedModelLowerBounds > 0 && cursorPositionY >= 125 && cursorPositionY <= 175) {
+        loadedModelLowerBounds -= 5;
+        loadedModelUpperBounds -= 5;
+
+        loadModels();
+      }
+
+      if (loadedModelUpperBounds < modelNameList.size() && cursorPositionY >= 925 && cursorPositionY <= 975) {
+        loadedModelLowerBounds += 5;
+        loadedModelUpperBounds += 5;
+
+        loadModels();
+      }
+    }
+  }
+}
+
+void ModelLoaderContainer::loadModels() {
+  modelContainer->deleteAllModels();
+
+  for (int x = loadedModelLowerBounds; x < std::min(loadedModelUpperBounds, int(modelNameList.size())); x++) {
+    modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), modelNameList[x].c_str(), 1);
+    modelContainer->addTransformation(x - loadedModelLowerBounds, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 8.0, 0.0, 0.0);
   }
 }
 
