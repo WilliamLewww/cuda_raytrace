@@ -13,10 +13,10 @@
 
 class ModelLoaderContainer {
 private:
+  int test;
   ShaderHandler* shaderHandler;
 
   Camera* camera;
-
   TextContainer* textContainer;
   ModelContainer* modelContainer;
 

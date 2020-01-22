@@ -112,8 +112,10 @@ void ModelLoaderContainer::loadModels() {
 }
 
 void ModelLoaderContainer::selectModel(Model* model) {
-  delete selectedModelClone;
-  delete selectedRasterModelClone;
+  if (selectedModelClone == nullptr) {
+    delete selectedModelClone;
+    delete selectedRasterModelClone;
+  }
 
   selectedModelClone = ModelHandler::createModel(model);
   selectedRasterModelClone = ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
