@@ -17,7 +17,8 @@ private:
   TextContainer* textContainer;
   ModelContainer* modelContainer;
 
-  ColoredRectangle* coloredRectangle;
+  ColoredRectangle* modelBackgroundRectangle;
+  ColoredRectangle *upRectangle, *downRectangle;
 
   int loadedModelLowerBounds;
   int loadedModelUpperBounds;

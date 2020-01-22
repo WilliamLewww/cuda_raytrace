@@ -1,18 +1,24 @@
 #include "colored_rectangle.h"
 
-ColoredRectangle::ColoredRectangle(GLuint* shaderProgramHandle, float red, float green, float blue) {
+ColoredRectangle::ColoredRectangle(GLuint* shaderProgramHandle, float positionX, float positionY, float width, float height, float red, float green, float blue) {
   this->shaderProgramHandle = shaderProgramHandle;
+
+  this->positionX = positionX;
+  this->positionY = positionY;
+
+  this->width = width;
+  this->height = height;
 
   this->red = red;
   this->green = green;
   this->blue = blue;
 
-  vertices[0] = -1.0;   vertices[1] = -1.0;
-  vertices[2] =  1.0;   vertices[3] = -1.0;
-  vertices[4] = -1.0;   vertices[5] =  1.0;
-  vertices[6] = -1.0;   vertices[7] =  1.0;
-  vertices[8] =  1.0;   vertices[9] = -1.0;
-  vertices[10] = 1.0;   vertices[11] = 1.0;
+  vertices[0] = ((positionX / 1000.0) * 2.0) - 1.0;             vertices[1] = ((positionY / 1000.0) * 2.0) - 1.0;
+  vertices[2] = (((positionX + width) / 1000.0) * 2.0) - 1.0;   vertices[3] = ((positionY / 1000.0) * 2.0) - 1.0;
+  vertices[4] = ((positionX / 1000.0) * 2.0) - 1.0;             vertices[5] = (((positionY + height) / 1000.0) * 2.0) - 1.0;
+  vertices[6] = ((positionX / 1000.0) * 2.0) - 1.0;             vertices[7] = (((positionY + height) / 1000.0) * 2.0) - 1.0;
+  vertices[8] = (((positionX + width) / 1000.0) * 2.0) - 1.0;   vertices[9] = ((positionY / 1000.0) * 2.0) - 1.0;
+  vertices[10] = (((positionX + width) / 1000.0) * 2.0) - 1.0;  vertices[11] = (((positionY + height) / 1000.0) * 2.0) - 1.0;
 
   glGenVertexArrays(1, &vao);
   glGenBuffers(1, vbo);

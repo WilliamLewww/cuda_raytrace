@@ -9,7 +9,9 @@ ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHan
   textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Model Loader", -0.95, 0.85);
   modelContainer = new ModelContainer();
 
-  coloredRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.2, 0.2, 0.2);
+  modelBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 0.0, 1000.0, 1000.0, 0.2, 0.2, 0.2);
+  upRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 825.0, 150.0, 50.0, 0.8, 0.2, 0.2);
+  downRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 25.0, 150.0, 50.0, 0.2, 0.8, 0.2);
 
   DIR* directory;
   struct dirent *directoryEntry;
@@ -34,7 +36,9 @@ ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHan
 }
 
 ModelLoaderContainer::~ModelLoaderContainer() {
-  delete coloredRectangle;
+  delete downRectangle;
+  delete upRectangle;
+  delete modelBackgroundRectangle;
   delete modelContainer;
   delete textContainer;
 }
@@ -47,11 +51,13 @@ void ModelLoaderContainer::update(float deltaTime) {
 
 void ModelLoaderContainer::render() {
   for (int x = 0; x < modelContainer->getSize(); x++) {
-    glViewport(0, 725 - (x * 150), 150, 150);
-    coloredRectangle->render();
+    glViewport(0, 675 - (x * 150), 150, 150);
+    modelBackgroundRectangle->render();
     modelContainer->getRasterModel(x)->render(camera->getViewMatrix(), camera->getProjectionMatrix());
   }
 
   glViewport(0, 0, 1000, 1000);
+  upRectangle->render();
+  downRectangle->render();
   textContainer->render();
 }
