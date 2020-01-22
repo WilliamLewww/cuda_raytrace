@@ -23,6 +23,6 @@ public:
   ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler);
   ~ModelLoaderContainer();
 
-  void update();
+  void update(float deltaTime);
   void render();
 };

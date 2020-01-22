@@ -14,7 +14,7 @@ Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
 
   modelLoaderContainer = new ModelLoaderContainer(shaderHandler, fontHandler);
 
-  renderMode = RENDERMODE_RASTER;
+  renderMode = RENDERMODE_MODELLOADER;
 }
 
 Joiner::~Joiner() {
@@ -46,7 +46,7 @@ void Joiner::update(float deltaTime) {
   }
 
   if (renderMode == RENDERMODE_MODELLOADER) {
-    modelLoaderContainer->update();
+    modelLoaderContainer->update(deltaTime);
   }
 }
 

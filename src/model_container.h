@@ -37,6 +37,7 @@ public:
   Model* getModel(int index);
   RasterModel* getRasterModel(int index);
 
+  void addTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll);
   void updateTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll);
   
   void setModelMatrix(int index, float* modelMatrix);

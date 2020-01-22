@@ -70,6 +70,10 @@ RasterModel* ModelContainer::getRasterModel(int index) {
   return rasterModelList[index];
 }
 
+void ModelContainer::addTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll) {
+  modelList[index]->addTransformation(positionX, positionY, positionZ, scaleX, scaleY, scaleZ, pitch, yaw, roll);
+}
+
 void ModelContainer::updateTransformation(int index, float positionX, float positionY, float positionZ, float scaleX, float scaleY, float scaleZ, float pitch, float yaw, float roll) {
   modelList[index]->updateTransformation(positionX, positionY, positionZ, scaleX, scaleY, scaleZ, pitch, yaw, roll);
 }

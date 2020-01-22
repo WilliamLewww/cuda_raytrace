@@ -27,6 +27,7 @@ ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHan
 
   for (int x = loadedModelLowerBounds; x < std::min(loadedModelUpperBounds, int(modelNameList.size())); x++) {
     modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), modelNameList[x].c_str(), 1);
+    modelContainer->addTransformation(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 8.0, 0.0, 0.0);
   }
 }
 
@@ -35,8 +36,10 @@ ModelLoaderContainer::~ModelLoaderContainer() {
   delete textContainer;
 }
 
-void ModelLoaderContainer::update() {
-
+void ModelLoaderContainer::update(float deltaTime) {
+  for (int x = loadedModelLowerBounds; x < std::min(loadedModelUpperBounds, int(modelNameList.size())); x++) {
+    modelContainer->addTransformation(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
+  }
 }
 
 void ModelLoaderContainer::render() {
