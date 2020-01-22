@@ -46,7 +46,9 @@ ModelLoaderContainer::~ModelLoaderContainer() {
 }
 
 void ModelLoaderContainer::update(float deltaTime) {
-  selectedModelClone->addTransformation(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
+  if (selectedModelClone != nullptr) {
+    selectedModelClone->addTransformation(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
+  }
 
   for (int x = 0; x < modelContainer->getSize(); x++) {
     modelContainer->addTransformation(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
@@ -92,12 +94,12 @@ void ModelLoaderContainer::selectModel(Model* model) {
   delete selectedRasterModelClone;
 
   selectedModelClone = ModelHandler::createModel(model);
-  selectedRasterModelClone = ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
+  selectedRasterModelClone = Mif (selectedRasterModelClone != nullptr) {odelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
 }
 
 void ModelLoaderContainer::render() {
   glViewport(0, 0, 1000, 1000);
-  if (selectedRasterModelClone != nullptr) {
+  if (selectedModelClone != nullptr) {
     selectedRasterModelClone->render(camera->getViewMatrix(), camera->getProjectionMatrix());
   }
 
