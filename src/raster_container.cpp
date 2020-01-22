@@ -95,24 +95,17 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
     }
 
     if (Input::checkTrianglePressed()) {
-      modelContainer->addModel(ModelHandler::createModel(selectedModel));
-      rasterModelList.push_back(ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelContainer->getModel(modelContainer->getSize() - 1)));
-
+      modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModel);
       modelContainer->updateDeviceMesh();
+
       initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
     }
 
     if (Input::checkCrossPressed()) {
-      modelContainer->addModel(selectedModel->createReducedModel());
-      int index = modelContainer->getModelIndexFromAddress(selectedModel);
-
-      modelContainer->removeModel(index);
-      rasterModelList.erase(rasterModelList.begin() + index);
-
-      rasterModelList.push_back(ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelContainer->getModel(modelContainer->getSize() - 1)));
-      selectedModel = modelContainer->getModel(modelContainer->getSize() - 1);
-
+      modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModel->createReducedModel());
+      modelContainer->deleteModel(modelContainer->getModelIndexFromAddress(selectedModel));
       modelContainer->updateDeviceMesh();
+      selectedModel = modelContainer->getModel(modelContainer->getSize() - 1);
       initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
     }
 
@@ -121,9 +114,7 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
 }
 
 void RasterContainer::render(Camera* camera) {
-  for (int x = 0; x < rasterModelList.size(); x++) {
-    rasterModelList[x]->render(camera->getViewMatrix(), camera->getProjectionMatrix());
-  }
+  modelContainer->renderRasterModels(camera->getViewMatrix(), camera->getProjectionMatrix());
 
   textContainer->render();
 }

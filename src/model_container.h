@@ -5,6 +5,7 @@
 
 #include "model.h"
 #include "raster_model.h"
+#include "model_handler.h"
 
 class ModelContainer {
 private:
@@ -26,6 +27,10 @@ public:
   int getSize();
   int getModelIndexFromAddress(Model* model);
 
+  void emplaceModel(GLuint* shaderProgramHandle, const char* filename, int reflective);
+  void emplaceModel(GLuint* shaderProgramHandle, Model* model);
+  void deleteModel(int index);
+
   void addModel(Model* model);
   void removeModel(int index);
   Model* getModel(int index);
@@ -40,4 +45,6 @@ public:
   int* getHostMeshSegmentCount();
 
   void updateDeviceMesh();
+
+  void renderRasterModels(float* viewMatrix, float* projectionMatrix);
 };
