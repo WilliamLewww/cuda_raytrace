@@ -46,50 +46,32 @@ ModelLoaderContainer::~ModelLoaderContainer() {
 }
 
 void ModelLoaderContainer::update(float deltaTime) {
-  // if (selectedModelClone != nullptr) {
-  //   float scaleX = 0.0, scaleY = 0.0, scaleZ = 0.0;
-  //   float pitch = 0.0, yaw = 0.0, roll = 0.0;
-
-  //   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
-  //     roll += cos(camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
-  //     pitch += sin(camera->getYaw()) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
-  //   }
-
-  //   if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
-  //     roll += cos(camera->getYaw() + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * (deltaTime * 2);
-  //     pitch += sin(camera->getYaw() + (M_PI / 2)) * Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * (deltaTime * 2);
-  //   }
-
-  //   if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_LEFT_BUMPER)) {
-  //     scaleX += (deltaTime * 2);
-  //     scaleY += (deltaTime * 2);
-  //     scaleZ += (deltaTime * 2);
-  //   }
-
-  //   if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER)) {
-  //     scaleX += -(deltaTime * 2);
-  //     scaleY += -(deltaTime * 2);
-  //     scaleZ += -(deltaTime * 2);
-  //   }
-
-  //   if (!isControllerUsed) {
-  //     if (scaleX != 0.0 || scaleY != 0.0 || scaleZ != 0.0 || pitch != 0.0 || yaw != 0.0 || roll != 0.0) {
-  //       isControllerUsed = true;
-  //     }
-  //   }
-
-  //   if (!isControllerUsed) {
-  //     selectedModelClone->addTransformation(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
-  //   }
-  //   else {
-  //     selectedModelClone->addTransformation(0.0, 0.0, 0.0, scaleX, scaleY, scaleZ, pitch, yaw, roll);
-  //   }
-  // }
-
   if (selectedModelClone != nullptr) {
-    selectedModelClone->addTransformation(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
-  }
+    float scaleX = 0.0, scaleY = 0.0, scaleZ = 0.0;
+    float pitch = 0.0, yaw = 0.0, roll = 0.0;
 
+    if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X)) > 0.08) {
+      yaw +=  Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_X) * (deltaTime * 2);
+    }
+
+    if (abs(Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y)) > 0.08) {
+      pitch += Input::checkGamepadAxis(GLFW_GAMEPAD_AXIS_RIGHT_Y) * -(deltaTime * 2);
+    }
+
+    if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_LEFT_BUMPER)) {
+      scaleX += (deltaTime * 2);
+      scaleY += (deltaTime * 2);
+      scaleZ += (deltaTime * 2);
+    }
+
+    if (Input::checkGamepadButtonDown(GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER)) {
+      scaleX += -(deltaTime * 2);
+      scaleY += -(deltaTime * 2);
+      scaleZ += -(deltaTime * 2);
+    }
+
+    selectedModelClone->addTransformation(0.0, 0.0, 0.0, scaleX, scaleY, scaleZ, pitch, yaw, roll);
+  }
   for (int x = 0; x < modelContainer->getSize(); x++) {
     modelContainer->addTransformation(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 12.0 * deltaTime, 0.0);
   }
