@@ -123,6 +123,7 @@ void ModelLoaderContainer::update(float deltaTime) {
         isAddingModel = false;
       }
       if (cursorPositionX >= 875 && cursorPositionX <= 975) {
+        selectedModelClone->updateTransformation(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         masterModelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
         masterModelContainer->updateDeviceMesh();
         initializeScene(masterModelContainer->getHostMeshDescriptorCount(), masterModelContainer->getHostMeshSegmentCount());
