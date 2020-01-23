@@ -137,7 +137,7 @@ void ModelLoaderContainer::loadModels() {
   modelContainer->deleteAllModels();
 
   for (int x = loadedModelLowerBounds; x < std::min(loadedModelUpperBounds, int(modelNameList.size())); x++) {
-    modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), modelNameList[x].c_str(), 1);
+    modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), modelNameList[x].c_str(), 0);
     modelContainer->addTransformation(x - loadedModelLowerBounds, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 8.0, 0.0, 0.0);
   }
 }

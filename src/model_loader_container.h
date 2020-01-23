@@ -33,7 +33,6 @@ private:
   int loadedModelUpperBounds;
   std::vector<std::string> modelNameList;
 
-  void loadModels();
   void selectModel(Model* model);
 public:
   ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* masterModelContainer);
@@ -42,6 +41,8 @@ public:
   bool checkAddingModel();
 
   Model* grabSelectedModel();
+
+  void loadModels();
 
   void update(float deltaTime);
   void render();
