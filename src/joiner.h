@@ -16,6 +16,8 @@ private:
     RENDERMODE_MODELLOADER,
   };
 
+  ShaderHandler* shaderHandler;
+
   Camera* camera;
   ModelContainer* modelContainer;
 

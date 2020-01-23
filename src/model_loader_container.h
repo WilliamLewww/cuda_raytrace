@@ -13,7 +13,9 @@
 
 class ModelLoaderContainer {
 private:
-  int test;
+  bool isAddingModel;
+
+  ModelContainer* masterModelContainer;
   ShaderHandler* shaderHandler;
 
   Camera* camera;
@@ -25,6 +27,7 @@ private:
 
   ColoredRectangle* modelBackgroundRectangle;
   ColoredRectangle *upRectangle, *downRectangle;
+  ColoredRectangle *applyRectangle, *cancelRectangle;
 
   int loadedModelLowerBounds;
   int loadedModelUpperBounds;
@@ -33,8 +36,12 @@ private:
   void loadModels();
   void selectModel(Model* model);
 public:
-  ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler);
+  ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* masterModelContainer);
   ~ModelLoaderContainer();
+
+  bool checkAddingModel();
+
+  Model* grabSelectedModel();
 
   void update(float deltaTime);
   void render();

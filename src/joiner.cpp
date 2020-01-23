@@ -11,8 +11,7 @@ Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
 
   rasterContainer = new RasterContainer(shaderHandler, fontHandler, modelContainer);
   raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelContainer);
-
-  modelLoaderContainer = new ModelLoaderContainer(shaderHandler, fontHandler);
+  modelLoaderContainer = new ModelLoaderContainer(shaderHandler, fontHandler, modelContainer);
 
   renderMode = RENDERMODE_MODELLOADER;
 }
@@ -47,6 +46,9 @@ void Joiner::update(float deltaTime) {
 
   if (renderMode == RENDERMODE_MODELLOADER) {
     modelLoaderContainer->update(deltaTime);
+    if (!modelLoaderContainer->checkAddingModel()) {
+      renderMode = RENDERMODE_RASTER;
+    }
   }
 }
 

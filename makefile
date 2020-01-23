@@ -18,6 +18,7 @@ NVCC=$(CUDA_PATH)/bin/nvcc
 NVPROF=$(CUDA_PATH)/bin/nvprof
 NSIGHT_CLI=$(CUDA_PATH)/bin/nv-nsight-cu-cli
 NVVP=$(CUDA_PATH)/bin/nvvp
+GDB=gdb
 CUDA_GDB=$(CUDA_PATH)/bin/cuda-gdb
 MEMCHECK=$(CUDA_PATH)/bin/cuda-memcheck
 
@@ -53,6 +54,9 @@ profile:
 
 nvvp:
 	sudo $(NVVP) $(CURRENT_PATH)/bin/$(EXEC) $(EXEC_ARGS) -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+
+gdb:
+	gdb $(CURRENT_PATH)/bin/$(EXEC)
 
 cuda-gdb:
 	$(CUDA_GDB) $(BIN_PATH)/$(EXEC)

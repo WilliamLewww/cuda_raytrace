@@ -1,6 +1,13 @@
 #include "model_loader_container.h"
 
-ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
+extern "C" {
+  void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount);
+}
+
+ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* masterModelContainer) {
+  isAddingModel = true;
+
+  this->masterModelContainer = masterModelContainer;
   this->shaderHandler = shaderHandler;
 
   camera = new Camera();
@@ -14,6 +21,8 @@ ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHan
   modelBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 0.0, 1000.0, 1000.0, 0.2, 0.2, 0.2);
   upRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 825.0, 150.0, 50.0, 0.8, 0.2, 0.2);
   downRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 25.0, 150.0, 50.0, 0.2, 0.8, 0.2);
+  applyRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 875.0, 25.0, 100.0, 100.0, 0.2, 0.8, 0.2);
+  cancelRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 765.0, 25.0, 100.0, 100.0, 0.8, 0.2, 0.2);
 
   DIR* directory;
   struct dirent *directoryEntry;
@@ -31,6 +40,9 @@ ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHan
   loadedModelLowerBounds = 0;
   loadedModelUpperBounds = 5;
 
+  selectedModelClone = nullptr;
+  selectedRasterModelClone = nullptr;
+
   loadModels();
   selectModel(modelContainer->getModel(0));
 }
@@ -40,9 +52,15 @@ ModelLoaderContainer::~ModelLoaderContainer() {
   delete selectedModelClone;
   delete downRectangle;
   delete upRectangle;
+  delete applyRectangle;
+  delete cancelRectangle;
   delete modelBackgroundRectangle;
   delete modelContainer;
   delete textContainer;
+}
+
+bool ModelLoaderContainer::checkAddingModel() {
+  return isAddingModel;
 }
 
 void ModelLoaderContainer::update(float deltaTime) {
@@ -99,10 +117,23 @@ void ModelLoaderContainer::update(float deltaTime) {
         selectModel(modelContainer->getModel(int(cursorPositionY - 175) / 150));
       }
     }
+
+    if (cursorPositionY >= 875 && cursorPositionY <= 975) {
+      if (cursorPositionX >= 765 && cursorPositionX <= 865) {
+        isAddingModel = false;
+      }
+      if (cursorPositionX >= 875 && cursorPositionX <= 975) {
+        masterModelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
+        masterModelContainer->updateDeviceMesh();
+        initializeScene(masterModelContainer->getHostMeshDescriptorCount(), masterModelContainer->getHostMeshSegmentCount());
+        isAddingModel = false;
+      }
+    }
   }
 }
 
 void ModelLoaderContainer::loadModels() {
+  isAddingModel = true;
   modelContainer->deleteAllModels();
 
   for (int x = loadedModelLowerBounds; x < std::min(loadedModelUpperBounds, int(modelNameList.size())); x++) {
@@ -112,8 +143,11 @@ void ModelLoaderContainer::loadModels() {
 }
 
 void ModelLoaderContainer::selectModel(Model* model) {
-  if (selectedModelClone == nullptr) {
+  if (selectedModelClone != nullptr) {
     delete selectedModelClone;
+  }
+
+  if (selectedRasterModelClone != nullptr) {
     delete selectedRasterModelClone;
   }
 
@@ -136,5 +170,7 @@ void ModelLoaderContainer::render() {
   glViewport(0, 0, 1000, 1000);
   upRectangle->render();
   downRectangle->render();
+  applyRectangle->render();
+  cancelRectangle->render();
   textContainer->render();
 }
