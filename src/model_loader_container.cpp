@@ -114,7 +114,10 @@ void ModelLoaderContainer::update(float deltaTime) {
       }
 
       if (cursorPositionY > 175 && cursorPositionY < 925) {
-        selectModel(modelContainer->getModel(int(cursorPositionY - 175) / 150));
+        int index = int(cursorPositionY - 175) / 150;
+        if (index < modelContainer->getSize()) {
+          selectModel(modelContainer->getModel(index));
+        }
       }
     }
 
