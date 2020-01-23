@@ -4,10 +4,12 @@ extern "C" {
   void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount);
 }
 
-ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* masterModelContainer) {
+ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* masterModelContainer, Camera* masterCamera) {
   isAddingModel = true;
 
   this->masterModelContainer = masterModelContainer;
+  this->masterCamera = masterCamera;
+
   this->shaderHandler = shaderHandler;
 
   camera = new Camera();
@@ -126,8 +128,14 @@ void ModelLoaderContainer::update(float deltaTime) {
         isAddingModel = false;
       }
       if (cursorPositionX >= 875 && cursorPositionX <= 975) {
-        selectedModelClone->updateTransformation(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+        Tuple modelPosition = masterCamera->getPosition();
+        modelPosition.x += cos(-masterCamera->getYaw() + (M_PI / 2)) * 5.0;
+        modelPosition.z += sin(-masterCamera->getYaw() + (M_PI / 2)) * 5.0;
+
+        selectedModelClone->updateTransformation(modelPosition.x, modelPosition.y, modelPosition.z, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         masterModelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
+        selectedModelClone->updateTransformation(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+
         masterModelContainer->updateDeviceMesh();
         initializeScene(masterModelContainer->getHostMeshDescriptorCount(), masterModelContainer->getHostMeshSegmentCount());
         isAddingModel = false;

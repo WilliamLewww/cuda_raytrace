@@ -16,6 +16,8 @@ private:
   bool isAddingModel;
 
   ModelContainer* masterModelContainer;
+  Camera* masterCamera;
+  
   ShaderHandler* shaderHandler;
 
   Camera* camera;
@@ -35,7 +37,7 @@ private:
 
   void selectModel(Model* model);
 public:
-  ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* masterModelContainer);
+  ModelLoaderContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* masterModelContainer, Camera* masterCamera);
   ~ModelLoaderContainer();
 
   bool checkAddingModel();

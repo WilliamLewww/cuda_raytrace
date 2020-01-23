@@ -11,7 +11,7 @@ Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
 
   rasterContainer = new RasterContainer(shaderHandler, fontHandler, modelContainer);
   raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelContainer);
-  modelLoaderContainer = new ModelLoaderContainer(shaderHandler, fontHandler, modelContainer);
+  modelLoaderContainer = new ModelLoaderContainer(shaderHandler, fontHandler, modelContainer, camera);
 
   renderMode = RENDERMODE_MODELLOADER;
 }
@@ -25,8 +25,6 @@ Joiner::~Joiner() {
 }
 
 void Joiner::update(float deltaTime) {
-  camera->update(deltaTime);
-
   if (Input::checkSquarePressed()) {
     if (renderMode == RENDERMODE_RASTER) {
       renderMode = RENDERMODE_RAYTRACE;
@@ -53,6 +51,8 @@ void Joiner::update(float deltaTime) {
     if (!modelLoaderContainer->checkAddingModel()) {
       renderMode = RENDERMODE_RASTER;
     }
+  } else {
+    camera->update(deltaTime);
   }
 }
 
