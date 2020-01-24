@@ -16,9 +16,9 @@ RasterModel::RasterModel(GLuint* shaderProgramHandle, Model* model) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->getVertexIndexArraySize() * sizeof(int), model->getVertexIndexArray(), GL_STATIC_DRAW);
 
-  modelMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "modelMatrix");
-  viewMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "viewMatrix");
-  projectionMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "projectionMatrix");
+  modelMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "u_modelMatrix");
+  viewMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "u_viewMatrix");
+  projectionMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "u_projectionMatrix");
 }
 
 RasterModel::~RasterModel() {
