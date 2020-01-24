@@ -20,6 +20,7 @@ Engine::Engine() {
   shaderHandler->addShaderProgram("shaders/textured_rectangle");
   shaderHandler->addShaderProgram("shaders/random_colored_model");
   shaderHandler->addShaderProgram("shaders/colored_rectangle");
+  shaderHandler->addShaderProgram("shaders/random_colored_phong_model");
 
   joiner = new Joiner(shaderHandler, fontHandler);
 

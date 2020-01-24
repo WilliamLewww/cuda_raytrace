@@ -3,6 +3,7 @@
 extern "C" {
   void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount);
   
+  void updateDirectionalLight(float x, float y, float z, float red, float green, float blue);
   void updateCudaCamera(float x, float y, float z, float pitch, float yaw);
   void updateScene();
 
@@ -15,6 +16,7 @@ RaytraceImage::RaytraceImage(ModelContainer* modelContainer) {
   modelContainer->updateDeviceMesh();
 
   initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
+  updateDirectionalLight(10.0, -10.0, -5.0, 1.0, 1.0, 1.0);
 
   frameWidth = 250;
   frameHeight = 250;

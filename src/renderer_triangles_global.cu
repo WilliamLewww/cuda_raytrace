@@ -14,10 +14,10 @@
 #define SHADOW_EPILSON 0.00001
 #define TRIANGLE_INTERSECTION_EPILSON 0.0000001
 
-#define LIGHT_COUNT 1
+#define DIRECTIONAL_LIGHT_COUNT 1
 
 __constant__ CudaCamera camera;
-__constant__ Light lightArray[LIGHT_COUNT];
+__constant__ DirectionalLight directionalLightArray[DIRECTIONAL_LIGHT_COUNT];
 
 __constant__ int meshDescriptorCount;
 __constant__ int meshSegmentCount;
@@ -84,7 +84,7 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
   if (intersectionIndex != -1) {
     Ray transformedRay = d_transform(ray, meshDescriptorArray[intersectionDescriptorIndex].inverseModelMatrix);
     Tuple intersectionPoint = d_project(transformedRay, intersectionMagnitude - SHADOW_EPILSON);
-    Ray lightRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, d_normalize(lightArray[0].position - (meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint))};
+    Ray lightRay = {meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint, d_normalize(directionalLightArray[0].position - (meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * intersectionPoint))};
 
     int intersecionCount = 0;
     segmentOffset = 0;
@@ -93,7 +93,7 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
     for (int y = 0; y < meshDescriptorCount; y++) {
       for (int x = segmentOffset; x < segmentOffset + meshDescriptorArray[y].segmentCount; x++) {
         float point = 0;
-        intersecionCount += intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], lightRay) * (point < d_magnitude(lightArray[0].position - intersectionPoint));
+        intersecionCount += intersectTriangle(&point, meshDescriptorArray[y], meshSegmentArray[x], lightRay) * (point < d_magnitude(directionalLightArray[0].position - intersectionPoint));
       }
 
       segmentOffset += meshDescriptorArray[y].segmentCount;
@@ -252,16 +252,13 @@ extern "C" int getClosestHitDescriptor(MeshDescriptor* d_meshDescriptorBuffer, M
 }
 
 extern "C" void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount) {
-  CudaCamera h_camera = {{0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}};
-  initializeModelMatrix(h_camera.modelMatrix, multiply(multiply(createTranslateMatrix(5.0, -3.5, -6.0), createRotationMatrixY(-M_PI / 4.5)), createRotationMatrixX(-M_PI / 12.0)));
-  initializeInverseModelMatrix(h_camera.inverseModelMatrix, h_camera.modelMatrix);
-  cudaMemcpyToSymbol(camera, &h_camera, sizeof(CudaCamera));
-
-  Light h_lightArray[] = {{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}};
-  cudaMemcpyToSymbol(lightArray, h_lightArray, LIGHT_COUNT*sizeof(Light));
-
   cudaMemcpyToSymbol(meshDescriptorCount, h_meshDescriptorCount, sizeof(int));
   cudaMemcpyToSymbol(meshSegmentCount, h_meshSegmentCount, sizeof(int));
+}
+
+extern "C" void updateDirectionalLight(float x, float y, float z, float red, float green, float blue) {
+  DirectionalLight h_directionalLightArray[] = {{{x, y, z, 1.0}, {red, green, blue, 1.0}}};
+  cudaMemcpyToSymbol(directionalLightArray, h_directionalLightArray, DIRECTIONAL_LIGHT_COUNT*sizeof(DirectionalLight));
 }
 
 extern "C" void updateCudaCamera(float x, float y, float z, float pitch, float yaw) {

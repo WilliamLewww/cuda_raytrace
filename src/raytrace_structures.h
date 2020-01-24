@@ -13,7 +13,7 @@ struct Ray {
   Tuple direction;
 };
 
-struct Light {
+struct DirectionalLight {
   Tuple position;
   Tuple intensity;
 };
