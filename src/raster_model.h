@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "model.h"
+#include "camera.h"
 
 class RasterModel {
 private:
@@ -20,5 +21,5 @@ public:
 
   Model* getModel();
 
-  void render(float* viewMatrix, float* projectionMatrix);
+  void render(Camera* camera);
 };

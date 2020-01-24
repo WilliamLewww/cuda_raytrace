@@ -1,7 +1,10 @@
-#include "raster_model.h"
+#include "phong_raster_model.h"
 
-RasterModel::RasterModel(GLuint* shaderProgramHandle, Model* model) {
+PhongRasterModel::PhongRasterModel(GLuint* shaderProgramHandle, Model* model) {
   this->model = model;
+
+  vertexListUnwrapped = model->getVertexListUnwrapped();
+  normalListUnwrapped = model->getNormalListUnwrapped();
 
   this->shaderProgramHandle = shaderProgramHandle;
 
@@ -11,25 +14,25 @@ RasterModel::RasterModel(GLuint* shaderProgramHandle, Model* model) {
   glBindVertexArray(vao);
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-  glBufferData(GL_ARRAY_BUFFER, model->getVertexArraySize() * sizeof(Tuple), model->getVertexArray(), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, vertexListUnwrapped.size() * sizeof(Tuple), &vertexListUnwrapped[0], GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->getVertexIndexArraySize() * sizeof(int), model->getVertexIndexArray(), GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+  glBufferData(GL_ARRAY_BUFFER, normalListUnwrapped.size() * sizeof(Tuple), &normalListUnwrapped[0], GL_STATIC_DRAW);
 
   modelMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "u_modelMatrix");
   viewMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "u_viewMatrix");
   projectionMatrixLocationHandle = glGetUniformLocation(*shaderProgramHandle, "u_projectionMatrix");
 }
 
-RasterModel::~RasterModel() {
+PhongRasterModel::~PhongRasterModel() {
 
 }
 
-Model* RasterModel::getModel() {
+Model* PhongRasterModel::getModel() {
   return model;
 }
 
-void RasterModel::render(Camera* camera) {
+void PhongRasterModel::render(Camera* camera, DirectionalLight* directionalLight) {
   glEnable(GL_DEPTH_TEST);
   glUseProgram(*shaderProgramHandle);
 
@@ -39,12 +42,15 @@ void RasterModel::render(Camera* camera) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Tuple), nullptr);
   glEnableVertexAttribArray(0);
 
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Tuple), nullptr);
+  glEnableVertexAttribArray(0);
+
   glUniformMatrix4fv(modelMatrixLocationHandle, 1, GL_TRUE, model->getModelMatrix());
   glUniformMatrix4fv(viewMatrixLocationHandle, 1, GL_TRUE, camera->getViewMatrix());
   glUniformMatrix4fv(projectionMatrixLocationHandle, 1, GL_TRUE, camera->getProjectionMatrix());
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
-  glDrawElements(GL_TRIANGLES, model->getVertexIndexArraySize(), GL_UNSIGNED_INT, nullptr);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
 
   glDisable(GL_DEPTH_TEST);
   glUseProgram(0);

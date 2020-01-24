@@ -1,6 +1,8 @@
 #include "joiner.h"
 
 Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
+  directionalLight = new DirectionalLight{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}};
+
   camera = new Camera();
   modelContainer = new ModelContainer();
 
@@ -22,6 +24,7 @@ Joiner::~Joiner() {
   delete rasterContainer;
   delete modelContainer;
   delete camera;
+  delete directionalLight;
 }
 
 void Joiner::update(float deltaTime) {
@@ -43,7 +46,7 @@ void Joiner::update(float deltaTime) {
   }
 
   if (renderMode == RENDERMODE_RAYTRACE) {
-    raytraceContainer->update(camera);
+    raytraceContainer->update(camera, directionalLight);
   }
 
   if (renderMode == RENDERMODE_MODELLOADER) {
@@ -58,7 +61,7 @@ void Joiner::update(float deltaTime) {
 
 void Joiner::render() {
   if (renderMode == RENDERMODE_RASTER) {
-    rasterContainer->render(camera);
+    rasterContainer->render(camera, directionalLight);
   }
   
   if (renderMode == RENDERMODE_RAYTRACE) {

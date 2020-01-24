@@ -16,7 +16,6 @@ RaytraceImage::RaytraceImage(ModelContainer* modelContainer) {
   modelContainer->updateDeviceMesh();
 
   initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
-  updateDirectionalLight(10.0, -10.0, -5.0, 1.0, 1.0, 1.0);
 
   frameWidth = 250;
   frameHeight = 250;
@@ -46,12 +45,13 @@ void RaytraceImage::updateResolution(int width, int height, GLuint textureResour
   cudaMalloc(&d_reflectionsBuffer, frameWidth*frameHeight*sizeof(Tuple));
 }
 
-void RaytraceImage::update(Camera* camera) {
+void RaytraceImage::update(Camera* camera, DirectionalLight* directionalLight) {
   if (Input::checkCirclePressed()) {
     renderImage(16, 16, "image.ppm", imageWidth, imageHeight, modelContainer->getDeviceMeshDescriptorBuffer(), modelContainer->getDeviceMeshSegmentBuffer());
   }
 
   Tuple cameraPosition = camera->getPosition();
+  updateDirectionalLight(directionalLight->position.x, directionalLight->position.y, directionalLight->position.z, directionalLight->intensity.x, directionalLight->intensity.y, directionalLight->intensity.z);
   updateCudaCamera(cameraPosition.x, cameraPosition.y, cameraPosition.z, camera->getPitch(), camera->getYaw());
   updateScene();
 }

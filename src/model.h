@@ -35,6 +35,12 @@ public:
   Tuple* getVertexArray();
   int getVertexArraySize();
 
+  Tuple* getNormalArray();
+  int getNormalArraySize();
+
+  std::vector<Tuple> getVertexListUnwrapped();
+  std::vector<Tuple> getNormalListUnwrapped();
+
   int* getVertexIndexArray();
   int getVertexIndexArraySize();
 

@@ -14,6 +14,6 @@ public:
   RaytraceContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* modelContainer);
   ~RaytraceContainer();
 
-  void update(Camera* camera);
+  void update(Camera* camera, DirectionalLight* directionalLight);
   void render();
 };

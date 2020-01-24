@@ -4,7 +4,7 @@ extern "C" {
   int getClosestHitDescriptor(MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer);
 
   void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount);
-
+  
   void updateCudaCamera(float x, float y, float z, float pitch, float yaw);
 }
 
@@ -113,8 +113,8 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
   }
 }
 
-void RasterContainer::render(Camera* camera) {
-  modelContainer->renderRasterModels(camera->getViewMatrix(), camera->getProjectionMatrix());
+void RasterContainer::render(Camera* camera, DirectionalLight* directionalLight) {
+  modelContainer->renderRasterModels(camera);
 
   textContainer->render();
 }

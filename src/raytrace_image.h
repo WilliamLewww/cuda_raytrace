@@ -31,7 +31,7 @@ public:
   RaytraceImage(ModelContainer* modelContainer);
   ~RaytraceImage();
 
-  void update(Camera* camera);
+  void update(Camera* camera, DirectionalLight* directionalLight);
   void render();
 
   void updateResolution(int width, int height, GLuint textureResource);

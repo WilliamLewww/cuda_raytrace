@@ -12,7 +12,7 @@ RaytraceContainer::~RaytraceContainer() {
   delete raytraceRectangle;
 }
 
-void RaytraceContainer::update(Camera* camera) {
+void RaytraceContainer::update(Camera* camera, DirectionalLight* directionalLight) {
   if (Input::checkTrianglePressed()) {
     raytraceRectangle->incrementResolution();
     std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
@@ -25,7 +25,7 @@ void RaytraceContainer::update(Camera* camera) {
     textContainer->changeText(resolutionString);
   }
 
-  raytraceRectangle->update(camera);
+  raytraceRectangle->update(camera, directionalLight);
 }
 
 void RaytraceContainer::render() {

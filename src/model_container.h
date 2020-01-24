@@ -52,5 +52,5 @@ public:
 
   void updateDeviceMesh();
 
-  void renderRasterModels(float* viewMatrix, float* projectionMatrix);
+  void renderRasterModels(Camera* camera);
 };

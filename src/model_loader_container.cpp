@@ -170,13 +170,13 @@ void ModelLoaderContainer::selectModel(Model* model) {
 void ModelLoaderContainer::render() {
   glViewport(0, 0, 1000, 1000);
   if (selectedModelClone != nullptr) {
-    selectedRasterModelClone->render(camera->getViewMatrix(), camera->getProjectionMatrix());
+    selectedRasterModelClone->render(camera);
   }
 
   for (int x = 0; x < modelContainer->getSize(); x++) {
     glViewport(0, 675 - (x * 150), 150, 150);
     modelBackgroundRectangle->render();
-    modelContainer->getRasterModel(x)->render(camera->getViewMatrix(), camera->getProjectionMatrix());
+    modelContainer->getRasterModel(x)->render(camera);
   }
 
   glViewport(0, 0, 1000, 1000);

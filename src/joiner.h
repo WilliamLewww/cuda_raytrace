@@ -18,6 +18,8 @@ private:
 
   ShaderHandler* shaderHandler;
 
+  DirectionalLight* directionalLight;
+
   Camera* camera;
   ModelContainer* modelContainer;
 

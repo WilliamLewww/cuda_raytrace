@@ -146,8 +146,8 @@ void ModelContainer::updateDeviceMesh() {
   cudaMemcpy(d_meshSegmentBuffer, &h_meshSegmentList[0], h_meshSegmentCount*sizeof(MeshSegment), cudaMemcpyHostToDevice);
 }
 
-void ModelContainer::renderRasterModels(float* viewMatrix, float* projectionMatrix) {
+void ModelContainer::renderRasterModels(Camera* camera) {
   for (int x = 0; x < rasterModelList.size(); x++) {
-    rasterModelList[x]->render(viewMatrix, projectionMatrix);
+    rasterModelList[x]->render(camera);
   }
 }

@@ -46,6 +46,34 @@ int Model::getVertexArraySize() {
   return vertexList.size();
 }
 
+Tuple* Model::getNormalArray() {
+  return &normalList[0];
+}
+
+int Model::getNormalArraySize() {
+  return normalList.size();
+}
+
+std::vector<Tuple> Model::getVertexListUnwrapped() {
+  std::vector<Tuple> vertexListUnwrapped;
+
+  for (int x = 0; x < vertexIndexList.size(); x++) {
+    vertexListUnwrapped.push_back(vertexList[vertexIndexList[x]]);
+  }
+
+  return vertexListUnwrapped;
+}
+
+std::vector<Tuple> Model::getNormalListUnwrapped() {
+  std::vector<Tuple> normalListUnwrapped;
+
+  for (int x = 0; x < normalIndexList.size(); x++) {
+    normalListUnwrapped.push_back(normalList[normalIndexList[x]]);
+  }
+
+  return normalListUnwrapped;
+}
+
 int* Model::getVertexIndexArray() {
   return &vertexIndexList[0];
 }

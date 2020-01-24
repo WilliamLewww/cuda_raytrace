@@ -42,8 +42,8 @@ int RaytraceRectangle::getImageResolution() {
   return imageResolution;
 }
 
-void RaytraceRectangle::update(Camera* camera) {
-  image->update(camera);
+void RaytraceRectangle::update(Camera* camera, DirectionalLight* directionalLight) {
+  image->update(camera, directionalLight);
 }
 
 void RaytraceRectangle::incrementResolution() {

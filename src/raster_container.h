@@ -22,5 +22,5 @@ public:
   ~RasterContainer();
 
   void update(float deltaTime, Camera* camera);
-  void render(Camera* camera);
+  void render(Camera* camera, DirectionalLight* directionalLight);
 };
