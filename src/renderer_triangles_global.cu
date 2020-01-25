@@ -116,12 +116,6 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
   return color;
 }
 
-  // float specularIntensity = 0.5;
-  // vec3 viewDirection = normalize(u_viewPosition - fragmentPosition);
-  // vec3 reflectDirection = reflect(-lightDirection, normal);
-  // float specularLight = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
-  // vec3 specular = specularIntensity * specularLight * u_lightColor;
-
 __device__
 Ray rayFromReflection(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* meshSegmentArray, int recursionCount = 0) {
   int intersectionIndex = -1;
