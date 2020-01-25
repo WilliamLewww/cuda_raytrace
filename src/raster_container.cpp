@@ -98,6 +98,8 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
       scaleZ += -(deltaTime * 2);
     }
 
+    selectedModel->addTransformation(positionX, positionY, positionZ, scaleX, scaleY, scaleZ, pitch, yaw, roll);
+
     if (Input::checkTrianglePressed()) {
       modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), selectedModel);
       modelContainer->updateDeviceMesh();
@@ -106,14 +108,14 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
     }
 
     if (Input::checkCrossPressed()) {
-      modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), selectedModel->createReducedModel());
-      modelContainer->deleteModel(modelContainer->getModelIndexFromAddress(selectedModel));
-      modelContainer->updateDeviceMesh();
-      selectedModel = modelContainer->getModel(modelContainer->getSize() - 1);
-      initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
+      if (selectedModel->getVertexArraySize() / 2 > 9) {
+        modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), selectedModel->createReducedModel());
+        modelContainer->deleteModel(modelContainer->getModelIndexFromAddress(selectedModel));
+        modelContainer->updateDeviceMesh();
+        selectedModel = modelContainer->getModel(modelContainer->getSize() - 1);
+        initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
+      }
     }
-
-    selectedModel->addTransformation(positionX, positionY, positionZ, scaleX, scaleY, scaleZ, pitch, yaw, roll);
   }
 }
 

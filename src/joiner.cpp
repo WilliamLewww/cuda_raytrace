@@ -27,7 +27,7 @@ Joiner::~Joiner() {
 
 void Joiner::update(float deltaTime) {
   if (Input::checkSquarePressed()) {
-    if (renderMode == RENDERMODE_RASTER) {
+    if (renderMode == RENDERMODE_RASTER && !rasterContainer->checkModelSelected()) {
       renderMode = RENDERMODE_RAYTRACE;
     }
     else {
