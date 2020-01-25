@@ -47,7 +47,7 @@ void RaytraceImage::updateResolution(int width, int height, GLuint textureResour
 
 void RaytraceImage::update(Camera* camera, DirectionalLight* directionalLight) {
   if (Input::checkCirclePressed()) {
-    renderImage(16, 16, "image.ppm", imageWidth, imageHeight, modelContainer->getDeviceMeshDescriptorBuffer(), modelContainer->getDeviceMeshSegmentBuffer());
+    renderImage(16, 16, "image.png", imageWidth, imageHeight, modelContainer->getDeviceMeshDescriptorBuffer(), modelContainer->getDeviceMeshSegmentBuffer());
   }
 
   Tuple cameraPosition = camera->getPosition();

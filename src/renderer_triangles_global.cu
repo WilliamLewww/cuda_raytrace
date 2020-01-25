@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <fstream>
 #include <vector>
 #include <stdio.h>
 
@@ -9,6 +8,9 @@
 #include "raytrace_structures.h"
 #include "model.h"
 #include "analysis.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb/stb_image_write.h"
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define SHADOW_EPILSON 0.00001
@@ -180,17 +182,16 @@ void reflections(Tuple* colorOut, MeshDescriptor* meshDescriptorArray, MeshSegme
 }
 
 void writeColorDataToFile(const char* filename, int imageWidth, int imageHeight, unsigned int* colorData) {
-  std::ofstream file;
-  file.open(filename);
-  file << "P3\n" << imageWidth << " " << imageHeight << "\n255\n";
-
+  uint8_t* pixels = new uint8_t[imageWidth * imageHeight * 4];
   for (int x = 0; x < imageWidth * imageHeight; x++) {
-    file << int(colorData[x] & 0x0000FF) << " ";
-    file << int((colorData[x] & 0x00FF00) >> 8) << " ";
-    file << int((colorData[x] & 0xFF0000) >> 16) << "\n";
+    pixels[(x * 4)] = (uint8_t)int(colorData[x] & 0x0000FF);
+    pixels[(x * 4) + 1] = (uint8_t)int((colorData[x] & 0x00FF00) >> 8);
+    pixels[(x * 4) + 2] = (uint8_t)int((colorData[x] & 0xFF0000) >> 16);
+    pixels[(x * 4) + 3] = 255;
   }
 
-  file.close();
+  stbi_write_png(filename, imageWidth, imageHeight, 4, pixels, imageWidth * 4);
+  delete [] pixels;
 }
 
 __global__
