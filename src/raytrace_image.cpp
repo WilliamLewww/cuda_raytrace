@@ -20,8 +20,8 @@ RaytraceImage::RaytraceImage(ModelContainer* modelContainer) {
   frameWidth = 250;
   frameHeight = 250;
   
-  imageWidth = 1000;
-  imageHeight = 1000;
+  imageWidth = 5000;
+  imageHeight = 5000;
 }
 
 RaytraceImage::~RaytraceImage() {

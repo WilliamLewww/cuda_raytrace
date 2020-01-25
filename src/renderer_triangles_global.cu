@@ -184,13 +184,13 @@ void reflections(Tuple* colorOut, MeshDescriptor* meshDescriptorArray, MeshSegme
 void writeColorDataToFile(const char* filename, int imageWidth, int imageHeight, unsigned int* colorData) {
   uint8_t* pixels = new uint8_t[imageWidth * imageHeight * 4];
   for (int x = 0; x < imageWidth * imageHeight; x++) {
-    pixels[(x * 4)] = (uint8_t)int(colorData[x] & 0x0000FF);
-    pixels[(x * 4) + 1] = (uint8_t)int((colorData[x] & 0x00FF00) >> 8);
-    pixels[(x * 4) + 2] = (uint8_t)int((colorData[x] & 0xFF0000) >> 16);
+    pixels[(x * 4)] = int(colorData[x] & 0x0000FF);
+    pixels[(x * 4) + 1] = int((colorData[x] & 0x00FF00) >> 8);
+    pixels[(x * 4) + 2] = int((colorData[x] & 0xFF0000) >> 16);
     pixels[(x * 4) + 3] = 255;
   }
 
-  stbi_write_png(filename, imageWidth, imageHeight, 4, pixels, imageWidth * 4);
+  stbi_write_png(filename, imageWidth, imageHeight, 4, pixels, imageWidth * 4 * sizeof(uint8_t));
   delete [] pixels;
 }
 
