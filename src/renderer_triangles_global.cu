@@ -101,14 +101,26 @@ Tuple colorFromRay(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* me
       segmentOffset += meshDescriptorArray[y].segmentCount;
     }
 
-    float lightNormalDifference = d_dot(d_normalize(meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * meshSegmentArray[intersectionIndex].normal), lightRay.direction);
+    Tuple normal = d_normalize(meshDescriptorArray[intersectionDescriptorIndex].modelMatrix * meshSegmentArray[intersectionIndex].normal);
+    float lightNormalDifference = d_dot(normal, lightRay.direction);
+
+    Tuple viewDirection = d_normalize((camera.modelMatrix * camera.position) - lightRay.origin);
+    Tuple reflectDirection = d_reflect(d_negate(lightRay.direction), normal);
+    float reflectedViewDifference = pow(d_dot(viewDirection, reflectDirection), 32);
 
     color = (0.1f * meshSegmentArray[intersectionIndex].color) + 
-            (0.7f * lightNormalDifference * meshSegmentArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0));
+            (0.85f * lightNormalDifference * meshSegmentArray[intersectionIndex].color * (lightNormalDifference > 0) * (intersecionCount == 0)) +
+            (0.5f * reflectedViewDifference * meshSegmentArray[intersectionIndex].color * (reflectedViewDifference > 0) * (intersecionCount == 0));
   }
 
   return color;
 }
+
+  // float specularIntensity = 0.5;
+  // vec3 viewDirection = normalize(u_viewPosition - fragmentPosition);
+  // vec3 reflectDirection = reflect(-lightDirection, normal);
+  // float specularLight = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
+  // vec3 specular = specularIntensity * specularLight * u_lightColor;
 
 __device__
 Ray rayFromReflection(Ray ray, MeshDescriptor* meshDescriptorArray, MeshSegment* meshSegmentArray, int recursionCount = 0) {

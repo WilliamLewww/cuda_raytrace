@@ -7,9 +7,7 @@ Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
   modelContainer = new ModelContainer();
 
   modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), "res/cube.obj", 1);
-  modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), "res/donut.obj", 0);
   modelContainer->updateTransformation(0, 0.0, 0.0, 0.0, 5.0, 0.15, 5.0, 0.0, 0.0, 0.0);
-  modelContainer->updateTransformation(1, 0.0, -2.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
 
   rasterContainer = new RasterContainer(shaderHandler, fontHandler, modelContainer);
   raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelContainer);
