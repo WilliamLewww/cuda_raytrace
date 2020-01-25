@@ -39,7 +39,7 @@ void Joiner::update(float deltaTime) {
 
   if (renderMode == RENDERMODE_RASTER) {
     rasterContainer->update(deltaTime, camera);
-    if (Input::checkCrossPressed()) {
+    if (Input::checkCrossPressed() && !rasterContainer->checkModelSelected()) {
       renderMode = RENDERMODE_MODELLOADER;
       modelLoaderContainer->loadModels();
     }

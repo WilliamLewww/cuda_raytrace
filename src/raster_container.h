@@ -21,6 +21,8 @@ public:
   RasterContainer(ShaderHandler* shaderHandler, FontHandler* fontHandler, ModelContainer* modelContainer);
   ~RasterContainer();
 
+  bool checkModelSelected();
+
   void update(float deltaTime, Camera* camera);
   void render(Camera* camera, DirectionalLight* directionalLight);
 };

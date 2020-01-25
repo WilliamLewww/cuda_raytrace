@@ -29,6 +29,10 @@ RasterContainer::~RasterContainer() {
   }
 }
 
+bool RasterContainer::checkModelSelected() {
+  return selectedModel != nullptr;
+}
+
 void RasterContainer::update(float deltaTime, Camera* camera) {
   if (Input::checkCirclePressed()) {
     if (selectedModel == nullptr) {
