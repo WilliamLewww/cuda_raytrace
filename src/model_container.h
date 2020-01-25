@@ -27,8 +27,8 @@ public:
   int getSize();
   int getModelIndexFromAddress(Model* model);
 
-  void emplaceModel(GLuint* shaderProgramHandle, const char* filename, int reflective);
-  void emplaceModel(GLuint* shaderProgramHandle, Model* model);
+  void emplaceModel(RasterModelType rasterModelType, GLuint* shaderProgramHandle, const char* filename, int reflective);
+  void emplaceModel(RasterModelType rasterModelType, GLuint* shaderProgramHandle, Model* model);
   void deleteModel(int index);
   void deleteAllModels();
 
@@ -52,5 +52,5 @@ public:
 
   void updateDeviceMesh();
 
-  void renderRasterModels(Camera* camera);
+  void renderRasterModels(Camera* camera, DirectionalLight* directionalLight);
 };

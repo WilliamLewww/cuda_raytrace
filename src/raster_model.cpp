@@ -29,7 +29,7 @@ Model* RasterModel::getModel() {
   return model;
 }
 
-void RasterModel::render(Camera* camera) {
+void RasterModel::render(Camera* camera, DirectionalLight* directionalLight) {
   glEnable(GL_DEPTH_TEST);
   glUseProgram(*shaderProgramHandle);
 

@@ -47,5 +47,5 @@ public:
   void loadModels();
 
   void update(float deltaTime);
-  void render();
+  void render(DirectionalLight* directionalLight);
 };

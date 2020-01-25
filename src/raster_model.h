@@ -5,8 +5,13 @@
 #include "model.h"
 #include "camera.h"
 
+enum RasterModelType {
+  RASTERMODELTYPE_RANDOM,
+  RASTERMODELTYPE_RANDOM_PHONG,
+};
+
 class RasterModel {
-private:
+protected:
   Model* model;
 
   GLuint* shaderProgramHandle;
@@ -21,5 +26,5 @@ public:
 
   Model* getModel();
 
-  void render(Camera* camera);
+  virtual void render(Camera* camera, DirectionalLight* directionalLight);
 };

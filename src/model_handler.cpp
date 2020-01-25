@@ -10,8 +10,17 @@ Model* ModelHandler::createModel(Model* model) {
   return cloneModel;
 }
 
-RasterModel* ModelHandler::createRasterModel(GLuint* shaderProgramHandle, Model* model) {
-  RasterModel* rasterModel = new RasterModel(shaderProgramHandle, model);
+RasterModel* ModelHandler::createRasterModel(RasterModelType rasterModelType, GLuint* shaderProgramHandle, Model* model) {
+  RasterModel* rasterModel = nullptr;
+
+  if (rasterModelType == RASTERMODELTYPE_RANDOM) {
+    rasterModel = new RasterModel(shaderProgramHandle, model);
+  }
+
+  if (rasterModelType == RASTERMODELTYPE_RANDOM_PHONG) {
+    rasterModel = new PhongRasterModel(shaderProgramHandle, model);
+  }
+
   return rasterModel;
 }
 

@@ -6,8 +6,8 @@ Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
   camera = new Camera();
   modelContainer = new ModelContainer();
 
-  modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), "res/cube.obj", 1);
-  modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), "res/donut.obj", 0);
+  modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), "res/cube.obj", 1);
+  modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), "res/donut.obj", 0);
   modelContainer->updateTransformation(0, 0.0, 0.0, 0.0, 5.0, 0.15, 5.0, 0.0, 0.0, 0.0);
   modelContainer->updateTransformation(1, 0.0, -2.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
 
@@ -69,6 +69,6 @@ void Joiner::render() {
   }
 
   if (renderMode == RENDERMODE_MODELLOADER) {
-    modelLoaderContainer->render();
+    modelLoaderContainer->render(directionalLight);
   }
 }

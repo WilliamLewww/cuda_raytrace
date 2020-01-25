@@ -8,14 +8,16 @@
 #include "model_container.h"
 #include "model_loader_container.h"
 
+enum RenderMode {
+  RENDERMODE_RASTER,
+  RENDERMODE_RAYTRACE,
+  RENDERMODE_MODELLOADER,
+};
+
 class Joiner {
 private:
-  enum RenderMode {
-    RENDERMODE_RASTER,
-    RENDERMODE_RAYTRACE,
-    RENDERMODE_MODELLOADER,
-  };
-
+  PhongRasterModel* test;
+  
   ShaderHandler* shaderHandler;
 
   DirectionalLight* directionalLight;

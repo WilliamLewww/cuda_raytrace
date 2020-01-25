@@ -32,14 +32,14 @@ int ModelContainer::getModelIndexFromAddress(Model* model) {
   return -1;
 }
 
-void ModelContainer::emplaceModel(GLuint* shaderProgramHandle, const char* filename, int reflective = 0) {
+void ModelContainer::emplaceModel(RasterModelType rasterModelType, GLuint* shaderProgramHandle, const char* filename, int reflective = 0) {
   modelList.push_back(ModelHandler::createModel(filename, reflective));
-  rasterModelList.push_back(ModelHandler::createRasterModel(shaderProgramHandle, modelList[modelList.size() - 1]));
+  rasterModelList.push_back(ModelHandler::createRasterModel(rasterModelType, shaderProgramHandle, modelList[modelList.size() - 1]));
 }
 
-void ModelContainer::emplaceModel(GLuint* shaderProgramHandle, Model* model) {
+void ModelContainer::emplaceModel(RasterModelType rasterModelType, GLuint* shaderProgramHandle, Model* model) {
   modelList.push_back(ModelHandler::createModel(model));
-  rasterModelList.push_back(ModelHandler::createRasterModel(shaderProgramHandle, modelList[modelList.size() - 1]));
+  rasterModelList.push_back(ModelHandler::createRasterModel(rasterModelType, shaderProgramHandle, modelList[modelList.size() - 1]));
 }
 
 void ModelContainer::deleteModel(int index) {
@@ -146,8 +146,8 @@ void ModelContainer::updateDeviceMesh() {
   cudaMemcpy(d_meshSegmentBuffer, &h_meshSegmentList[0], h_meshSegmentCount*sizeof(MeshSegment), cudaMemcpyHostToDevice);
 }
 
-void ModelContainer::renderRasterModels(Camera* camera) {
+void ModelContainer::renderRasterModels(Camera* camera, DirectionalLight* directionalLight) {
   for (int x = 0; x < rasterModelList.size(); x++) {
-    rasterModelList[x]->render(camera);
+    rasterModelList[x]->render(camera, directionalLight);
   }
 }

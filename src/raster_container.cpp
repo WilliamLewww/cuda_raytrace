@@ -15,7 +15,7 @@ RasterContainer::RasterContainer(ShaderHandler* shaderHandler, FontHandler* font
   selectedModel = nullptr;
 
   for (int x = 0; x < modelContainer->getSize(); x++) {
-    rasterModelList.push_back(ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), modelContainer->getModel(x)));
+    rasterModelList.push_back(ModelHandler::createRasterModel(RASTERMODELTYPE_RANDOM, shaderHandler->getShaderFromName("random_colored_model"), modelContainer->getModel(x)));
   }
 
   textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Raster", -0.95, 0.85);
@@ -95,14 +95,14 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
     }
 
     if (Input::checkTrianglePressed()) {
-      modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModel);
+      modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), selectedModel);
       modelContainer->updateDeviceMesh();
 
       initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
     }
 
     if (Input::checkCrossPressed()) {
-      modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModel->createReducedModel());
+      modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), selectedModel->createReducedModel());
       modelContainer->deleteModel(modelContainer->getModelIndexFromAddress(selectedModel));
       modelContainer->updateDeviceMesh();
       selectedModel = modelContainer->getModel(modelContainer->getSize() - 1);
@@ -114,7 +114,7 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
 }
 
 void RasterContainer::render(Camera* camera, DirectionalLight* directionalLight) {
-  modelContainer->renderRasterModels(camera);
+  modelContainer->renderRasterModels(camera, directionalLight);
 
   textContainer->render();
 }

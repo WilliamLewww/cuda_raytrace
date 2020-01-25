@@ -133,7 +133,7 @@ void ModelLoaderContainer::update(float deltaTime) {
         modelPosition.z += sin(-masterCamera->getYaw() + (M_PI / 2)) * 5.0;
 
         selectedModelClone->updateTransformation(modelPosition.x, modelPosition.y, modelPosition.z, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
-        masterModelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
+        masterModelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), selectedModelClone);
         selectedModelClone->updateTransformation(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
 
         masterModelContainer->updateDeviceMesh();
@@ -149,7 +149,7 @@ void ModelLoaderContainer::loadModels() {
   modelContainer->deleteAllModels();
 
   for (int x = loadedModelLowerBounds; x < std::min(loadedModelUpperBounds, int(modelNameList.size())); x++) {
-    modelContainer->emplaceModel(shaderHandler->getShaderFromName("random_colored_model"), modelNameList[x].c_str(), 0);
+    modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM, shaderHandler->getShaderFromName("random_colored_model"), modelNameList[x].c_str(), 0);
     modelContainer->addTransformation(x - loadedModelLowerBounds, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, M_PI / 8.0, 0.0, 0.0);
   }
 }
@@ -164,19 +164,19 @@ void ModelLoaderContainer::selectModel(Model* model) {
   }
 
   selectedModelClone = ModelHandler::createModel(model);
-  selectedRasterModelClone = ModelHandler::createRasterModel(shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
+  selectedRasterModelClone = ModelHandler::createRasterModel(RASTERMODELTYPE_RANDOM, shaderHandler->getShaderFromName("random_colored_model"), selectedModelClone);
 }
 
-void ModelLoaderContainer::render() {
+void ModelLoaderContainer::render(DirectionalLight* directionalLight) {
   glViewport(0, 0, 1000, 1000);
   if (selectedModelClone != nullptr) {
-    selectedRasterModelClone->render(camera);
+    selectedRasterModelClone->render(camera, directionalLight);
   }
 
   for (int x = 0; x < modelContainer->getSize(); x++) {
     glViewport(0, 675 - (x * 150), 150, 150);
     modelBackgroundRectangle->render();
-    modelContainer->getRasterModel(x)->render(camera);
+    modelContainer->getRasterModel(x)->render(camera, directionalLight);
   }
 
   glViewport(0, 0, 1000, 1000);
