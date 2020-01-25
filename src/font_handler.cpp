@@ -1,7 +1,7 @@
 #include "font_handler.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 FontHandler::FontHandler() {
 
