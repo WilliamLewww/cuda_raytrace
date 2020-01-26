@@ -36,18 +36,20 @@ Joiner::~Joiner() {
 
 void Joiner::update(float deltaTime) {
   if (Input::checkSquarePressed()) {
-    if (renderMode == RENDERMODE_RASTER && !rasterContainer->checkModelSelected()) {
-      renderMode = RENDERMODE_RAYTRACE;
-    }
-    else {
-      renderMode = RENDERMODE_RASTER;
+    if (!rasterContainer->checkModelSelected()) {
+      if (renderMode == RENDERMODE_RASTER) {
+        renderMode = RENDERMODE_RAYTRACE;
+      }
+      else {
+        if (renderMode == RENDERMODE_RAYTRACE) {
+          renderMode = RENDERMODE_RASTER;
+        }
+      }
     }
   }
 
-  if (renderMode == RENDERMODE_RASTER) {
-    rasterContainer->update(deltaTime, camera);
-
-    if (Input::checkCrossPressed()) {
+  if (Input::checkCrossPressed()) {
+    if (renderMode == RENDERMODE_RASTER) {
       if (!rasterContainer->checkModelSelected()) {
         renderMode = RENDERMODE_MODELLOADER;
         modelLoaderContainer->loadModels();
@@ -57,6 +59,16 @@ void Joiner::update(float deltaTime) {
         renderMode = RENDERMODE_PROPERTYCONTAINER;
       }
     }
+    else {
+      if (renderMode == RENDERMODE_PROPERTYCONTAINER) {
+        delete modelPropertyContainer;
+        renderMode = RENDERMODE_RASTER;
+      }
+    }
+  }
+
+  if (renderMode == RENDERMODE_RASTER) {
+    rasterContainer->update(deltaTime, camera);
   }
 
   if (renderMode == RENDERMODE_RAYTRACE) {
