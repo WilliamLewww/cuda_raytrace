@@ -1,6 +1,9 @@
 #include "joiner.h"
 
 Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
+  this->shaderHandler = shaderHandler;
+  this->fontHandler = fontHandler;
+
   directionalLight = new DirectionalLight{{10.0, -10.0, -5.0, 1.0}, {1.0, 1.0, 1.0, 1.0}};
 
   camera = new Camera();
@@ -13,10 +16,16 @@ Joiner::Joiner(ShaderHandler* shaderHandler, FontHandler* fontHandler) {
   raytraceContainer = new RaytraceContainer(shaderHandler, fontHandler, modelContainer);
   modelLoaderContainer = new ModelLoaderContainer(shaderHandler, fontHandler, modelContainer, camera);
 
+  modelPropertyContainer = nullptr;
+
   renderMode = RENDERMODE_MODELLOADER;
 }
 
 Joiner::~Joiner() {
+  if (modelPropertyContainer != nullptr) {
+    delete modelPropertyContainer;
+  }
+
   delete modelLoaderContainer;
   delete raytraceContainer;
   delete rasterContainer;
@@ -37,9 +46,16 @@ void Joiner::update(float deltaTime) {
 
   if (renderMode == RENDERMODE_RASTER) {
     rasterContainer->update(deltaTime, camera);
-    if (Input::checkCrossPressed() && !rasterContainer->checkModelSelected()) {
-      renderMode = RENDERMODE_MODELLOADER;
-      modelLoaderContainer->loadModels();
+
+    if (Input::checkCrossPressed()) {
+      if (!rasterContainer->checkModelSelected()) {
+        renderMode = RENDERMODE_MODELLOADER;
+        modelLoaderContainer->loadModels();
+      }
+      else {
+        modelPropertyContainer = new ModelPropertyContainer(rasterContainer->getSelectedModel(), shaderHandler, fontHandler);
+        renderMode = RENDERMODE_PROPERTYCONTAINER;
+      }
     }
   }
 
@@ -55,6 +71,10 @@ void Joiner::update(float deltaTime) {
   } else {
     camera->update(deltaTime);
   }
+
+  if (renderMode == RENDERMODE_PROPERTYCONTAINER) {
+    modelPropertyContainer->update();
+  }
 }
 
 void Joiner::render() {
@@ -68,5 +88,9 @@ void Joiner::render() {
 
   if (renderMode == RENDERMODE_MODELLOADER) {
     modelLoaderContainer->render(directionalLight);
+  }
+
+  if (renderMode == RENDERMODE_PROPERTYCONTAINER) {
+    modelPropertyContainer->render(camera, directionalLight);
   }
 }

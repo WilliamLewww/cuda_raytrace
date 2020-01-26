@@ -2,9 +2,7 @@
 
 extern "C" {
   int getClosestHitDescriptor(MeshDescriptor* d_meshDescriptorBuffer, MeshSegment* d_meshSegmentBuffer);
-
   void initializeScene(int* h_meshDescriptorCount, int* h_meshSegmentCount);
-  
   void updateCudaCamera(float x, float y, float z, float pitch, float yaw);
 }
 
@@ -31,6 +29,10 @@ RasterContainer::~RasterContainer() {
 
 bool RasterContainer::checkModelSelected() {
   return selectedModel != nullptr;
+}
+
+Model* RasterContainer::getSelectedModel() {
+  return selectedModel;
 }
 
 void RasterContainer::update(float deltaTime, Camera* camera) {
@@ -105,16 +107,6 @@ void RasterContainer::update(float deltaTime, Camera* camera) {
       modelContainer->updateDeviceMesh();
 
       initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
-    }
-
-    if (Input::checkCrossPressed()) {
-      if (selectedModel->getVertexArraySize() / 2 > 9) {
-        modelContainer->emplaceModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), selectedModel->createReducedModel());
-        modelContainer->deleteModel(modelContainer->getModelIndexFromAddress(selectedModel));
-        modelContainer->updateDeviceMesh();
-        selectedModel = modelContainer->getModel(modelContainer->getSize() - 1);
-        initializeScene(modelContainer->getHostMeshDescriptorCount(), modelContainer->getHostMeshSegmentCount());
-      }
     }
   }
 }

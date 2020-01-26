@@ -7,18 +7,19 @@
 #include "raytrace_container.h"
 #include "model_container.h"
 #include "model_loader_container.h"
+#include "model_property_container.h"
 
 enum RenderMode {
   RENDERMODE_RASTER,
   RENDERMODE_RAYTRACE,
   RENDERMODE_MODELLOADER,
+  RENDERMODE_PROPERTYCONTAINER,
 };
 
 class Joiner {
-private:
-  PhongRasterModel* test;
-  
+private:  
   ShaderHandler* shaderHandler;
+  FontHandler* fontHandler;
 
   DirectionalLight* directionalLight;
 
@@ -29,6 +30,7 @@ private:
   RaytraceContainer* raytraceContainer;
 
   ModelLoaderContainer* modelLoaderContainer;
+  ModelPropertyContainer* modelPropertyContainer;
 
   RenderMode renderMode;
 public:

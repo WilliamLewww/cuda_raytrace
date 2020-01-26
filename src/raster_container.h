@@ -22,6 +22,7 @@ public:
   ~RasterContainer();
 
   bool checkModelSelected();
+  Model* getSelectedModel();
 
   void update(float deltaTime, Camera* camera);
   void render(Camera* camera, DirectionalLight* directionalLight);
