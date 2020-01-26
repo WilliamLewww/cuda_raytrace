@@ -27,4 +27,5 @@ public:
   Model* getModel();
 
   virtual void render(Camera* camera, DirectionalLight* directionalLight);
+  virtual void renderProvidedModelMatrix(Camera* camera, DirectionalLight* directionalLight, float* modelMatrix);
 };

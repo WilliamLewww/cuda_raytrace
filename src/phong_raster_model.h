@@ -20,4 +20,5 @@ public:
   Model* getModel();
 
   void render(Camera* camera, DirectionalLight* directionalLight) override;
+  void renderProvidedModelMatrix(Camera* camera, DirectionalLight* directionalLight, float* modelMatrix) override;
 };

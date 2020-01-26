@@ -8,14 +8,19 @@
 
 class ModelPropertyContainer {
 private:
+  Camera* camera;
   Model* selectedModel;
   RasterModel* selectedRasterModel;
+
+  float* modelMatrix;
+  float rotationX;
+  float rotationY;
 
   TextContainer* textContainer;
 public:
   ModelPropertyContainer(Model* selectedModel, ShaderHandler* shaderHandler, FontHandler* fontHandler);
   ~ModelPropertyContainer();
 
-  void update();
-  void render(Camera* camera, DirectionalLight* directionalLight);
+  void update(float deltaTime);
+  void render(DirectionalLight* directionalLight);
 };

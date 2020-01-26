@@ -73,7 +73,7 @@ void Joiner::update(float deltaTime) {
   }
 
   if (renderMode == RENDERMODE_PROPERTYCONTAINER) {
-    modelPropertyContainer->update();
+    modelPropertyContainer->update(deltaTime);
   }
 }
 
@@ -91,6 +91,6 @@ void Joiner::render() {
   }
 
   if (renderMode == RENDERMODE_PROPERTYCONTAINER) {
-    modelPropertyContainer->render(camera, directionalLight);
+    modelPropertyContainer->render(directionalLight);
   }
 }
