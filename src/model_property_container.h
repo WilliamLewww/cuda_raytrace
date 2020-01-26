@@ -5,6 +5,7 @@
 #include "raytrace_structures.h"
 #include "raster_model.h"
 #include "model_handler.h"
+#include "colored_rectangle.h"
 
 class ModelPropertyContainer {
 private:
@@ -15,6 +16,8 @@ private:
   float* modelMatrix;
   float rotationX;
   float rotationY;
+
+  ColoredRectangle *upperBackgroundRectangle, *lowerBackgroundRectangle;
 
   TextContainer* textContainer;
 public:
