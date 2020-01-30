@@ -16,7 +16,7 @@ RasterContainer::RasterContainer(ShaderHandler* shaderHandler, FontHandler* font
     rasterModelList.push_back(ModelHandler::createRasterModel(RASTERMODELTYPE_RANDOM, shaderHandler->getShaderFromName("random_colored_model"), modelContainer->getModel(x)));
   }
 
-  textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Raster", 0.0, 0.0);
+  textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Raster", 0.0, 32.0);
 }
 
 RasterContainer::~RasterContainer() {

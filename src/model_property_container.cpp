@@ -17,7 +17,7 @@ ModelPropertyContainer::ModelPropertyContainer(Model* selectedModel, ShaderHandl
   upperBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 500.0, 500.0, 500.0, 0.2, 0.2, 0.2);
   lowerBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 0.0, 1000.0, 500.0, 0.2, 0.2, 0.2);
 
-  textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Model Property", 0.0, 0.0);
+  textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Model Property", 0.0, 32.0);
 }
 
 ModelPropertyContainer::~ModelPropertyContainer() {

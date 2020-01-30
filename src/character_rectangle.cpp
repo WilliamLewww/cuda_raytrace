@@ -11,12 +11,12 @@ CharacterRectangle::CharacterRectangle(GLuint* shaderProgramHandle, Font* font, 
   float maxX = minX + (float(this->font->characterList[index].width) / this->font->width);
   float maxY = minY + (float(this->font->characterList[index].height) / this->font->height);
 
-  vertices[0] =  positionX;                                            vertices[1] =  positionY;
-  vertices[2] =  positionX + this->font->characterList[index].width;   vertices[3] =  positionY;
-  vertices[4] =  positionX;                                            vertices[5] =  positionY + this->font->characterList[index].height;
-  vertices[6] =  positionX;                                            vertices[7] =  positionY + this->font->characterList[index].height;
-  vertices[8] =  positionX + this->font->characterList[index].width;   vertices[9] =  positionY;
-  vertices[10] = positionX + this->font->characterList[index].width;   vertices[11] = positionY + this->font->characterList[index].height;
+  vertices[0] =  positionX;                                            vertices[1] =  positionY - this->font->characterList[index].originY;
+  vertices[2] =  positionX + this->font->characterList[index].width;   vertices[3] =  positionY - this->font->characterList[index].originY;
+  vertices[4] =  positionX;                                            vertices[5] =  positionY - this->font->characterList[index].originY + this->font->characterList[index].height;
+  vertices[6] =  positionX;                                            vertices[7] =  positionY - this->font->characterList[index].originY + this->font->characterList[index].height;
+  vertices[8] =  positionX + this->font->characterList[index].width;   vertices[9] =  positionY - this->font->characterList[index].originY;
+  vertices[10] = positionX + this->font->characterList[index].width;   vertices[11] = positionY - this->font->characterList[index].originY + this->font->characterList[index].height;
 
   textureCoordinates[0] =  minX;   textureCoordinates[1] =  minY;
   textureCoordinates[2] =  maxX;   textureCoordinates[3] =  minY;

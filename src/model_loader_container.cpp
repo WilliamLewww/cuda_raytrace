@@ -17,7 +17,7 @@ ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHan
   camera->setPitch(0.0);
   camera->setYaw(0.0);
 
-  textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Model Loader", 0.0, 0.0);
+  textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Model Loader", 0.0, 32.0);
   modelContainer = new ModelContainer();
 
   modelBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 0.0, 1000.0, 1000.0, 0.2, 0.2, 0.2);
