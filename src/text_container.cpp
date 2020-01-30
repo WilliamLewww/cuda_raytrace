@@ -25,7 +25,7 @@ void TextContainer::changeText(std::string text) {
     offsetX += characterRectangleList[characterRectangleList.size() - 1]->getOffsetX();
 
     if (text[x] == ' ') {
-      offsetX += 0.05;
+      offsetX += 10.0;
     }
   }
 }
