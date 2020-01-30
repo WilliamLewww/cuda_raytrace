@@ -10,12 +10,12 @@ RaytraceRectangle::RaytraceRectangle(GLuint* shaderProgramHandle, ModelContainer
   vertices[8] = SCREEN_WIDTH;    vertices[9] = 0.0;
   vertices[10] = SCREEN_WIDTH;   vertices[11] = SCREEN_HEIGHT;
 
-  textureCoordinates[0] =  0.0;   textureCoordinates[1] =  1.0;
-  textureCoordinates[2] =  1.0;   textureCoordinates[3] =  1.0;
-  textureCoordinates[4] =  0.0;   textureCoordinates[5] =  0.0;
-  textureCoordinates[6] =  0.0;   textureCoordinates[7] =  0.0;
-  textureCoordinates[8] =  1.0;   textureCoordinates[9] =  1.0;
-  textureCoordinates[10] = 1.0;   textureCoordinates[11] = 0.0;
+  textureCoordinates[0] =  0.0;   textureCoordinates[1] =  0.0;
+  textureCoordinates[2] =  1.0;   textureCoordinates[3] =  0.0;
+  textureCoordinates[4] =  0.0;   textureCoordinates[5] =  1.0;
+  textureCoordinates[6] =  0.0;   textureCoordinates[7] =  1.0;
+  textureCoordinates[8] =  1.0;   textureCoordinates[9] =  0.0;
+  textureCoordinates[10] = 1.0;   textureCoordinates[11] = 1.0;
 
   this->shaderProgramHandle = shaderProgramHandle;
 

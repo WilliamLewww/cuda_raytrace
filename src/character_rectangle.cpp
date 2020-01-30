@@ -11,12 +11,6 @@ CharacterRectangle::CharacterRectangle(GLuint* shaderProgramHandle, Font* font, 
   float maxX = minX + (float(this->font->characterList[index].width) / this->font->width);
   float maxY = minY + (float(this->font->characterList[index].height) / this->font->height);
 
-  float clipX = (float(this->font->characterList[index].width) / this->font->width) / 4.0;
-  float clipY = (float(this->font->characterList[index].height) / this->font->height) / 4.0;
-
-  float offsetX = positionX;
-  float offsetY = positionY + (float(this->font->characterList[index].originY) / this->font->height) / 4.0;
-
   vertices[0] =  positionX;                                            vertices[1] =  positionY;
   vertices[2] =  positionX + this->font->characterList[index].width;   vertices[3] =  positionY;
   vertices[4] =  positionX;                                            vertices[5] =  positionY + this->font->characterList[index].height;
@@ -24,12 +18,12 @@ CharacterRectangle::CharacterRectangle(GLuint* shaderProgramHandle, Font* font, 
   vertices[8] =  positionX + this->font->characterList[index].width;   vertices[9] =  positionY;
   vertices[10] = positionX + this->font->characterList[index].width;   vertices[11] = positionY + this->font->characterList[index].height;
 
-  textureCoordinates[0] =  minX;   textureCoordinates[1] =  maxY;
-  textureCoordinates[2] =  maxX;   textureCoordinates[3] =  maxY;
-  textureCoordinates[4] =  minX;   textureCoordinates[5] =  minY;
-  textureCoordinates[6] =  minX;   textureCoordinates[7] =  minY;
-  textureCoordinates[8] =  maxX;   textureCoordinates[9] =  maxY;
-  textureCoordinates[10] = maxX;   textureCoordinates[11] = minY;
+  textureCoordinates[0] =  minX;   textureCoordinates[1] =  minY;
+  textureCoordinates[2] =  maxX;   textureCoordinates[3] =  minY;
+  textureCoordinates[4] =  minX;   textureCoordinates[5] =  maxY;
+  textureCoordinates[6] =  minX;   textureCoordinates[7] =  maxY;
+  textureCoordinates[8] =  maxX;   textureCoordinates[9] =  minY;
+  textureCoordinates[10] = maxX;   textureCoordinates[11] = maxY;
 
   this->shaderProgramHandle = shaderProgramHandle;
 
