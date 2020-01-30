@@ -7,6 +7,7 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
+#include "common_definitions.h"
 #include "raytrace_image.h"
 
 class RaytraceRectangle {
@@ -19,7 +20,9 @@ private:
   GLuint textureResource;
   
   GLuint vao, vbo[2];
-  GLuint textureHandle;
+
+  GLuint textureLocationHandle;
+  GLuint resolutionLocationHandle;
 
   GLfloat vertices[12];
   GLfloat textureCoordinates[12];

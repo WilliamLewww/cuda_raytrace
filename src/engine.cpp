@@ -4,7 +4,7 @@ Engine::Engine() {
   glfwInit();
 
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-  window = glfwCreateWindow(1000, 1000, "cuda_raytrace", NULL, NULL);
+  window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "cuda_raytrace", NULL, NULL);
   
   glfwMakeContextCurrent(window);
   glewInit();

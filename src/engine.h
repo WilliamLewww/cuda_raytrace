@@ -6,6 +6,7 @@
 #include "font_handler.h"
 #include "model_handler.h"
 #include "shader_handler.h"
+#include "common_definitions.h"
 #include "joiner.h"
 
 class Engine {

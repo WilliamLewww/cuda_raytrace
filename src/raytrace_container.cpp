@@ -4,7 +4,7 @@ RaytraceContainer::RaytraceContainer(ShaderHandler* shaderHandler, FontHandler* 
   raytraceRectangle = new RaytraceRectangle(shaderHandler->getShaderFromName("textured_rectangle"), modelContainer);
 
   std::string resolutionString = std::to_string(raytraceRectangle->getImageResolution()) + "x" + std::to_string(raytraceRectangle->getImageResolution());
-  textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), resolutionString, -0.95, 0.85);
+  textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), resolutionString, 0.0, 0.0);
 }
 
 RaytraceContainer::~RaytraceContainer() {

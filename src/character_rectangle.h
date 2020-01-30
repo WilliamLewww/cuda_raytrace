@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "common_definitions.h"
 #include "font_handler.h"
 
 class CharacterRectangle {
@@ -13,7 +14,9 @@ private:
   GLuint textureResource;
 
   GLuint vao, vbo[2];
-  GLuint textureHandle;
+
+  GLuint textureLocationHandle;
+  GLuint resolutionLocationHandle;
 
   GLfloat vertices[12];
   GLfloat textureCoordinates[12];
@@ -22,7 +25,6 @@ public:
   ~CharacterRectangle();
 
   float getOffsetX();
-  void addPosition(float positionX, float positionY);
 
   void render();
 };
