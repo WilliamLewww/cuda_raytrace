@@ -68,7 +68,7 @@ void CharacterRectangle::render() {
   glEnableVertexAttribArray(1);
 
   glUniform1i(textureLocationHandle, 0);
-  glUniform2f(resolutionLocationHandle, SCREEN_WIDTH, SCREEN_HEIGHT);
+  glUniform2f(resolutionLocationHandle, RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
 
   glDrawArrays(GL_TRIANGLES, 0, 6);
 

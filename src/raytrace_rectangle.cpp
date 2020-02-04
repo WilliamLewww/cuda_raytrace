@@ -3,12 +3,12 @@
 RaytraceRectangle::RaytraceRectangle(GLuint* shaderProgramHandle, ModelContainer* modelContainer) {
   imageResolution = 50;
 
-  vertices[0] = 0.0;             vertices[1] = 0.0;
-  vertices[2] = SCREEN_WIDTH;    vertices[3] = 0.0;
-  vertices[4] = 0.0;             vertices[5] = SCREEN_HEIGHT;
-  vertices[6] = 0.0;             vertices[7] = SCREEN_HEIGHT;
-  vertices[8] = SCREEN_WIDTH;    vertices[9] = 0.0;
-  vertices[10] = SCREEN_WIDTH;   vertices[11] = SCREEN_HEIGHT;
+  vertices[0] = 0.0;       vertices[1] = 0.0;
+  vertices[2] = 1000.0;    vertices[3] = 0.0;
+  vertices[4] = 0.0;       vertices[5] = 1000.0;
+  vertices[6] = 0.0;       vertices[7] = 1000.0;
+  vertices[8] = 1000.0;    vertices[9] = 0.0;
+  vertices[10] = 1000.0;   vertices[11] = 1000.0;
 
   textureCoordinates[0] =  0.0;   textureCoordinates[1] =  0.0;
   textureCoordinates[2] =  1.0;   textureCoordinates[3] =  0.0;
@@ -76,7 +76,7 @@ void RaytraceRectangle::render() {
   glEnableVertexAttribArray(1);
 
   glUniform1i(textureLocationHandle, 0);
-  glUniform2f(resolutionLocationHandle, SCREEN_WIDTH, SCREEN_HEIGHT);
+  glUniform2f(resolutionLocationHandle, RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
 
   glDrawArrays(GL_TRIANGLES, 0, 6);
 

@@ -44,7 +44,7 @@ void ColoredRectangle::render() {
   glEnableVertexAttribArray(0);
 
   glUniform4f(colorLocationHandle, red, green, blue, 1.0);
-  glUniform2f(resolutionLocationHandle, SCREEN_WIDTH, SCREEN_HEIGHT);
+  glUniform2f(resolutionLocationHandle, RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
 
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glUseProgram(0);
