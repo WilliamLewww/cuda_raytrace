@@ -14,8 +14,8 @@ ModelPropertyContainer::ModelPropertyContainer(Model* selectedModel, ShaderHandl
   this->selectedModel = selectedModel;
   selectedRasterModel = ModelHandler::createRasterModel(RASTERMODELTYPE_RANDOM_PHONG, shaderHandler->getShaderFromName("random_colored_phong_model"), selectedModel);
 
-  upperBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 500.0, 500.0, 500.0, 0.2, 0.2, 0.2);
-  lowerBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 0.0, 1000.0, 500.0, 0.2, 0.2, 0.2);
+  upperBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 0.0, 500.0, 500.0, 0.2, 0.2, 0.2);
+  lowerBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 500.0, 1000.0, 500.0, 0.2, 0.2, 0.2);
 
   textContainer = new TextContainer(shaderHandler->getShaderFromName("textured_rectangle"), fontHandler->getFontFromName("Ubuntu"), "Model Property Editor", 0.0, 32.0);
 }

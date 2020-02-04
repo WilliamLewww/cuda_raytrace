@@ -21,10 +21,10 @@ ModelLoaderContainer::ModelLoaderContainer(ShaderHandler* shaderHandler, FontHan
   modelContainer = new ModelContainer();
 
   modelBackgroundRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 0.0, 1000.0, 1000.0, 0.2, 0.2, 0.2);
-  upRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 825.0, 150.0, 50.0, 0.8, 0.2, 0.2);
-  downRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 25.0, 150.0, 50.0, 0.2, 0.8, 0.2);
-  applyRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 875.0, 25.0, 100.0, 100.0, 0.2, 0.8, 0.2);
-  cancelRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 765.0, 25.0, 100.0, 100.0, 0.8, 0.2, 0.2);
+  upRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 125.0, 150.0, 50.0, 0.8, 0.2, 0.2);
+  downRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 0.0, 925.0, 150.0, 50.0, 0.2, 0.8, 0.2);
+  applyRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 875.0, 875.0, 100.0, 100.0, 0.2, 0.8, 0.2);
+  cancelRectangle = new ColoredRectangle(shaderHandler->getShaderFromName("colored_rectangle"), 765.0, 875.0, 100.0, 100.0, 0.8, 0.2, 0.2);
 
   DIR* directory;
   struct dirent *directoryEntry;
