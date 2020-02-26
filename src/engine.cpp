@@ -17,10 +17,10 @@ Engine::Engine() {
   fontHandler->addFontFromFile("res/font_ubuntu");
 
   shaderHandler = new ShaderHandler();
-  shaderHandler->addShaderProgram("shaders/textured_rectangle");
-  shaderHandler->addShaderProgram("shaders/random_colored_model");
-  shaderHandler->addShaderProgram("shaders/colored_rectangle");
-  shaderHandler->addShaderProgram("shaders/random_colored_phong_model");
+  shaderHandler->addShaderProgram("src/shaders/textured_rectangle");
+  shaderHandler->addShaderProgram("src/shaders/random_colored_model");
+  shaderHandler->addShaderProgram("src/shaders/colored_rectangle");
+  shaderHandler->addShaderProgram("src/shaders/random_colored_phong_model");
 
   joiner = new Joiner(shaderHandler, fontHandler);
 
