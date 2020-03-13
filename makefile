@@ -36,8 +36,8 @@ all: clean $(EXEC) run
 SRCS := $(wildcard src/*.cpp)
 OBJS := $(SRCS:src/%.cpp=%.o)
 
-CUDA_SRCS := renderer_triangles_global.cu
-CUDA_OBJS := $(CUDA_SRCS:%.cu=%.o)
+CUDA_SRCS := $(wildcard src/*.cu)
+CUDA_OBJS := $(CUDA_SRCS:src/%.cu=%.o)
 
 $(EXEC): $(OBJS) $(CUDA_OBJS)
 	$(NVCC) $(CUDA_FLAGS) $(BUILD_PATH)/*.o -o $(BIN_PATH)/$(EXEC) $(LINKER_ARGUMENTS)
