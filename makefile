@@ -36,8 +36,8 @@ all: clean $(EXEC) run
 SRCS := $(wildcard src/*.cpp)
 OBJS := $(SRCS:src/%.cpp=%.o)
 
-CUDA_SRCS := $(wildcard src/*.cu)
-CUDA_OBJS := $(CUDA_SRCS:src/%.cu=%.o)
+CUDA_SRCS := $(wildcard src/cuda/*.cu)
+CUDA_OBJS := $(CUDA_SRCS:src/cuda/%.cu=%.o)
 
 $(EXEC): $(OBJS) $(CUDA_OBJS)
 	$(NVCC) $(CUDA_FLAGS) $(BUILD_PATH)/*.o -o $(BIN_PATH)/$(EXEC) $(LINKER_ARGUMENTS)
@@ -45,7 +45,7 @@ $(EXEC): $(OBJS) $(CUDA_OBJS)
 %.o: $(SRC_PATH)/%.cpp
 	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BUILD_PATH)/$@ $(LINKER_ARGUMENTS)
 
-%.o: $(SRC_PATH)/%.cu
+%.o: $(SRC_PATH)/cuda/%.cu
 	$(NVCC) $(CUDA_FLAGS) --device-c $^ -o $(BUILD_PATH)/$@ $(LINKER_ARGUMENTS)
 
 run:

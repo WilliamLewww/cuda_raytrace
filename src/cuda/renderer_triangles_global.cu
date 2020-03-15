@@ -5,12 +5,12 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "raytrace_structures.h"
-#include "model.h"
-#include "analysis.h"
+#include "../raytrace_structures.h"
+#include "../model.h"
+#include "../analysis.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb/stb_image_write.h"
+#include "../stb/stb_image_write.h"
 
 #define REFLECTIVE_RAY_EPILSON 0.0001
 #define SHADOW_EPILSON 0.00001
