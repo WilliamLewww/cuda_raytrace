@@ -6,7 +6,6 @@
 #include <GLFW/glfw3.h>
 
 #include "ray_math.cuh"
-#include "../raytrace_structures.h"
 #include "../model.h"
 #include "../analysis.h"
 
