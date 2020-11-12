@@ -1,5 +1,7 @@
 # cuda_raytrace
 
+[![Video](https://img.youtube.com/vi/6RQwBniXa-M/hqdefault.jpg)](https://www.youtube.com/watch?v=6RQwBniXa-M)
+
 cuda_raytrace contains a real-time ray-tracer engine that uses OpenGL's interoperability with CUDA. The ray-traced graphics are generated via CUDA which are then copied into a OpenGL texture. The texture is then applied to a quad that encompass the entire view-port.
 
 ## Dependencies
